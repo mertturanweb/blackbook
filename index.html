@@ -5114,9 +5114,21 @@ function obFinish() {
     ltv: g('ob-ltv') || '€0',
     ca: g('ob-ca') || 'CA-101',
     contact: g('ob-contact') || 'WhatsApp',
-    birthday: g('ob-birthday') || '—',
+    birthday: (() => {
+      const raw = g('ob-birthday');
+      if (!raw) return '—';
+      const d = new Date(raw + 'T00:00:00');
+      if (isNaN(d)) return raw;
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    })(),
     partner: g('ob-partner') || 'None',
-    anniversary: g('ob-anniversary') || 'N/A',
+    anniversary: (() => {
+      const raw = g('ob-anniversary');
+      if (!raw) return 'N/A';
+      const d = new Date(raw + 'T00:00:00');
+      if (isNaN(d)) return raw;
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    })(),
     pet: g('ob-pet') || 'None',
     beverage: g('ob-beverage') || '—',
     sizeTop: g('ob-sizeTop') || '—',
@@ -5148,6 +5160,7 @@ function obFinish() {
     note: newClient.lastNote
   }]};
   filtered = [...clients];
+  renderDashboard();
 
   // Show success then close
   const body = document.querySelector('.onboarding-body');
@@ -6767,7 +6780,7 @@ setInterval(tickClock, 30000);
           <div class="onboarding-two-col">
             <div class="onboarding-group">
               <div class="onboarding-field-label">Birthday</div>
-              <input class="onboarding-input" id="ob-birthday" placeholder="12 April 1982">
+              <input class="onboarding-input" id="ob-birthday" type="date" style="color-scheme:light;">
             </div>
             <div class="onboarding-group">
               <div class="onboarding-field-label">Preferred Contact</div>
@@ -6790,7 +6803,7 @@ setInterval(tickClock, 30000);
             </div>
             <div class="onboarding-group">
               <div class="onboarding-field-label">Anniversary</div>
-              <input class="onboarding-input" id="ob-anniversary" placeholder="5 September 2010">
+              <input class="onboarding-input" id="ob-anniversary" type="date" style="color-scheme:light;">
             </div>
           </div>
 
