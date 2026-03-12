@@ -4297,40 +4297,66 @@ async function renderGiftSection(clientId, occasion) {
     return;
   }
 
-  // Call backend for AI gift selection
-  try {
-    const catalogSummary = masterCatalog.map(item => ({
-      id: item.id,
-      name: item.name,
-      category: item.category,
-      gender: item.gender,
-      price: item.price,
-      priceNum: item.priceNum,
-      colors: item.colors,
-      occasion: item.occasion,
-      stock: item.stock
-    }));
+  // Slim catalog — only fields needed for AI selection (no img, no sku, no priceNum)
+  const catalogSlim = masterCatalog.map(({ id, tier, name, category, gender, price, colors, stock }) =>
+    ({ id, tier, name, category, gender, price, colors, stock })
+  );
 
+  // Slim client — only fields relevant to gift selection
+  const clientSlim = {
+    name: cl.name, tier: cl.tier, ltv: cl.ltv, location: cl.location,
+    colors: cl.colors, avoid: cl.avoid,
+    sizeTop: cl.sizeTop, sizeBottom: cl.sizeBottom, shoe: cl.shoe,
+    jewelry: cl.jewelry || 'N/A',
+    lastPurchase: cl.lastPurchase, lastNote: cl.lastNote,
+    partner: cl.partner, pet: cl.pet
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000); // 25s timeout
+
+  try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       body: JSON.stringify({
         type: 'gifts',
-        client: cl,
+        client: clientSlim,
         occasion: occasionLabel,
-        catalog: catalogSummary
+        catalog: catalogSlim
       })
     });
+    clearTimeout(timeout);
+
+    if (!res.ok) throw new Error('API error ' + res.status);
 
     const data = await res.json();
-    const text = data.content.map(b => b.text || '').join('').trim();
-    const parsed = JSON.parse(text.replace(/\`\`\`json|\`\`\`/g, '').trim());
+    if (!data.content) throw new Error('No content in response');
 
-    aiGiftCache[clientId] = parsed; // cache it
+    const text = data.content.map(b => b.text || '').join('').trim();
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('Invalid response format');
+
+    aiGiftCache[clientId] = parsed;
     populateGiftGrid(clientId, parsed, occasionLabel);
   } catch(err) {
+    clearTimeout(timeout);
     const grid = document.getElementById('giftGrid-' + clientId);
-    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:20px;color:#8b3a22;font-size:12px;">Could not load gift recommendations. Please try again.</div>';
+    if (!grid) return;
+    const isTimeout = err.name === 'AbortError';
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;padding:24px 0;text-align:center;">
+        <div style="font-family:'Libre Baskerville',serif;font-style:italic;color:var(--ink-faint);font-size:12px;margin-bottom:12px;">
+          ${isTimeout ? 'Request timed out — please try again.' : 'Could not load recommendations — please try again.'}
+        </div>
+        <button onclick="delete aiGiftCache['${clientId}']; renderGiftSection('${clientId}','${occasionLabel}')" 
+          style="font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.5px;padding:8px 16px;border:1px solid var(--rule-dark);background:transparent;color:var(--ink-mid);cursor:pointer;border-radius:2px;">
+          Retry
+        </button>
+      </div>`;
   }
 }
 
