@@ -4574,42 +4574,16 @@ async function generateBriefing() {
     <div style="text-align:center; font-family:'Libre Baskerville',serif; font-style:italic; color:var(--ink-faint); padding: 12px; font-size:13px;">Preparing client intelligence...</div>
   `;
 
-  const prompt = `You are a discreet, highly intelligent luxury client intelligence system used internally by Client Advisors at a major luxury fashion house. Your tone is warm, precise, and human — never robotic or clinical. Help Client Advisors deliver extraordinary, personalised service.
 
-Generate a pre-visit briefing. Three sections only. No filler.
-
-CLIENT:
-Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv}
-Appointment: ${c.appointment} at ${c.location}
-Birthday: ${c.birthday}${c.partner!=='None'?' | Partner: '+c.partner:''}${c.anniversary!=='N/A'?' | Anniversary: '+c.anniversary:''}
-${c.pet!=='None'?'Pet: '+c.pet:''}
-Sizes: Top ${c.sizeTop} / Bottom ${c.sizeBottom} / Shoe ${c.shoe}${c.jewelry&&c.jewelry!=='N/A'?' / Jewelry: '+c.jewelry:''}
-Preferred colours: ${c.colors} | Never show: ${c.avoid}
-Beverage: ${c.beverage}
-Last contact: ${c.lastDate} (${c.lastType}) — "${c.lastNote}"
-Last purchase: ${c.lastPurchase} (${c.sku}) on ${c.purchaseDate}
-Alterations: ${c.alterations} | Aftercare due: ${c.aftercare}
-Current CA action: ${c.caAction} | Urgency: ${c.urgency}
-
-Client mood/energy today (CA assessment): ${mood} — adjust your briefing tone and what you prioritise accordingly. If Relaxed: warm and exploratory. If Busy: concise, direct, pre-select fewer options. If Celebrating: lean into the moment. If Difficult: flag sensitivities, give CA tools to de-escalate.
-
-Respond ONLY with valid JSON, no markdown, no backticks:
-{
-  "opening": "2-3 sentences. Who this client is and what matters most to them right now. Reference specific personal context naturally — as if briefing a trusted colleague. If they have a pet, weave it in naturally as part of who they are.",
-  "conversation": "2-3 sentences. Exact topics for the Client Advisor to raise and how to frame them. Specific, not generic. Reference real details from their file. If they have a pet and are likely to bring it, note any preparation (treats by the fitting room, etc.).",
-  "action": "2-3 sentences. Precise commercial action to take in this appointment. What to show, confirm, or resolve. Reference the CA action and urgency.",
-  "alerts": ["Any critical alert — dates, sensitivities, restrictions. Only if genuinely important. Max 2."],
-  "tags": ["3-4 short descriptor tags for this client profile"]
-}`;
 
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
+        type: 'briefing',
+        client: c,
+        mood: mood
       })
     });
 
@@ -5721,30 +5695,10 @@ async function generateCommDraft(clientId) {
     ? `The client's most recent message to you was: "${lastInbound.text}". Your reply should acknowledge this naturally before moving to outreach.`
     : `There is no recent inbound message. Write a proactive outreach message.`;
 
-  const prompt = `You are a luxury Client Advisor at a high-end fashion house. Write a short, personalised ${cl.contact} message to ${cl.name} (${cl.tier} client, lifetime value ${cl.ltv}).
 
-Tone: ${tone}. ${tone === 'Formal' ? 'Refined and professional. Complete sentences. No contractions.' : tone === 'Warm' ? 'Friendly but polished. Personal without being overly casual.' : 'Light and conversational. Brief sentences. Tasteful personality.'}
-
-Context:
-- ${replyContext}
-- Last CA note: "${cl.lastNote}"
-- Upcoming appointment: ${cl.appointment} at ${cl.location}
-- Urgency: ${cl.urgency}
-- CA action: ${cl.caAction}
-${cl.partner !== 'None' ? `- Partner: ${cl.partner}` : ''}
-${cl.anniversary !== 'N/A' ? `- Anniversary: ${cl.anniversary}` : ''}
-${cl.pet !== 'None' ? `- Pet: ${cl.pet}` : ''}
-- Beverage preference: ${cl.beverage}
-
-Rules:
-- Max 4 sentences total
-- No emojis unless WeChat or Instagram
-- Do not mention prices
-- Reference one specific personal detail naturally
-- Output only the message text, nothing else`;
 
   try {
-    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:250, messages:[{role:'user',content:prompt}] }) });
+    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ type: 'message', client: cl, tone: tone, replyContext: replyContext }) });
     const data = await res.json();
     const text = data.content.map(b=>b.text||'').join('').trim();
     if (ta) ta.value = text;
