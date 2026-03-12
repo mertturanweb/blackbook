@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { type, client: c, mood, tone, replyContext } = req.body;
+  const { type, client: c, mood, tone, replyContext, occasion, catalog } = req.body;
 
   if (!type || !c) {
     return res.status(400).json({ error: 'Missing required fields: type, client' });
@@ -91,7 +91,70 @@ Rules:
 - Output only the message text, nothing else`;
   }
 
-  // ── ROUTE ────────────────────────────────────────────────────────────────────
+  function buildGiftsPrompt() {
+    const catalogJson = JSON.stringify(catalog, null, 2);
+
+    const tierGuide = {
+      'VVIC':     'Prioritise Tier 5–6 items (fine jewellery, bags, coats). Tier 1–2 only as a thoughtful accent alongside a hero piece.',
+      'VIC':      'Focus on Tier 4–6. Mix one statement Tier 6 piece with complementary Tier 3–4 items.',
+      'Platinum': 'Tier 3–5 is the sweet spot. One Tier 6 item if occasion warrants.',
+      'Gold':     'Tier 2–4 range. Avoid the very top of Tier 6 unless the occasion is exceptional.',
+      'Silver':   'Tier 1–3. Keep selections aspirational but not over-extended for this relationship stage.'
+    };
+
+    const spendGuide = tierGuide[c.tier] || 'Mix tiers thoughtfully based on the occasion.';
+
+    return `You are a luxury gift recommendation engine for a high-end fashion house. Select exactly 6 items from the catalog that are the best match for this client.
+
+CLIENT PROFILE:
+Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv} | Location: ${c.location}
+Occasion: ${occasion || 'Important Date'}
+Preferred colours: ${c.colors}
+Avoid / never show: ${c.avoid}
+Sizes: Top ${c.sizeTop} / Bottom ${c.sizeBottom} / Shoe ${c.shoe}
+Jewellery sizing: ${c.jewelry || 'not specified'}
+Last purchase: ${c.lastPurchase} — avoid recommending the same or near-identical item
+Last CA note: "${c.lastNote}"
+Partner: ${c.partner !== 'None' ? c.partner : 'none'}
+Pet: ${c.pet !== 'None' ? c.pet : 'none'}
+
+TIER SPEND GUIDANCE FOR ${c.tier}:
+${spendGuide}
+
+SELECTION RULES:
+- Exactly 6 items
+- Follow the tier spend guidance — tier alignment signals the maison's respect for this client's status
+- Colour: match preferred colours, strictly exclude anything in the avoid list
+- Categories: vary across the 6 selections — no more than 2 from the same category
+- Occasion calibration: anniversary → more elevated/romantic; birthday → personal/celebratory; evergreen → versatile
+- Shoe size compatibility: only recommend footwear if shoe size is on file
+- Jewellery compatibility: respect ring/neck sizing if noted
+- Stock: avoid items with stock of 1 unless they are an exceptional match
+- Last purchase: do not repeat the same category twice in a row if avoidable
+- Gender: infer appropriate gender targeting from the client's name and profile
+
+REASON WRITING:
+- Each reason must be 1–2 sentences
+- Reference a specific profile detail (colour preference, location, occasion, partner, size, LTV tier)
+- Never write generic copy like "a timeless piece" — be specific to this client
+- Tone: warm, insider, like briefing a trusted colleague
+
+CATALOG:
+${catalogJson}
+
+Respond ONLY with a valid JSON array — no markdown, no backticks, no explanation:
+[
+  { "id": "T#-###", "reason": "..." },
+  { "id": "T#-###", "reason": "..." },
+  { "id": "T#-###", "reason": "..." },
+  { "id": "T#-###", "reason": "..." },
+  { "id": "T#-###", "reason": "..." },
+  { "id": "T#-###", "reason": "..." }
+]`;
+  }
+
+
+    // ── ROUTE ────────────────────────────────────────────────────────────────────
 
   let prompt, max_tokens;
 
@@ -101,6 +164,12 @@ Rules:
   } else if (type === 'message') {
     prompt = buildMessagePrompt();
     max_tokens = 250;
+  } else if (type === 'gifts') {
+    if (!catalog || !Array.isArray(catalog)) {
+      return res.status(400).json({ error: 'Missing catalog array for gifts request' });
+    }
+    prompt = buildGiftsPrompt();
+    max_tokens = 800;
   } else {
     return res.status(400).json({ error: `Unknown request type: ${type}` });
   }
