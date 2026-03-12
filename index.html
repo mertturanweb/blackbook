@@ -4293,7 +4293,7 @@ function renderGiftSection(clientId, occasion) {
     populateGiftGrid(clientId, selections, occasionLabel);
   } else {
     const grid = document.getElementById('giftGrid-' + clientId);
-    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:24px 0;text-align:center;font-family:'Libre Baskerville',serif;font-style:italic;color:var(--ink-faint);font-size:12px;">Gift selections not yet generated. Run generate_gifts.py to build them.</div>';
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:24px 0;text-align:center;font-family:serif;font-style:italic;color:var(--ink-faint);font-size:12px;">Gift selections not yet generated.</div>';
   }
 }
 
