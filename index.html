@@ -3747,17 +3747,17 @@ function renderDashboard() {
         </div>
 
         ${alerts.length > 0 ? `
-        <div class="dash-section-label">Important Dates — Next 30 Days</div>
+        <div class="dash-section-label">Important Dates</div>
         <div class="date-alert-list">
           ${alerts.map(a => `
-            <div class="date-alert-row ${a.days <= 7 ? 'urgent' : ''}" data-id="${a.client.id}" data-occasion="${a.label}" style="cursor:pointer;">
+            <div class="date-alert-row ${a.passed ? '' : a.days <= 7 ? 'urgent' : ''}" data-id="${a.client.id}" data-occasion="${a.label}" style="cursor:pointer;${a.passed ? 'opacity:0.6;' : ''}">
               <div class="date-alert-left">
-                <div class="date-alert-name">${a.client.name}</div>
+                <div class="date-alert-name">${a.client.name} ${a.passed ? '<span style="font-size:7px;letter-spacing:1px;color:#8b8b7a;text-transform:uppercase;">· Follow up</span>' : ''}</div>
                 <div class="date-alert-detail">${a.label} · ${a.date}</div>
               </div>
               <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-family:'DM Sans',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);opacity:0.7;">Gift →</span>
-                <div class="date-alert-days ${a.days <= 7 ? 'urgent' : ''}">${a.days === 0 ? 'Today' : a.days === 1 ? 'Tomorrow' : `In ${a.days} days`}</div>
+                <span style="font-family:'DM Sans',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);opacity:0.7;">${a.passed ? 'Reach out →' : 'Gift →'}</span>
+                <div class="date-alert-days ${a.passed ? '' : a.days <= 7 ? 'urgent' : ''}" style="${a.passed ? 'color:#8b8b7a;' : ''}">${a.passed ? `${Math.abs(a.days)}d ago` : a.days === 0 ? 'Today' : a.days === 1 ? 'Tomorrow' : `In ${a.days} days`}</div>
               </div>
             </div>
           `).join('')}
@@ -6508,8 +6508,9 @@ function renderSparkline(clientId) {
   const trend = recent > prior ? 'up' : recent < prior ? 'down' : 'flat';
   const trendLabel = trend === 'up' ? '↑ Strengthening' : trend === 'down' ? '↓ Cooling' : '→ Steady';
 
-  // Conversion rate: interactions that were followed by a transaction within 7 days
+  // Conversion rate: interactions that led to a purchase OR a gift action
   const conversionCount = hist.interactions.filter(interaction => {
+    if (interaction.type === 'Gift Shipped' || interaction.type === 'Gift Reserved') return true;
     const iDate = parseInteractionDate(interaction.date);
     if (!iDate) return false;
     const iMs = new Date(iDate.year, iDate.month, 1).getTime();
