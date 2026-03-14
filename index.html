@@ -4755,14 +4755,15 @@ function getSwatches(clientColors, productName) {
 }
 
 function renderGiftVisual(g, clientColors) {
-  const isLow = parseInt(g.stock) <= 2;
+  const stock = (typeof stockLevels !== 'undefined' && stockLevels[g.id] !== undefined) ? stockLevels[g.id] : parseInt(g.stock);
+  const isLow = stock <= 2;
   const imgSrc = (g.img && g.img !== 'PLACEHOLDER') ? g.img : getCategoryImg(g.category);
   return `
     <div class="gift-card-visual">
       <img src="${imgSrc}" alt="${g.name}">
       <div class="gift-card-visual-overlay">
         <span class="gift-card-visual-price">${g.price}</span>
-        <span class="gift-card-visual-stock ${isLow ? 'low' : ''}">${isLow ? '⚠ ' : ''}${g.stock} in stock</span>
+        <span class="gift-card-visual-stock ${isLow ? 'low' : ''}">${isLow ? '⚠ ' : ''}${stock} in stock</span>
       </div>
     </div>`;
 }
@@ -4810,14 +4811,25 @@ function renderGiftSectionShell(clientId, occasion) {
 
 function renderGiftSection(clientId, occasion) {
   const occasionLabel = occasion || 'Important Date';
-  // Load pre-generated selections (instant — no API call)
-  const selections = (typeof prebuiltGiftSelections !== 'undefined' && prebuiltGiftSelections[clientId]) || [];
-  if (selections.length > 0) {
-    populateGiftGrid(clientId, selections, occasionLabel);
-  } else {
-    const grid = document.getElementById('giftGrid-' + clientId);
-    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:24px 0;text-align:center;font-family:serif;font-style:italic;color:var(--ink-faint);font-size:12px;">Gift selections not yet generated.</div>';
+  // Load pre-generated selections, or fall back to tier-appropriate defaults
+  let selections = (typeof prebuiltGiftSelections !== 'undefined' && prebuiltGiftSelections[clientId]) || [];
+
+  if (selections.length === 0) {
+    // Generate tier-appropriate default selections for new/unknown clients
+    const cl = clients.find(x => x.id === clientId);
+    const tier = cl ? cl.tier : 'Gold';
+    const tierDefaults = {
+      'VVIC':     ['T6-003','T5-009','T6-001','T5-003','T6-013','T4-001'],
+      'VIC':      ['T6-001','T5-001','T6-012','T4-001','T3-005','T5-005'],
+      'Platinum': ['T5-001','T6-001','T3-005','T4-001','T5-006','T3-002'],
+      'Gold':     ['T6-002','T3-005','T4-001','T1-001','T3-001','T2-004'],
+      'Silver':   ['T3-005','T2-001','T1-001','T4-009','T1-004','T3-001']
+    };
+    const ids = tierDefaults[tier] || tierDefaults['Gold'];
+    selections = ids.map(id => ({ id, reason: '' }));
   }
+
+  populateGiftGrid(clientId, selections, occasionLabel);
 }
 
 function populateGiftGrid(clientId, selections, occasionLabel) {
@@ -5914,7 +5926,27 @@ function renderCAPanel(el) {
     const ltv = group.reduce((s,x)=>s+parseInt((x.ltv||'0').replace(/[^0-9]/g,'')),0);
     const vvic = group.filter(x=>x.tier==='VVIC').length;
     const appts = group.filter(x=>x.appointment&&x.appointment!=='—').length;
-    return {ca, count:group.length, ltv, vvic, appts};
+    // Conversion: interactions that led to a transaction (same month) or gift action
+    let convTotal = 0, convConverted = 0;
+    group.forEach(cl => {
+      const hist = histories[cl.id];
+      if (!hist) return;
+      hist.interactions.forEach(interaction => {
+        convTotal++;
+        if (interaction.type === 'Gift Shipped' || interaction.type === 'Gift Reserved') { convConverted++; return; }
+        const iDate = parseInteractionDate(interaction.date);
+        if (!iDate) return;
+        const iMs = new Date(iDate.year, iDate.month, 1).getTime();
+        if (hist.transactions.some(t => {
+          const tDate = parseInteractionDate(t.date);
+          if (!tDate) return false;
+          return Math.abs(new Date(tDate.year, tDate.month, 1).getTime() - iMs) <= 7*24*60*60*1000*5;
+        })) convConverted++;
+      });
+    });
+    const convRate = convTotal ? Math.round((convConverted/convTotal)*100) : 0;
+    const convColor = convRate >= 70 ? '#7ab87a' : convRate >= 40 ? '#c8a84a' : '#c47a5a';
+    return {ca, count:group.length, ltv, vvic, appts, convRate, convColor};
   });
   const maxLTV = Math.max(...stats.map(s=>s.ltv));
   const topCA = stats.reduce((a,b)=>b.ltv>a.ltv?b:a);
@@ -5931,7 +5963,11 @@ function renderCAPanel(el) {
           </div>
           <div class="ca-stat">
             <div class="ca-stat-val" style="font-size:16px;">€${(s.ltv/1000).toFixed(0)}k</div>
-            <div class="ca-stat-lbl">Total Lifetime Value</div>
+            <div class="ca-stat-lbl">Portfolio LTV</div>
+          </div>
+          <div class="ca-stat">
+            <div class="ca-stat-val" style="font-size:16px;color:${s.convColor};">${s.convRate}%</div>
+            <div class="ca-stat-lbl">Conversion Rate</div>
           </div>
           <div class="ca-stat">
             <div class="ca-stat-val" style="font-size:16px;">${s.vvic}</div>
