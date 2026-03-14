@@ -4773,7 +4773,7 @@ function renderGiftCard(g, reason, clientId, occasionLabel) {
   <div class="gift-card ${action ? 'actioned' : ''}" id="gcard-${g.id}">
     ${renderGiftVisual(g, (clients.find(x=>x.id===clientId)||{}).colors)}
     <div class="gift-card-body">
-      <div style="font-family:'DM Sans',sans-serif;font-size:7px;letter-spacing:1px;color:var(--ink-faint);margin-bottom:8px;">${g.sku}</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:7px;letter-spacing:1px;color:var(--ink-faint);margin-bottom:8px;">${g.sku.split('-').slice(2).join('-')}</div>
       ${action ? `
         <div class="gift-actioned-label ${action}">${action === 'shipped' ? '✓ Gift shipped to address on file' : '◎ Reserved — awaiting dispatch date'}</div>
       ` : `
@@ -4823,10 +4823,19 @@ function renderGiftSection(clientId, occasion) {
 function populateGiftGrid(clientId, selections, occasionLabel) {
   const grid = document.getElementById('giftGrid-' + clientId);
   if (!grid) return;
+  const usedImgs = new Set();
+  const allImgs = masterCatalog.map(i => i.img).filter(u => u && u !== 'PLACEHOLDER');
   const html = selections.map(sel => {
     const item = catalogById[sel.id];
     if (!item) return '';
-    return renderGiftCard(item, sel.reason, clientId, occasionLabel);
+    // Deduplicate: if this image already used in this profile, find an unused one
+    let displayItem = item;
+    if (usedImgs.has(item.img)) {
+      const altImg = allImgs.find(u => !usedImgs.has(u)) || item.img;
+      displayItem = Object.assign({}, item, { img: altImg });
+    }
+    usedImgs.add(displayItem.img);
+    return renderGiftCard(displayItem, sel.reason, clientId, occasionLabel);
   }).filter(Boolean).join('');
   grid.innerHTML = html || '<div style="grid-column:1/-1;padding:20px;color:var(--ink-faint);font-size:12px;">No matching items found.</div>';
 }
