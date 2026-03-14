@@ -5919,6 +5919,16 @@ function switchDashTab(tab) {
   }
 }
 
+function parseInteractionDate(str) {
+  if (!str) return null;
+  const monthMap = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  const p = str.split(' ');
+  if (p.length < 3) return null;
+  const m = monthMap[p[1]]; if (m === undefined) return null;
+  return { year: parseInt(p[2]), month: m };
+}
+
+
 function renderCAPanel(el) {
   const cas = ['CA-101','CA-102','CA-103','CA-104','CA-105'];
   const stats = cas.map(ca => {
@@ -6464,14 +6474,7 @@ function renderSparkline(clientId) {
   }
 
   // Count interactions per month
-  function parseInteractionDate(str) {
-    if (!str) return null;
-    const monthMap = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-    const p = str.split(' ');
-    if (p.length < 3) return null;
-    const m = monthMap[p[1]]; if (m === undefined) return null;
-    return { year: parseInt(p[2]), month: m };
-  }
+  // (parseInteractionDate is defined globally below)
 
   const interactionCounts = months.map(m => {
     return hist.interactions.filter(i => {
