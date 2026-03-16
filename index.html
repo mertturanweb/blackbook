@@ -7000,10 +7000,63 @@ async function startDemo() {
 
   if (!demoRunning) return;
 
-  // ── STEP 11: Draft WhatsApp message ──
-  // outreach demo removed
+  // ── STEP 11: Gift Intelligence — navigate to Priya via dashboard alert ──
+  goHome();
+  await demoDelay(600);
+  if (!demoRunning) return;
+
+  // Highlight the date alert section
+  const giftAlertRow = document.querySelector('.date-alert-row');
+  if (giftAlertRow) {
+    giftAlertRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await demoDelay(500);
+    demoHighlight(giftAlertRow);
+    demoPill('Important date alert — birthday or anniversary approaching');
+    await demoDelay(2000);
+    if (!demoRunning) return;
+
+    // Click the alert to open gift section
+    demoPill('One tap opens curated gift selections for this occasion');
+    giftAlertRow.click();
+    await demoDelay(1800);
+    if (!demoRunning) return;
+
+    // Scroll to gift section
+    const giftSection = document.querySelector('.gift-section');
+    if (giftSection) {
+      giftSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      await demoDelay(600);
+      demoHighlight(giftSection.querySelector('.gift-grid'));
+      demoPill('Gift Intelligence — 6 items selected by AI for this client and occasion');
+      await demoDelay(2800);
+      if (!demoRunning) return;
+
+      // Highlight a single gift card
+      const firstCard = giftSection.querySelector('.gift-card');
+      if (firstCard) {
+        demoHighlight(firstCard);
+        demoPill('Each item matched to her colour palette, tier, and upcoming occasion');
+        await demoDelay(2400);
+        if (!demoRunning) return;
+
+        // Click Ship Now on the first card
+        const shipBtn = firstCard.querySelector('.gift-action-btn.ship');
+        if (shipBtn) {
+          demoHighlight(shipBtn);
+          demoPill('Ship Now — dispatched to address on file, logged to activity');
+          await demoDelay(1200);
+          if (!demoRunning) return;
+          shipBtn.click();
+          await demoDelay(1800);
+          if (!demoRunning) return;
+        }
+      }
+    }
+  }
 
   if (!demoRunning) return;
+  document.getElementById('content').scrollTo({ top: 0, behavior: 'smooth' });
+  await demoDelay(600);
 
   // ── STEP 12: Communication — scroll to comm section, draft a message ──
   const commSection = document.querySelector('.comm-section');
