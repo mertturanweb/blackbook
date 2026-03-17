@@ -7070,7 +7070,7 @@ async function startDemo() {
 
   if (!demoRunning) return;
 
-  // Draft a message
+  // Draft a message — guaranteed typewriter, no API dependency
   const draftTa = document.getElementById('commDraft-C-1005');
   if (draftTa) {
     draftTa.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -7079,25 +7079,20 @@ async function startDemo() {
     demoPill('Draft a message — AI writes it in the right tone for this client');
     await demoDelay(1400);
     if (!demoRunning) return;
-    // Simulate clicking the Draft button
-    const draftBtn = document.getElementById('draftBtn-C-1005');
-    if (draftBtn) {
-      draftBtn.click();
-      demoPill('Generating WeChat draft for Wei Chen…');
-      await demoDelay(3200);
-      if (!demoRunning) return;
-    } else {
-      // Fallback: type directly
-      const msg = `Wei, just to confirm — the Look 4 sample has been located at our Paris atelier. I've reserved it ahead of your arrival next week. I'll have everything prepared for you.`;
-      for (const ch of msg) {
-        draftTa.value += ch;
-        if (!demoRunning) return;
-        await demoDelay(12);
-      }
-    }
-    await demoDelay(800);
+    // Show thinking state briefly
+    demoPill('Generating WeChat draft for Wei Chen…');
+    draftTa.value = '';
+    await demoDelay(1200);
     if (!demoRunning) return;
-    // Send it
+    // Type out the message character by character
+    const msg = `Wei, the Look 4 sample has been located at our Paris atelier — I've reserved it ahead of your arrival next week. I'll have everything prepared. Looking forward to seeing you.`;
+    for (const ch of msg) {
+      if (!demoRunning) return;
+      draftTa.value += ch;
+      await demoDelay(14);
+    }
+    await demoDelay(900);
+    if (!demoRunning) return;
     demoHighlight(null);
     demoPill('Message approved and sent via WeChat');
     sendCommMessage('C-1005');
@@ -7162,7 +7157,43 @@ async function startDemo() {
         await demoDelay(1200);
         if (!demoRunning) return;
         firstNotif.click();
-        await demoDelay(2000);
+        await demoDelay(1800);
+        if (!demoRunning) return;
+
+        // Scroll to comm section and show a reply being drafted
+        const notifCommSection = document.querySelector('.comm-section');
+        if (notifCommSection) {
+          notifCommSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          await demoDelay(700);
+          if (!demoRunning) return;
+
+          // Find the draft textarea for the opened client
+          const openedClientId = document.querySelector('.comm-section')?.closest('[id]')?.id?.replace('comm-','') || 'C-1001';
+          const notifDraftTa = document.querySelector('.comm-draft-ta');
+          if (notifDraftTa) {
+            demoHighlight(notifDraftTa);
+            demoPill('Draft a reply — AI matches the tone for this client and channel');
+            await demoDelay(1200);
+            if (!demoRunning) return;
+
+            demoPill('Generating reply…');
+            notifDraftTa.value = '';
+            await demoDelay(900);
+            if (!demoRunning) return;
+
+            const replyMsg = 'Eleanor, lovely to hear from you — Arthur has excellent taste. I have already set aside three pieces from the new collection that I think he will love for the anniversary. Shall I send over the details, or would you prefer to come in together?';
+            for (const ch of replyMsg) {
+              if (!demoRunning) return;
+              notifDraftTa.value += ch;
+              await demoDelay(13);
+            }
+            await demoDelay(800);
+            if (!demoRunning) return;
+            demoHighlight(null);
+            demoPill('Reply drafted — personalised, channel-appropriate, ready to send');
+            await demoDelay(2200);
+          }
+        }
       }
     } else {
       // Mobile: badge highlight only — tray would cover narration
