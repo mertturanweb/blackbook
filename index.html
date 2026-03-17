@@ -7058,33 +7058,44 @@ async function startDemo() {
   document.getElementById('content').scrollTo({ top: 0, behavior: 'smooth' });
   await demoDelay(600);
 
-  // ── STEP 12: Communication — scroll to comm section, draft a message ──
-  const commSection = document.querySelector('.comm-section');
-  if (commSection) {
-    commSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await demoDelay(800);
-    demoHighlight(commSection);
-    demoPill('Last messages with the client — full channel history');
+  // ── STEP 12: Communication — re-open Wei Chen, show incoming message + draft reply ──
+  select('C-1005');
+  await demoDelay(800);
+  if (!demoRunning) return;
+
+  // Inject a new incoming WeChat message from Wei
+  if (!commThreads['C-1005']) commThreads['C-1005'] = [];
+  appendCommMessage('C-1005', {
+    from: 'client',
+    text: 'Will Arthur be joining? He wants to look at the new belts.',
+    time: 'Just now',
+    channel: 'WeChat'
+  });
+
+  const commSection2 = document.querySelector('.comm-section');
+  if (commSection2) {
+    commSection2.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await demoDelay(700);
+    demoHighlight(commSection2);
+    demoPill('Incoming WeChat from Wei Chen — needs a reply');
     await demoDelay(2000);
   }
 
   if (!demoRunning) return;
 
-  // Draft a message — guaranteed typewriter, no API dependency
+  // Draft a reply — typewriter, no API
   const draftTa = document.getElementById('commDraft-C-1005');
   if (draftTa) {
     draftTa.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await demoDelay(600);
+    await demoDelay(500);
     demoHighlight(draftTa);
-    demoPill('Draft a message — AI writes it in the right tone for this client');
-    await demoDelay(1400);
-    if (!demoRunning) return;
-    // Show thinking state briefly
-    demoPill('Generating WeChat draft for Wei Chen…');
-    draftTa.value = '';
+    demoPill('Draft a reply — AI writes in the right tone for this client');
     await demoDelay(1200);
     if (!demoRunning) return;
-    // Type out the message character by character
+    demoPill('Generating WeChat draft for Wei Chen…');
+    draftTa.value = '';
+    await demoDelay(1000);
+    if (!demoRunning) return;
     const msg = `Wei, the Look 4 sample has been located at our Paris atelier — I've reserved it ahead of your arrival next week. I'll have everything prepared. Looking forward to seeing you.`;
     for (const ch of msg) {
       if (!demoRunning) return;
@@ -7094,7 +7105,7 @@ async function startDemo() {
     await demoDelay(900);
     if (!demoRunning) return;
     demoHighlight(null);
-    demoPill('Message approved and sent via WeChat');
+    demoPill('Reply drafted and sent via WeChat');
     sendCommMessage('C-1005');
     await demoDelay(2200);
   }
@@ -7160,40 +7171,7 @@ async function startDemo() {
         await demoDelay(1800);
         if (!demoRunning) return;
 
-        // Scroll to comm section and show a reply being drafted
-        const notifCommSection = document.querySelector('.comm-section');
-        if (notifCommSection) {
-          notifCommSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          await demoDelay(700);
-          if (!demoRunning) return;
 
-          // Find the draft textarea for the opened client
-          const openedClientId = document.querySelector('.comm-section')?.closest('[id]')?.id?.replace('comm-','') || 'C-1001';
-          const notifDraftTa = document.querySelector('.comm-draft-ta');
-          if (notifDraftTa) {
-            demoHighlight(notifDraftTa);
-            demoPill('Draft a reply — AI matches the tone for this client and channel');
-            await demoDelay(1200);
-            if (!demoRunning) return;
-
-            demoPill('Generating reply…');
-            notifDraftTa.value = '';
-            await demoDelay(900);
-            if (!demoRunning) return;
-
-            const replyMsg = 'Eleanor, lovely to hear from you — Arthur has excellent taste. I have already set aside three pieces from the new collection that I think he will love for the anniversary. Shall I send over the details, or would you prefer to come in together?';
-            for (const ch of replyMsg) {
-              if (!demoRunning) return;
-              notifDraftTa.value += ch;
-              await demoDelay(13);
-            }
-            await demoDelay(800);
-            if (!demoRunning) return;
-            demoHighlight(null);
-            demoPill('Reply drafted — personalised, channel-appropriate, ready to send');
-            await demoDelay(2200);
-          }
-        }
       }
     } else {
       // Mobile: badge highlight only — tray would cover narration
