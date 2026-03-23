@@ -4006,25 +4006,32 @@ function toggleVoiceNote(id) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const rec = new SR();
   rec.lang = 'en-GB';
-  rec.interimResults = false;
-  rec.continuous = false;
+  rec.interimResults = true;
+  rec.continuous = true;
   voiceRecognizers[id] = rec;
   icon.setAttribute('stroke', 'var(--gold)');
   btn.style.background = 'var(--gold-pale)';
   rec.onresult = e => {
-    const transcript = Array.from(e.results).map(r => r[0].transcript).join(' ');
-    ta.value = (ta.value ? ta.value + ' ' : '') + transcript;
-    ta.dispatchEvent(new Event('input'));
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+    }
+    if (final) ta.value = (ta.value ? ta.value.trimEnd() + ' ' : '') + final;
   };
   rec.onend = () => {
-    delete voiceRecognizers[id];
+    // If still in voiceRecognizers, user hasn't tapped stop — Chrome cut it, restart
+    if (voiceRecognizers[id]) {
+      try { rec.start(); return; } catch(e) {}
+    }
     if (icon) icon.setAttribute('stroke', 'var(--ink-faint)');
     if (btn) btn.style.background = '';
   };
-  rec.onerror = () => {
+  rec.onerror = e => {
+    console.warn('Voice error:', e.error);
     delete voiceRecognizers[id];
     if (icon) icon.setAttribute('stroke', 'var(--ink-faint)');
     if (btn) btn.style.background = '';
+    if (e.error === 'not-allowed') showToast('!', 'Mic blocked', 'Allow microphone access in Chrome site settings');
   };
   rec.start();
 }
