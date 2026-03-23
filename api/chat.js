@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { type, client: c, mood, tone, replyContext, occasion, catalog, rawNotes, history } = req.body;
+  const { type, client: c, mood, tone, replyContext, occasion, catalog, rawNotes, history, appointmentContext } = req.body;
 
   if (!type || !c) {
     return res.status(400).json({ error: 'Missing required fields: type, client' });
@@ -46,6 +46,8 @@ Alterations: ${c.alterations} | Aftercare due: ${c.aftercare}
 Current CA action: ${c.caAction} | Urgency: ${c.urgency}
 
 Client mood/energy today (CA assessment): ${mood || 'Relaxed'} — adjust your briefing tone and what you prioritise accordingly. If Relaxed: warm and exploratory. If Busy: concise, direct, pre-select fewer options. If Celebrating: lean into the moment. If Difficult: flag sensitivities, give CA tools to de-escalate.
+
+Appointment context: ${appointmentContext || 'No upcoming appointment scheduled.'} — if the appointment is TODAY, make action items immediate and directive. If tomorrow or within a week, flag preparation steps. If further out, standard tone.
 
 Respond ONLY with valid JSON, no markdown, no backticks:
 {
