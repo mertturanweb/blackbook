@@ -3750,6 +3750,7 @@ function renderDashboard() {
               ${isPast && !hasNote ? `<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-top:6px;cursor:pointer;" onclick="selectClient('${cl.id}')">Log visit →</div>` : `<div class="dash-card-alert ${urgClass}">${cl.urgency}</div>`}
             </div>`;
           }).join('')}
+        </div>
 
         ${alerts.length > 0 ? `
         <div class="dash-section-label">Important Dates</div>
