@@ -45,8 +45,10 @@ Last purchase: ${c.lastPurchase} (${c.sku}) on ${c.purchaseDate}
 Alterations: ${c.alterations} | Aftercare due: ${c.aftercare}
 Current CA action: ${c.caAction} | Urgency: ${c.urgency}
 
-Client mood/energy today (CA assessment): ${mood || 'Relaxed'} — adjust your briefing tone and what you prioritise accordingly. If Relaxed: warm and exploratory. If Busy: concise, direct, pre-select fewer options. If Celebrating: lean into the moment. If Difficult: flag sensitivities, give CA tools to de-escalate.
-${appointmentContext && (appointmentContext.includes('TODAY') || appointmentContext.includes('TOMORROW')) ? `\nURGENT — ${appointmentContext} Make the action items immediate and specific to what needs to happen before they arrive. This is not a general briefing — the client is coming imminently.` : ''}
+CA's read on the client today: ${mood || 'Relaxed'}. Let this shape tone and emphasis only — never reference the mood explicitly or narrate it. Relaxed: slightly more exploratory, surface one or two additional conversation threads. Busy: tighten everything, lead with the single most important action, cut anything optional. Celebrating: let warmth come through in word choice, lean into the occasion. Difficult: stay factual and measured, give the CA concrete tools to de-escalate, flag any known sensitivities upfront.
+
+The briefing should read like a sharp, trusted colleague handing off before a meeting. Precise. Human. No performed warmth, no filler, no lines that narrate the client's personality back at the reader.
+${appointmentContext && (appointmentContext.includes('TODAY') || appointmentContext.includes('TOMORROW')) ? `\nCRITICAL APPOINTMENT ALERT: ${appointmentContext} Rewrite the action items section to be immediate and specific — what needs to happen in the next few hours, not general recommendations. This client is arriving imminently.` : ''}
 
 Respond ONLY with valid JSON, no markdown, no backticks:
 {
