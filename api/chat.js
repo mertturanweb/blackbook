@@ -46,8 +46,7 @@ Alterations: ${c.alterations} | Aftercare due: ${c.aftercare}
 Current CA action: ${c.caAction} | Urgency: ${c.urgency}
 
 Client mood/energy today (CA assessment): ${mood || 'Relaxed'} — adjust your briefing tone and what you prioritise accordingly. If Relaxed: warm and exploratory. If Busy: concise, direct, pre-select fewer options. If Celebrating: lean into the moment. If Difficult: flag sensitivities, give CA tools to de-escalate.
-
-Appointment context: ${appointmentContext || 'No upcoming appointment scheduled.'} — if the appointment is TODAY, make action items immediate and directive. If tomorrow or within a week, flag preparation steps. If further out, standard tone.
+${appointmentContext && (appointmentContext.includes('TODAY') || appointmentContext.includes('TOMORROW')) ? `\nURGENT — ${appointmentContext} Make the action items immediate and specific to what needs to happen before they arrive. This is not a general briefing — the client is coming imminently.` : ''}
 
 Respond ONLY with valid JSON, no markdown, no backticks:
 {
