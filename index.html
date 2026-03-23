@@ -3619,11 +3619,12 @@ function getDateAlerts() {
 
 function getUpcomingAppointments() {
   const tierOrder = { 'VVIC': 0, 'VIC': 1, 'Platinum': 2, 'Gold': 3, 'Silver': 4 };
-  const today = new Date();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const twoDaysAgo = new Date(today); twoDaysAgo.setDate(today.getDate() - 2);
   return clients
     .filter(c => {
       const d = parseDate(c.appointment);
-      return d && d >= today;
+      return d && d >= twoDaysAgo;
     })
     .sort((a, b) => {
       const tA = tierOrder[a.tier] ?? 5;
@@ -3732,19 +3733,23 @@ function renderDashboard() {
             const urgClass = cl.urgency.toLowerCase().includes('critical') || cl.urgency.toLowerCase().includes('high') ? 'urgent' : '';
             const hasHandover = !!handoverNotes[cl.id];
             const countdown = apptCountdown(cl.appointment);
-            return `<div class="dash-card" data-id="${cl.id}">
+            const apptDate = parseDate(cl.appointment);
+            const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
+            const isPast = apptDate && apptDate < todayMidnight;
+            const hasNote = postVisitNotes[cl.id] && postVisitNotes[cl.id].length > 0;
+            return `<div class="dash-card" data-id="${cl.id}" style="${isPast ? 'opacity:0.5;' : ''}">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
                 <span class="tier-pill ${tierClass(cl.tier)}">${cl.tier}</span>
                 ${hasHandover ? '<span style="font-size:9px;color:#8b3a22;letter-spacing:0.5px;">⚠ Handover</span>' : ''}
                 ${arrivedClients.has(cl.id) ? '<span class="arrived-badge">In</span>' : ''}
+                ${isPast ? `<span style="font-size:9px;color:var(--ink-faint);letter-spacing:0.5px;">${hasNote ? '✓ Logged' : 'Visit passed'}</span>` : ''}
               </div>
               <div class="dash-card-name">${cl.name}</div>
               ${countdown ? `<div class="dash-card-countdown">${countdown}</div>` : ''}
               <div class="dash-card-appt">${cl.appointment} · ${cl.location}</div>
-              <div class="dash-card-alert ${urgClass}">${cl.urgency}</div>
+              ${isPast && !hasNote ? `<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-top:6px;cursor:pointer;" onclick="selectClient('${cl.id}')">Log visit →</div>` : `<div class="dash-card-alert ${urgClass}">${cl.urgency}</div>`}
             </div>`;
           }).join('')}
-        </div>
 
         ${alerts.length > 0 ? `
         <div class="dash-section-label">Important Dates</div>
