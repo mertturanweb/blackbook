@@ -11,18 +11,18 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #f7f4ef;
-  --bg2: #ede9e1;
-  --surface: #faf8f4;
-  --ink: #1c1c18;
-  --ink-mid: #4a4a44;
-  --ink-light: #7a7870;
-  --ink-faint: #b0ada4;
-  --rule: #ddd9d0;
-  --rule-dark: #c4c0b6;
-  --gold: #8a6d35;
-  --gold-light: #b89050;
-  --gold-pale: #f0e8d0;
+  --bg: #f2ede6;
+  --bg2: #e8e2d8;
+  --surface: #f8f5f0;
+  --ink: #181814;
+  --ink-mid: #42423c;
+  --ink-light: #6e6c64;
+  --ink-faint: #a8a59c;
+  --rule: #d4cfc5;
+  --rule-dark: #b8b4a8;
+  --gold: #7a5e28;
+  --gold-light: #a07c3e;
+  --gold-pale: #ece0c4;
   --sidebar-w: 260px;
 }
 
@@ -619,7 +619,7 @@ html, body {
 .dashboard { }
 
 .dash-greeting {
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .dash-greeting-time {
@@ -627,14 +627,15 @@ html, body {
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--ink-faint);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .dash-greeting-text {
   font-family: 'Playfair Display', serif;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 400;
   color: var(--ink);
+  line-height: 1.2;
 }
 
 .dash-section-label {
@@ -656,17 +657,20 @@ html, body {
 }
 
 .dash-card {
-  background: var(--surface);
+  background: #ffffff;
   border: 1px solid var(--rule);
   border-top: 2px solid var(--ink);
   padding: 18px 20px;
   cursor: pointer;
   transition: border-top-color 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .dash-card:hover {
   border-top-color: var(--gold);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
 }
 
 .dash-card-tier {
@@ -678,9 +682,44 @@ html, body {
 
 .dash-card-name {
   font-family: 'Playfair Display', serif;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--ink);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+}
+
+.dash-card-ltv {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+
+.dash-card-divider {
+  height: 1px;
+  background: var(--rule);
+  margin-bottom: 10px;
+}
+
+.dash-card-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+
+.dash-card-meta-item {
+  font-size: 10px;
+  color: var(--ink-faint);
+  display: flex;
+  gap: 5px;
+}
+
+.dash-card-meta-item strong {
+  color: var(--ink-mid);
+  font-weight: 400;
+  min-width: 48px;
+  flex-shrink: 0;
 }
 
 .dash-card-countdown {
@@ -706,6 +745,7 @@ html, body {
   font-size: 10px;
   color: var(--gold);
   font-style: italic;
+  margin-top: auto;
 }
 
 .dash-card-alert.urgent { color: #8b3a22; }
@@ -3716,7 +3756,7 @@ function renderDashboard() {
         </div>` : ''}
       </div>
 
-      <div class="dash-greeting" style="margin-bottom:20px;">
+      <div class="dash-greeting">
         <div class="dash-greeting-time">${dateStr}</div>
         <div class="dash-greeting-text" id="liveGreeting">${getGreeting()}. Here is your client overview.</div>
       </div>
@@ -3738,16 +3778,22 @@ function renderDashboard() {
             const isPast = apptDate && apptDate < todayMidnight;
             const hasNote = postVisitNotes[cl.id] && postVisitNotes[cl.id].length > 0;
             return `<div class="dash-card" data-id="${cl.id}" style="${isPast ? 'opacity:0.5;' : ''}">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
                 <span class="tier-pill ${tierClass(cl.tier)}">${cl.tier}</span>
                 ${hasHandover ? '<span style="font-size:9px;color:#8b3a22;letter-spacing:0.5px;">⚠ Handover</span>' : ''}
                 ${arrivedClients.has(cl.id) ? '<span class="arrived-badge">In</span>' : ''}
                 ${isPast ? `<span style="font-size:9px;color:var(--ink-faint);letter-spacing:0.5px;">${hasNote ? '✓ Logged' : 'Visit passed'}</span>` : ''}
               </div>
               <div class="dash-card-name">${cl.name}</div>
+              <div class="dash-card-ltv">${cl.ltv}</div>
+              <div class="dash-card-divider"></div>
+              <div class="dash-card-meta-row">
+                <div class="dash-card-meta-item"><strong>Last</strong>${cl.lastPurchase}</div>
+                <div class="dash-card-meta-item"><strong>CA</strong>${cl.caAction}</div>
+              </div>
               ${countdown ? `<div class="dash-card-countdown">${countdown}</div>` : ''}
               <div class="dash-card-appt">${cl.appointment} · ${cl.location}</div>
-              ${isPast && !hasNote ? `<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-top:6px;cursor:pointer;" onclick="selectClient('${cl.id}')">Log visit →</div>` : `<div class="dash-card-alert ${urgClass}">${cl.urgency}</div>`}
+              ${isPast && !hasNote ? `<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-top:6px;cursor:pointer;" onclick="selectClient('${cl.id}')">Log visit →</div>` : `<div class="dash-card-alert ${urgClass}"><span style="color:var(--ink-faint);font-style:normal;margin-right:4px;">Urgency</span>${cl.urgency}</div>`}
             </div>`;
           }).join('')}
         </div>
