@@ -3956,14 +3956,135 @@ function renderPostVisitNote(id) {
   `).join('');
 
   const inputHtml = `
-    <textarea class="post-visit-textarea" id="postVisitInput-${id}" placeholder="What happened in this visit? Items shown, client mood, key requests, next steps..."></textarea>
-    <div class="post-visit-actions">
-      <button class="post-visit-save-btn" onclick="savePostVisitNote('${id}')">${isEditing ? 'Update Note' : 'Save Note'}</button>
-      ${isEditing ? `<button onclick="cancelEditNote('${id}')" style="background:none;border:none;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;letter-spacing:1px;color:var(--ink-mid);text-transform:uppercase;margin-left:10px;">Cancel</button>` : `<span style="font-size:10px;color:var(--ink-faint);font-style:italic;">Saved locally for this session</span>`}
+    <div style="position:relative;">
+      <textarea class="post-visit-textarea" id="postVisitInput-${id}" placeholder="What happened in this visit? Items shown, client mood, key requests, next steps..." style="padding-right:42px;"></textarea>
+      <button id="voiceBtn-${id}" onclick="toggleVoiceNote('${id}')" title="Dictate note" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.15s;">
+        <svg id="voiceIcon-${id}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/>
+          <path d="M5 10a7 7 0 0 0 14 0"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+          <line x1="9" y1="22" x2="15" y2="22"/>
+        </svg>
+      </button>
+    </div>
+    <div class="post-visit-actions" style="justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="post-visit-save-btn" onclick="savePostVisitNote('${id}')">${isEditing ? 'Update Note' : 'Save Note'}</button>
+        ${isEditing ? `<button onclick="cancelEditNote('${id}')" style="background:none;border:none;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;letter-spacing:1px;color:var(--ink-mid);text-transform:uppercase;">Cancel</button>` : `<span style="font-size:10px;color:var(--ink-faint);font-style:italic;">Saved locally for this session</span>`}
+      </div>
+      <button id="aiDebriefBtn-${id}" onclick="generateAIDebrief('${id}')" style="display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--gold-light);padding:5px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);border-radius:2px;transition:all 0.15s;" title="Let AI expand your raw notes into a structured log entry">
+        <span style="font-size:11px;">✦</span> AI Debrief
+      </button>
+    </div>
+    <div id="aiDebriefResult-${id}" style="display:none;margin-top:12px;padding:12px 14px;background:var(--gold-pale);border-left:2px solid var(--gold-light);border-radius:2px;">
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">AI Debrief — Review &amp; Accept</div>
+      <div id="aiDebriefText-${id}" style="font-size:12px;line-height:1.7;color:var(--ink);margin-bottom:10px;"></div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button onclick="acceptAIDebrief('${id}')" class="post-visit-save-btn" style="font-size:9px;">Accept &amp; Save</button>
+        <button onclick="document.getElementById('aiDebriefResult-${id}').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;letter-spacing:1px;color:var(--ink-mid);text-transform:uppercase;">Discard</button>
+      </div>
     </div>
   `;
 
   container.innerHTML = savedHtml + inputHtml;
+}
+
+// ── VOICE NOTE ──
+const voiceRecognizers = {};
+function toggleVoiceNote(id) {
+  const btn = document.getElementById('voiceBtn-' + id);
+  const icon = document.getElementById('voiceIcon-' + id);
+  const ta = document.getElementById('postVisitInput-' + id);
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    showToast('!', 'Not supported', 'Voice notes require Chrome or Safari');
+    return;
+  }
+  if (voiceRecognizers[id]) {
+    voiceRecognizers[id].stop();
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  rec.lang = 'en-GB';
+  rec.interimResults = false;
+  rec.continuous = false;
+  voiceRecognizers[id] = rec;
+  icon.setAttribute('stroke', 'var(--gold)');
+  btn.style.background = 'var(--gold-pale)';
+  rec.onresult = e => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join(' ');
+    ta.value = (ta.value ? ta.value + ' ' : '') + transcript;
+    ta.dispatchEvent(new Event('input'));
+  };
+  rec.onend = () => {
+    delete voiceRecognizers[id];
+    if (icon) icon.setAttribute('stroke', 'var(--ink-faint)');
+    if (btn) btn.style.background = '';
+  };
+  rec.onerror = () => {
+    delete voiceRecognizers[id];
+    if (icon) icon.setAttribute('stroke', 'var(--ink-faint)');
+    if (btn) btn.style.background = '';
+  };
+  rec.start();
+}
+
+// ── AI DEBRIEF ──
+const aiDebriefCache = {};
+async function generateAIDebrief(id) {
+  const ta = document.getElementById('postVisitInput-' + id);
+  const rawNotes = ta ? ta.value.trim() : '';
+  if (!rawNotes) { showToast('!', 'No notes', 'Type or dictate your visit notes first'); return; }
+  const cl = clients.find(c => c.id === id);
+  if (!cl) return;
+  const btn = document.getElementById('aiDebriefBtn-' + id);
+  const resultEl = document.getElementById('aiDebriefResult-' + id);
+  const textEl = document.getElementById('aiDebriefText-' + id);
+  if (btn) { btn.innerHTML = '<span style="font-size:11px;">✦</span> Generating…'; btn.disabled = true; }
+  resultEl.style.display = 'none';
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'debrief', client: cl, rawNotes, history: histories[id] || {} })
+    });
+    const data = await res.json();
+    if (!data.content) throw new Error('API error');
+    const text = data.content.map(b => b.text || '').join('');
+    let parsed;
+    try { parsed = JSON.parse(text.replace(/```json|```/g, '').trim()); } catch(e) { throw new Error('Parse error'); }
+    aiDebriefCache[id] = parsed;
+    textEl.innerHTML = parsed.logEntry || '';
+    resultEl.style.display = 'block';
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch(err) {
+    showToast('!', 'Error', 'AI Debrief failed — check connection');
+  } finally {
+    if (btn) { btn.innerHTML = '<span style="font-size:11px;">✦</span> AI Debrief'; btn.disabled = false; }
+  }
+}
+
+function acceptAIDebrief(id) {
+  const parsed = aiDebriefCache[id];
+  if (!parsed) return;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  if (!postVisitNotes[id]) postVisitNotes[id] = [];
+  postVisitNotes[id].unshift({ id: noteUUID(), text: parsed.logEntry, date: dateStr, time: timeStr, aiGenerated: true });
+  if (parsed.newPreferences && parsed.newPreferences.length) {
+    logActivity(id, 'briefing', 'AI Debrief — preferences detected', parsed.newPreferences.join(', '));
+  }
+  if (parsed.followUpDate) {
+    logActivity(id, 'briefing', 'AI Debrief — follow-up suggested', parsed.followUpDate);
+  }
+  delete aiDebriefCache[id];
+  const resultEl = document.getElementById('aiDebriefResult-' + id);
+  if (resultEl) resultEl.style.display = 'none';
+  const ta = document.getElementById('postVisitInput-' + id);
+  if (ta) ta.value = '';
+  renderPostVisitNote(id);
+  showToast('✦', 'Debrief saved', 'Log updated · ' + (parsed.followUpDate ? 'Follow-up: ' + parsed.followUpDate : 'Session recorded'));
 }
 
 function saveHandoverNote(id) {
@@ -5161,6 +5282,24 @@ function renderHistory(clientId) {
   `;
 }
 
+
+function getBriefingAppointmentContext(c) {
+  if (!c.appointment || c.appointment === '—') return 'No upcoming appointment scheduled.';
+  const months = {January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
+  const parts = c.appointment.split(' ');
+  if (parts.length < 3) return 'Appointment date unclear.';
+  const d = parseInt(parts[0]), m = months[parts[1]], y = parseInt(parts[2]);
+  if (isNaN(d)||isNaN(m)||isNaN(y)) return 'Appointment date unclear.';
+  const appt = new Date(y, m, d);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((appt - now) / (1000*60*60*24));
+  if (diff < 0) return 'Appointment has passed.';
+  if (diff === 0) return `CONFIRMED APPOINTMENT TODAY at ${c.location}. Make the briefing directive and time-sensitive. Action items should be immediate.`;
+  if (diff === 1) return `Confirmed appointment TOMORROW at ${c.location}. Briefing should be preparation-focused and specific.`;
+  if (diff <= 7) return `Appointment in ${diff} days at ${c.location}. Briefing should begin flagging preparation steps.`;
+  return `Appointment on ${c.appointment} at ${c.location} — ${diff} days away. Standard briefing tone.`;
+}
+
 async function generateBriefing() {
   if (!selected) return;
   const c = selected;
@@ -5192,7 +5331,8 @@ async function generateBriefing() {
       body: JSON.stringify({
         type: 'briefing',
         client: c,
-        mood: mood
+        mood: mood,
+        appointmentContext: getBriefingAppointmentContext(c)
       })
     });
 

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { type, client: c, mood, tone, replyContext, occasion, catalog } = req.body;
+  const { type, client: c, mood, tone, replyContext, occasion, catalog, rawNotes, history } = req.body;
 
   if (!type || !c) {
     return res.status(400).json({ error: 'Missing required fields: type, client' });
@@ -154,6 +154,37 @@ Respond ONLY with a valid JSON array — no markdown, no backticks, no explanati
   }
 
 
+  function buildDebriefPrompt() {
+    const historyJson = JSON.stringify(history || {}, null, 2);
+    return `You are a luxury clienteling intelligence system. A Client Advisor has just finished a visit with ${c.name} (${c.tier}, LTV ${c.ltv}) and left raw notes. Your job is to turn those raw notes into a polished interaction log entry — matching the tone and style of existing entries in this client's history.
+
+CLIENT:
+Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv}
+Preferred colours: ${c.colors} | Avoid: ${c.avoid}
+Last purchase: ${c.lastPurchase} on ${c.purchaseDate}
+Current CA action: ${c.caAction} | Urgency: ${c.urgency}
+
+EXISTING INTERACTION HISTORY (match this tone exactly):
+${historyJson}
+
+CA'S RAW NOTES FROM TODAY'S VISIT:
+"${rawNotes}"
+
+RULES:
+- Log entry: 1–2 sentences max. Factual, warm, written in past tense. Match the style of existing interaction notes exactly — short, specific, no fluff.
+- Extract any new preferences mentioned (colours, categories, fits, occasions, people). Only real ones from the notes, not inferred.
+- Suggest a follow-up date: realistic based on urgency and what was discussed. Format as "15 April 2026".
+- Draft a short follow-up message (2–3 sentences, via ${c.contact}) to send within the suggested timeframe. Warm, specific, references something from the visit.
+
+Respond ONLY with valid JSON, no markdown, no backticks:
+{
+  "logEntry": "One or two sentences. What happened in the visit, written like the existing history entries.",
+  "newPreferences": ["only if something genuinely new was mentioned — e.g. 'prefers wider lapels', 'interested in jewellery for first time'. Empty array if nothing new."],
+  "followUpDate": "e.g. 15 April 2026",
+  "followUpDraft": "Short follow-up message text, ready to send via ${c.contact}."
+}`;
+  }
+
     // ── ROUTE ────────────────────────────────────────────────────────────────────
 
   let prompt, max_tokens;
@@ -170,6 +201,10 @@ Respond ONLY with a valid JSON array — no markdown, no backticks, no explanati
     }
     prompt = buildGiftsPrompt();
     max_tokens = 800;
+  } else if (type === 'debrief') {
+    if (!rawNotes) return res.status(400).json({ error: 'Missing rawNotes for debrief request' });
+    prompt = buildDebriefPrompt();
+    max_tokens = 600;
   } else {
     return res.status(400).json({ error: `Unknown request type: ${type}` });
   }
