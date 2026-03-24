@@ -3943,8 +3943,9 @@ function noteUUID() { return Math.random().toString(36).slice(2, 9); }
 function logActivity(clientId, type, title, detail) {
   if (!activityLogs[clientId]) activityLogs[clientId] = [];
   const now = new Date();
+  const caName = activeCA ? activeCA.name : null;
   activityLogs[clientId].unshift({
-    type, title, detail,
+    type, title, detail, caName,
     time: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
     date: now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
   });
@@ -3962,7 +3963,7 @@ function renderActivityLog(clientId) {
       ${entries.map(e => `
         <div class="activity-log-entry">
           <div class="activity-log-dot ${e.type}"></div>
-          <div class="activity-log-body"><strong>${e.title}</strong>${e.detail ? ' · ' + e.detail : ''}</div>
+          <div class="activity-log-body"><strong>${e.title}</strong>${e.detail ? ' · ' + e.detail : ''}${e.caName ? `<span style="color:var(--ink-faint);font-weight:300;"> — ${e.caName}</span>` : ''}</div>
           <div class="activity-log-time">${e.date} ${e.time}</div>
         </div>
       `).join('')}
