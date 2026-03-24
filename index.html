@@ -3527,6 +3527,23 @@ function closeDemoEnd(){var m=document.getElementById('demoEndModal');if(m)m.sty
 </script>
 </head>
 <body>
+
+  <!-- ── LOGIN SCREEN ── -->
+  <div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-direction:column;">
+    <div style="text-align:center;margin-bottom:48px;">
+      <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:400;color:#e8e2d8;letter-spacing:2px;margin-bottom:4px;">BlackBook</div>
+      <div style="font-size:9px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.2);">Client Intelligence</div>
+    </div>
+
+    <div style="width:320px;">
+      <div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;">Select Advisor</div>
+      <div id="caList" style="display:flex;flex-direction:column;gap:2px;margin-bottom:32px;"></div>
+      <button onclick="loginCA()" id="loginBtn" style="width:100%;background:none;border:1px solid rgba(255,255,255,0.15);color:#e8e2d8;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:14px;cursor:pointer;transition:border-color 0.15s;opacity:0.4;pointer-events:none;" onmouseenter="this.style.borderColor='rgba(255,255,255,0.4)'" onmouseleave="this.style.borderColor='rgba(255,255,255,0.15)'">Enter</button>
+    </div>
+
+    <div style="position:absolute;bottom:28px;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.12);text-transform:uppercase;">Built by Mert Turan</div>
+  </div>
+
   <div class="app">
     <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
     <div id="mobileBackBtn" class="hidden">
@@ -5706,6 +5723,67 @@ function updateMobileBriefingBar(show, generating) {
     }
   }
 }
+
+// ── CA LOGIN ──
+const caProfiles = [
+  { id: 'CA-101', name: 'Sophie Marchand',  location: 'Milan Flagship' },
+  { id: 'CA-102', name: 'James Reid',        location: 'Paris Flagship' },
+  { id: 'CA-103', name: 'Giulia Ferretti',   location: 'Rome Boutique' },
+  { id: 'CA-104', name: 'Kenji Park',        location: 'New York' },
+  { id: 'CA-105', name: 'Nadia Al-Hassan',   location: 'Dubai' },
+];
+
+let activeCA = null;
+let selectedCAId = null;
+
+function buildLoginScreen() {
+  const list = document.getElementById('caList');
+  if (!list) return;
+  list.innerHTML = caProfiles.map(ca => `
+    <div class="ca-login-row" data-ca="${ca.id}" onclick="selectCARow('${ca.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:background 0.12s;border-radius:1px;">
+      <div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;color:#e8e2d8;">${ca.name}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px;letter-spacing:0.3px;">${ca.location}</div>
+      </div>
+      <div class="ca-check" id="check-${ca.id}" style="width:6px;height:6px;border-radius:50%;background:var(--gold);opacity:0;transition:opacity 0.15s;"></div>
+    </div>
+  `).join('');
+}
+
+function selectCARow(id) {
+  selectedCAId = id;
+  document.querySelectorAll('.ca-login-row').forEach(r => {
+    r.style.background = r.dataset.ca === id ? 'rgba(255,255,255,0.05)' : '';
+    r.style.borderColor = r.dataset.ca === id ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.06)';
+  });
+  document.querySelectorAll('.ca-check').forEach(c => c.style.opacity = '0');
+  const check = document.getElementById('check-' + id);
+  if (check) check.style.opacity = '1';
+  const btn = document.getElementById('loginBtn');
+  if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+}
+
+function loginCA() {
+  if (!selectedCAId) return;
+  activeCA = caProfiles.find(c => c.id === selectedCAId);
+  const screen = document.getElementById('loginScreen');
+  if (screen) {
+    screen.style.transition = 'opacity 0.5s ease';
+    screen.style.opacity = '0';
+    setTimeout(() => { screen.style.display = 'none'; }, 500);
+  }
+  // Filter clients to this CA
+  filtered = clients.filter(c => c.ca === selectedCAId);
+  renderList();
+  renderDashboard();
+  // Update greeting to CA name
+  setTimeout(() => {
+    const g = document.getElementById('liveGreeting');
+    if (g && activeCA) g.textContent = getGreeting() + ', ' + activeCA.name.split(' ')[0] + '. Here is your client overview.';
+  }, 550);
+}
+
+buildLoginScreen();
 
 renderList();
 renderDashboard();
