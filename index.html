@@ -4169,7 +4169,11 @@ async function toggleVoiceNote(id) {
     return;
   }
   if (voiceRecognizers[id]) {
-    voiceRecognizers[id].stop();
+    const rec = voiceRecognizers[id];
+    delete voiceRecognizers[id];
+    rec.stop();
+    if (icon) icon.setAttribute('stroke', 'var(--ink-faint)');
+    if (btn) btn.style.background = '';
     return;
   }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
