@@ -2833,10 +2833,24 @@ html, body {
     grid-template-columns: 1fr !important;
   }
 
-  /* LTV ticker — 2 columns on mobile */
+  /* LTV ticker — 2 columns on mobile, override inline style */
   .ltv-grid {
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
+  }
+  .ltv-ticker-bar {
+    grid-template-columns: 1fr 1fr !important;
+    overflow: hidden !important;
+  }
+  .ltv-ticker-item {
+    border-right: 1px solid var(--rule) !important;
+    border-bottom: 1px solid var(--rule) !important;
+  }
+  .ltv-ticker-item:nth-child(2n) {
+    border-right: none !important;
+  }
+  .dash-cards {
+    grid-template-columns: 1fr !important;
   }
 
   /* CA performance grid — single column */
@@ -4113,12 +4127,45 @@ function renderPostVisitNote(id) {
 
 // ── VOICE NOTE ──
 const voiceRecognizers = {};
-function toggleVoiceNote(id) {
+async function toggleVoiceNote(id) {
   const btn = document.getElementById('voiceBtn-' + id);
   const icon = document.getElementById('voiceIcon-' + id);
   const ta = document.getElementById('postVisitInput-' + id);
-  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-    showToast('!', 'Not supported', 'Voice notes require Chrome or Safari');
+
+  const hasSpeechAPI = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+  const hasMediaRecorder = ('MediaRecorder' in window && navigator.mediaDevices);
+
+  // Mobile fallback: MediaRecorder when SpeechRecognition not available (most mobile browsers)
+  if (!hasSpeechAPI) {
+    if (!hasMediaRecorder) {
+      showToast('!', 'Not supported', 'Voice notes are not available on this device');
+      return;
+    }
+    // Stop if already recording
+    if (window._bbMediaRecorder && window._bbMediaRecorder.state === 'recording') {
+      window._bbMediaRecorder.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
+      window._bbMediaRecorder = recorder;
+      icon.setAttribute('stroke', 'var(--gold)');
+      btn.style.background = 'var(--gold-pale)';
+      showToast('●', 'Recording', 'Tap the mic again to stop');
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        icon.setAttribute('stroke', 'var(--ink-faint)');
+        btn.style.background = '';
+        showToast('✓', 'Done', 'Recording complete — type your notes below');
+        if (ta) { ta.focus(); ta.placeholder = 'Type what you recorded…'; }
+      };
+      recorder.start();
+    } catch(e) {
+      showToast('!', 'Mic blocked', 'Allow microphone access in your browser settings');
+    }
     return;
   }
   if (voiceRecognizers[id]) {
