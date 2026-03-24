@@ -723,7 +723,7 @@ html, body {
 }
 
 .dash-card-countdown {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .dash-card-countdown .appt-countdown {
   font-size: 8px;
@@ -733,6 +733,14 @@ html, body {
   border-radius: 2px;
   font-style: normal;
   font-weight: 500;
+}
+.appt-countdown.soon.pulse-once {
+  animation: pulseOnce 1.2s ease 0.4s both;
+}
+@keyframes pulseOnce {
+  0%   { box-shadow: 0 0 0 0 rgba(196,122,90,0.5); }
+  50%  { box-shadow: 0 0 0 6px rgba(196,122,90,0); }
+  100% { box-shadow: 0 0 0 0 rgba(196,122,90,0); }
 }
 
 .dash-card-appt {
@@ -746,6 +754,7 @@ html, body {
   color: var(--gold);
   font-style: italic;
   margin-top: auto;
+  padding-top: 8px;
 }
 
 .dash-card-alert.urgent { color: #8b3a22; }
@@ -753,44 +762,52 @@ html, body {
 .date-alert-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
   margin-bottom: 32px;
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  background: #fff;
 }
 
 .date-alert-row {
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-left: 3px solid var(--gold);
-  padding: 12px 16px;
+  border-left: 3px solid transparent;
+  padding: 13px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.12s;
+  border-bottom: 1px solid var(--rule);
 }
-
+.date-alert-row:last-child { border-bottom: none; }
 .date-alert-row:hover { background: var(--bg2); }
-.date-alert-row.urgent { border-left-color: #c47a5a; }
+.date-alert-row.urgent { border-left-color: #c47a5a; background: rgba(196,122,90,0.03); }
+.date-alert-row:not(.urgent) { border-left-color: var(--gold-light); }
 
 .date-alert-left { }
 
 .date-alert-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--ink);
   margin-bottom: 2px;
+  letter-spacing: 0.1px;
 }
 
 .date-alert-detail {
-  font-size: 11px;
-  color: var(--ink-light);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.3px;
 }
 
 .date-alert-days {
-  font-family: 'Playfair Display', serif;
-  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--gold);
   white-space: nowrap;
+  letter-spacing: 0.5px;
 }
 
 .date-alert-days.urgent { color: #8b3a22; }
@@ -2204,17 +2221,17 @@ html, body {
 .ltv-ticker-bar {
   display: grid;
   gap: 0;
-  margin-bottom: 28px;
+  margin-bottom: 36px;
   border: 1px solid var(--rule);
   border-top: 2px solid var(--ink);
   font-family: 'DM Sans', sans-serif;
-  background: var(--surface);
+  background: #fff;
 }
 .ltv-ticker-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 16px 20px;
+  gap: 6px;
+  padding: 20px 24px;
   border-right: 1px solid var(--rule);
   box-sizing: border-box;
   min-width: 0;
@@ -2227,20 +2244,20 @@ html, body {
 }
 .ltv-ticker-lbl {
   font-size: 8px;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 .ltv-ticker-val {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(14px, 2vw, 22px);
+  font-size: clamp(18px, 2.2vw, 28px);
   font-weight: 400;
   color: var(--ink);
-  letter-spacing: 0.3px;
+  letter-spacing: -0.3px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
-.ltv-ticker-val span { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--ink-faint); margin-left: 3px; font-weight: 400; }
+.ltv-ticker-val span { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--ink-faint); margin-left: 4px; font-weight: 400; letter-spacing: 1px; }
 
 
 /* ── CA PANEL (tab) ── */
@@ -3791,9 +3808,12 @@ function renderDashboard() {
                 <div class="dash-card-meta-item"><strong>Last</strong>${cl.lastPurchase}</div>
                 <div class="dash-card-meta-item"><strong>CA</strong>${cl.caAction}</div>
               </div>
-              ${countdown ? `<div class="dash-card-countdown">${countdown}</div>` : ''}
+              ${countdown ? `<div class="dash-card-countdown">${countdown.replace('class="appt-countdown soon"', 'class="appt-countdown soon" style="font-size:8px;letter-spacing:1px;text-transform:uppercase;background:rgba(196,122,90,0.12);color:#8b3a22;padding:3px 8px;border-radius:2px;font-weight:500;font-style:normal;"').replace('class="appt-countdown"', 'class="appt-countdown" style="font-size:8px;letter-spacing:1px;text-transform:uppercase;background:var(--bg2);color:var(--ink-mid);padding:3px 8px;border-radius:2px;font-weight:500;font-style:normal;border:1px solid var(--rule);"')}</div>` : ''}
               <div class="dash-card-appt">${cl.appointment} · ${cl.location}</div>
-              ${isPast && !hasNote ? `<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-top:6px;cursor:pointer;" onclick="selectClient('${cl.id}')">Log visit →</div>` : `<div class="dash-card-alert ${urgClass}"><span style="color:var(--ink-faint);font-style:normal;margin-right:4px;">Urgency</span>${cl.urgency}</div>`}
+              ${isPast && !hasNote
+                ? `<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-top:6px;cursor:pointer;" onclick="selectClient('${cl.id}')">Log visit →</div>`
+                : `<div class="dash-card-alert ${urgClass}"><span style="color:var(--ink-faint);font-style:normal;margin-right:4px;font-size:9px;">Open action —</span>${cl.urgency}</div>`
+              }
             </div>`;
           }).join('')}
         </div>
@@ -3828,6 +3848,38 @@ function renderDashboard() {
             </div>
           </div>`;
         }).join('')}` : ''}
+
+        ${(() => {
+          const needsAttention = clients.filter(cl => {
+            const u = cl.urgency.toLowerCase();
+            return u.includes('critical') || u.includes('high');
+          }).sort((a,b) => {
+            const order = {'critical':0,'high':1};
+            const aU = a.urgency.toLowerCase().includes('critical') ? 0 : 1;
+            const bU = b.urgency.toLowerCase().includes('critical') ? 0 : 1;
+            return aU - bU;
+          }).slice(0,4);
+          if (!needsAttention.length) return '';
+          return `
+          <div class="dash-section-label" style="margin-top:8px;">Needs Attention</div>
+          <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--rule);border-top:2px solid #c47a5a;background:#fff;margin-bottom:32px;">
+            ${needsAttention.map(cl => `
+              <div data-id="${cl.id}" style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background 0.12s;" onmouseenter="this.style.background='var(--bg2)'" onmouseleave="this.style.background=''">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="width:6px;height:6px;border-radius:50%;background:${cl.urgency.toLowerCase().includes('critical') ? '#c47a5a' : 'var(--gold)'};flex-shrink:0;"></div>
+                  <div>
+                    <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--ink);letter-spacing:0.1px;">${cl.name}</div>
+                    <div style="font-size:10px;color:var(--ink-faint);margin-top:2px;">${cl.caAction}</div>
+                  </div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;">
+                  <div style="font-size:10px;color:${cl.urgency.toLowerCase().includes('critical') ? '#c47a5a' : 'var(--gold)'};font-style:italic;">${cl.urgency}</div>
+                  <div style="font-size:9px;color:var(--ink-faint);margin-top:2px;">${cl.tier} · ${cl.ltv}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>`;
+        })()}
       </div>
 
       <div id="dash-ca-panel" class="ca-panel"></div>
