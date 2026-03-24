@@ -48,7 +48,7 @@ Current CA action: ${c.caAction} | Urgency: ${c.urgency}
 CA's read on the client today: ${mood || 'Relaxed'}. Let this shape tone and emphasis only — never reference the mood explicitly or narrate it. Relaxed: slightly more exploratory, surface one or two additional conversation threads. Busy: tighten everything, lead with the single most important action, cut anything optional. Celebrating: let warmth come through in word choice, lean into the occasion. Difficult: stay factual and measured, give the CA concrete tools to de-escalate, flag any known sensitivities upfront.
 
 The briefing should read like a sharp, trusted colleague handing off before a meeting. Precise. Human. No performed warmth, no filler, no lines that narrate the client's personality back at the reader.
-${appointmentContext && (appointmentContext.includes('TODAY') || appointmentContext.includes('TOMORROW')) ? `\nCRITICAL APPOINTMENT ALERT: ${appointmentContext} Rewrite the action items section to be immediate and specific — what needs to happen in the next few hours, not general recommendations. This client is arriving imminently.` : ''}
+${appointmentContext && (appointmentContext.includes('TODAY') || appointmentContext.includes('TOMORROW')) ? `\nCRITICAL — IMMINENT APPOINTMENT: ${appointmentContext}\nThe "action" section must be completely rewritten as a pre-arrival checklist. Not general recommendations — specific things the CA must do or have ready before the client walks in. Reference the exact CA action on file (${c.caAction}), the urgency (${c.urgency}), and anything from the last contact note. Write it as if the client could arrive in the next hour.` : ''}
 
 Respond ONLY with valid JSON, no markdown, no backticks:
 {
@@ -159,32 +159,41 @@ Respond ONLY with a valid JSON array — no markdown, no backticks, no explanati
 
   function buildDebriefPrompt() {
     const historyJson = JSON.stringify(history || {}, null, 2);
-    return `You are a luxury clienteling intelligence system. A Client Advisor has just finished a visit with ${c.name} (${c.tier}, LTV ${c.ltv}) and left raw notes. Your job is to turn those raw notes into a polished interaction log entry — matching the tone and style of existing entries in this client's history.
+    return `You are a luxury clienteling intelligence system. A Client Advisor has just finished a visit with ${c.name} (${c.tier}, LTV ${c.ltv}) and left a raw voice/text brain dump. Your job is to extract EVERYTHING useful from those notes — nothing should be lost.
 
 CLIENT:
 Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv}
 Preferred colours: ${c.colors} | Avoid: ${c.avoid}
+Beverage on file: ${c.beverage}
 Last purchase: ${c.lastPurchase} on ${c.purchaseDate}
 Current CA action: ${c.caAction} | Urgency: ${c.urgency}
+Preferred contact: ${c.contact}
 
-EXISTING INTERACTION HISTORY (match this tone exactly):
+EXISTING INTERACTION HISTORY (match this tone and length exactly):
 ${historyJson}
 
 CA'S RAW NOTES FROM TODAY'S VISIT:
 "${rawNotes}"
 
-RULES:
-- Log entry: 1–2 sentences max. Factual, warm, written in past tense. Match the style of existing interaction notes exactly — short, specific, no fluff.
-- Extract any new preferences mentioned (colours, categories, fits, occasions, people). Only real ones from the notes, not inferred.
-- Suggest a follow-up date: realistic based on urgency and what was discussed. Format as "15 April 2026".
-- Draft a short follow-up message (2–3 sentences, via ${c.contact}) to send within the suggested timeframe. Warm, specific, references something from the visit.
+YOUR JOB — extract every single detail. Do not summarise loosely. Be specific:
+
+1. LOG ENTRY: 2-3 sentences max. Past tense. Match the style of existing history entries exactly — short, factual, specific. Include items discussed, decisions made, anything notable that happened.
+
+2. NEW PREFERENCES: Extract EVERY new preference, change, or update mentioned — including beverage changes, style preferences, things they rejected, size notes, occasions mentioned, people mentioned. If they changed their usual drink, note it. If they rejected something, note why. Be exhaustive.
+
+3. OPEN TASKS: Any action items the CA mentioned needing to do — things to send, follow up on, arrange. Extract these exactly as stated.
+
+4. FOLLOW-UP DATE: Based on urgency and what was discussed, suggest a specific date. Format: "15 April 2026".
+
+5. FOLLOW-UP DRAFT: 2-3 sentence message via ${c.contact}. Warm, specific, references something concrete from today's visit.
 
 Respond ONLY with valid JSON, no markdown, no backticks:
 {
-  "logEntry": "One or two sentences. What happened in the visit, written like the existing history entries.",
-  "newPreferences": ["only if something genuinely new was mentioned — e.g. 'prefers wider lapels', 'interested in jewellery for first time'. Empty array if nothing new."],
+  "logEntry": "2-3 sentences matching existing history tone. Factual, specific, past tense.",
+  "newPreferences": ["every new preference, change, rejection, or update — be exhaustive, not selective"],
+  "openTasks": ["every action item the CA mentioned needing to do"],
   "followUpDate": "e.g. 15 April 2026",
-  "followUpDraft": "Short follow-up message text, ready to send via ${c.contact}."
+  "followUpDraft": "Ready-to-send message via ${c.contact}."
 }`;
   }
 
