@@ -454,6 +454,13 @@ html, body {
 .data-card.full { grid-column: 1 / -1; }
 .data-card.half { grid-column: span 2; }
 
+/* ── PROFILE TWO-COLUMN LAYOUT ── */
+.profile-layout { display:grid; grid-template-columns:30% 1fr; gap:28px; align-items:start; }
+.profile-col-left { position:sticky; top:0; display:flex; flex-direction:column; gap:16px; }
+.profile-col-right { min-width:0; }
+.profile-right-cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.profile-right-cards .span-full { grid-column:1/-1; }
+
 /* ── LAST INTERACTION ── */
 .interaction-note {
   background: var(--surface);
@@ -2702,6 +2709,12 @@ html, body {
   box-sizing: border-box;
   animation: fadeSlideIn 0.2s ease both;
 }
+/* Profile two-column — stack at 1024px */
+@media (max-width: 1024px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .profile-col-left { position: static; }
+}
+
 @media (max-width: 768px) {
   .demo-pill {
     white-space: normal;
@@ -2827,6 +2840,11 @@ html, body {
   .data-card.half {
     grid-column: span 1 !important;
   }
+
+  /* Profile two-column layout — collapse to single column */
+  .profile-layout { grid-template-columns: 1fr !important; }
+  .profile-col-left { position: static !important; }
+  .profile-right-cards { grid-template-columns: 1fr !important; }
 
   /* Dashboard cards — single column */
   .dash-grid {
@@ -4758,6 +4776,9 @@ function renderProfile() {
                    c.urgency.toLowerCase().includes('medium') ? 'gold' : '';
 
   document.getElementById('content').innerHTML = `
+    <div class="profile-layout">
+
+    <div class="profile-col-left">
     <div class="appt-header-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
       <div class="appt-pill" style="margin-bottom:0;">
         <div class="appt-dot"></div>
@@ -4787,8 +4808,6 @@ function renderProfile() {
       </div>
     </div>
 
-    <div class="data-grid">
-
       <div class="data-card">
         <div class="data-card-head">Identity</div>
         <div class="data-card-body">
@@ -4817,6 +4836,11 @@ function renderProfile() {
         </div>
       </div>
 
+    </div><!-- /profile-col-left -->
+
+    <div class="profile-col-right">
+      <div class="profile-right-cards">
+
       <div class="data-card">
         <div class="data-card-head">Last Transaction</div>
         <div class="data-card-body">
@@ -4829,7 +4853,7 @@ function renderProfile() {
         </div>
       </div>
 
-      <div class="data-card half">
+      <div class="data-card">
         <div class="data-card-head">Current Status</div>
         <div class="data-card-body">
           ${row('Urgency', c.urgency, urgClass)}
@@ -4839,7 +4863,7 @@ function renderProfile() {
         </div>
       </div>
 
-      <div class="data-card">
+      <div class="data-card span-full">
         <div class="data-card-head">Appointment</div>
         <div class="data-card-body">
           ${row('Date', c.appointment)}
@@ -4881,7 +4905,7 @@ function renderProfile() {
         </div>
       </div>
 
-    </div>
+      </div><!-- /profile-right-cards -->
 
     <div class="interaction-note">
       <div class="interaction-meta">Last Interaction — ${c.lastDate} · ${c.lastType}</div>
@@ -4903,6 +4927,27 @@ function renderProfile() {
           `).join('')}
         </div>`;
       })()}
+    </div>
+
+    <div class="section-divider" style="margin:28px 0 16px;">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Stylist Picks</div>
+      <div class="section-divider-line"></div>
+    </div>
+    <div class="gift-section" id="giftSection-${c.id}">
+      <div class="recs-context-row">
+        <select class="recs-select" id="recsContext-${c.id}">
+          <option value="Just Because">Just Because</option>
+          <option value="New Arrivals">New Arrivals</option>
+          <option value="Birthday">Birthday</option>
+          <option value="Anniversary">Anniversary</option>
+          <option value="Seasonal Update">Seasonal Update</option>
+        </select>
+        <button id="recsBtn-${c.id}" class="post-visit-save-btn" onclick="triggerStyleRecommendations('${c.id}')">Generate Recommendations</button>
+      </div>
+      <div class="gift-grid" id="giftGrid-${c.id}">
+        <div style="grid-column:1/-1;padding:20px 0;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--ink-faint);text-align:center;letter-spacing:0.3px;">Select an outreach context and generate recommendations.</div>
+      </div>
     </div>
 
     ${renderHistory(c.id)}
@@ -4933,28 +4978,11 @@ function renderProfile() {
       <div id="activityLog-${c.id}"></div>
     </div>
 
-    <div class="section-divider" style="margin:28px 0 16px;">
-      <div class="section-divider-line"></div>
-      <div class="section-divider-label">Stylist Picks</div>
-      <div class="section-divider-line"></div>
-    </div>
-    <div class="gift-section" id="giftSection-${c.id}">
-      <div class="recs-context-row">
-        <select class="recs-select" id="recsContext-${c.id}">
-          <option value="Just Because">Just Because</option>
-          <option value="New Arrivals">New Arrivals</option>
-          <option value="Birthday">Birthday</option>
-          <option value="Anniversary">Anniversary</option>
-          <option value="Seasonal Update">Seasonal Update</option>
-        </select>
-        <button id="recsBtn-${c.id}" class="post-visit-save-btn" onclick="triggerStyleRecommendations('${c.id}')">Generate Recommendations</button>
-      </div>
-      <div class="gift-grid" id="giftGrid-${c.id}">
-        <div style="grid-column:1/-1;padding:20px 0;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--ink-faint);text-align:center;letter-spacing:0.3px;">Select an outreach context and generate recommendations.</div>
-      </div>
-    </div>
+      <div id="briefingArea"></div>
 
-<div id="briefingArea"></div>
+    </div><!-- /profile-col-right -->
+
+    </div><!-- /profile-layout -->
   `;
 
   // Render notes after DOM is built
