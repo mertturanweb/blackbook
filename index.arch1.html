@@ -1,0 +1,4731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackBook — Client Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f7f4ef;
+  --bg2: #ede9e1;
+  --surface: #faf8f4;
+  --ink: #1c1c18;
+  --ink-mid: #4a4a44;
+  --ink-light: #7a7870;
+  --ink-faint: #b0ada4;
+  --rule: #ddd9d0;
+  --rule-dark: #c4c0b6;
+  --gold: #8a6d35;
+  --gold-light: #b89050;
+  --gold-pale: #f0e8d0;
+  --sidebar-w: 260px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  overflow: hidden;
+}
+
+/* ── LAYOUT ── */
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: relative;
+}
+
+.sidebar-clock {
+  position: absolute;
+  top: 26px;
+  right: 20px;
+}
+
+.sidebar-clock-time {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #e8e2d8;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.brand-sub {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+}
+
+.sidebar-search {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.sidebar-search input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #e8e2d8;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  padding: 8px 12px;
+  outline: none;
+}
+
+.sidebar-search input::placeholder { color: rgba(255,255,255,0.2); }
+.sidebar-search input:focus { border-color: rgba(255,255,255,0.2); }
+
+.client-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.client-list::-webkit-scrollbar { width: 3px; }
+.client-list::-webkit-scrollbar-track { background: transparent; }
+.client-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+.client-row {
+  padding: 12px 20px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.client-row:hover { background: rgba(255,255,255,0.04); }
+.client-row.active { background: rgba(184,144,80,0.15); border-left: 2px solid var(--gold-light); }
+
+.client-row-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: opacity 0.15s;
+  overflow: hidden;
+}
+
+.client-row.active .client-row-avatar { border-color: rgba(184,144,80,0.35); }
+
+.search-result-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  overflow: hidden;
+}
+
+.client-row-info { min-width: 0; flex: 1; }
+
+.client-row-name {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.client-row.active .client-row-name { color: #e8e2d8; }
+
+.client-row-tier {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.t-vvic { color: #e8c97a; }
+.t-platinum { color: #b8cfd9; }
+.t-vic { color: #a8c090; }
+.t-gold { color: #c8a84a; }
+.t-silver { color: rgba(255,255,255,0.3); }
+
+/* Tier badge pills used in sidebar rows */
+.tier-pill {
+  display: inline-block;
+  font-size: 8.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: 'DM Sans', sans-serif;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+.tier-pill.t-vvic   { background: rgba(232,201,122,0.18); color: #e8c97a; border: 1px solid rgba(232,201,122,0.3); }
+.tier-pill.t-platinum { background: rgba(184,207,217,0.15); color: #b8cfd9; border: 1px solid rgba(184,207,217,0.25); }
+.tier-pill.t-vic    { background: rgba(168,192,144,0.15); color: #a8c090; border: 1px solid rgba(168,192,144,0.25); }
+.tier-pill.t-gold   { background: rgba(200,168,74,0.15); color: #c8a84a; border: 1px solid rgba(200,168,74,0.25); }
+.tier-pill.t-silver { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.12); }
+
+/* Tier badge in profile data card */
+.profile-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+}
+.profile-tier-badge.t-vvic   { background: rgba(232,201,122,0.15); color: #e8c97a; border: 1px solid rgba(232,201,122,0.3); }
+.profile-tier-badge.t-platinum { background: rgba(184,207,217,0.12); color: #b8cfd9; border: 1px solid rgba(184,207,217,0.22); }
+.profile-tier-badge.t-vic    { background: rgba(168,192,144,0.12); color: #a8c090; border: 1px solid rgba(168,192,144,0.22); }
+.profile-tier-badge.t-gold   { background: rgba(200,168,74,0.12); color: #c8a84a; border: 1px solid rgba(200,168,74,0.22); }
+.profile-tier-badge.t-silver { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 2px solid var(--ink);
+  padding: 0 36px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.topbar-left {}
+
+.topbar-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 3px;
+}
+
+.topbar-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.gen-btn {
+  background: var(--ink);
+  border: none;
+  color: #e8e2d8;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 11px 24px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.gen-btn:hover:not(:disabled) { opacity: 0.8; }
+.gen-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 36px 60px;
+}
+
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--rule-dark); }
+
+/* ── EMPTY ── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--ink-faint);
+}
+
+.empty-line {
+  width: 40px;
+  height: 1px;
+  background: var(--gold);
+  margin-bottom: 8px;
+}
+
+.empty-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink-light);
+}
+
+.empty-sub {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--ink-faint);
+}
+
+/* ── PROFILE LAYOUT ── */
+.profile-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.appt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--gold);
+  background: var(--gold-pale);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.appt-dot {
+  width: 5px; height: 5px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── DATA GRID ── */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.data-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  padding: 0;
+  overflow: hidden;
+}
+
+.data-card-head {
+  padding: 10px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--rule);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.data-card-body { padding: 0; }
+
+.data-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.data-row:last-child { border-bottom: none; }
+
+.data-key {
+  font-size: 10px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.data-val {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 12px;
+  color: var(--ink-mid);
+  text-align: right;
+  word-break: break-word;
+}
+
+.data-val.em { color: var(--ink); font-weight: 700; }
+.data-val.gold { color: var(--gold); }
+.data-val.alert { color: #8b3a22; }
+
+/* Full width card */
+.data-card.full { grid-column: 1 / -1; }
+.data-card.half { grid-column: span 2; }
+
+/* ── LAST INTERACTION ── */
+.interaction-note {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--gold);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.interaction-meta {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.interaction-text {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-mid);
+}
+
+/* ── BRIEFING ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 28px 0 20px;
+}
+
+.section-divider-line { flex: 1; height: 1px; background: var(--rule); }
+
+.section-divider-label {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.brief-block {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.brief-block-head {
+  padding: 10px 20px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brief-block-num {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--gold);
+}
+
+.brief-block-title {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.brief-block-body {
+  padding: 20px 24px;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ink-mid);
+}
+
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.tag {
+  padding: 4px 12px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border: 1px solid var(--rule-dark);
+  color: var(--ink-light);
+}
+
+.tag.gold { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+.tag.alert { border-color: #c47a5a; color: #8b3a22; background: #fdf0ec; }
+
+.loading-sweep {
+  height: 1px;
+  background: var(--rule);
+  position: relative;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.loading-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -50%;
+  width: 50%; height: 100%;
+  background: var(--gold);
+  animation: sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes sweep { 0%{left:-50%} 100%{left:100%} }
+
+.briefing-reveal { animation: fadeUp 0.4s ease forwards; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ── SIDEBAR NAV ── */
+.sidebar-nav {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-radius: 2px;
+}
+
+.sidebar-nav-item:hover {
+  color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.04);
+}
+
+.sidebar-nav-item.active {
+  color: var(--gold-light);
+  background: rgba(184,144,80,0.1);
+}
+
+/* ── DASHBOARD ── */
+.dashboard { }
+
+.dash-greeting {
+  margin-bottom: 32px;
+}
+
+.dash-greeting-time {
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.dash-greeting-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.dash-section-label {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.dash-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: border-top-color 0.15s, box-shadow 0.15s;
+}
+
+.dash-card:hover {
+  border-top-color: var(--gold);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.dash-card-tier {
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.dash-card-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.dash-card-appt {
+  font-size: 10px;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+
+.dash-card-alert {
+  font-size: 10px;
+  color: var(--gold);
+  font-style: italic;
+}
+
+.dash-card-alert.urgent { color: #8b3a22; }
+
+.date-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.date-alert-row {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--gold);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.date-alert-row:hover { background: var(--bg2); }
+.date-alert-row.urgent { border-left-color: #c47a5a; }
+
+.date-alert-left { }
+
+.date-alert-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.date-alert-detail {
+  font-size: 11px;
+  color: var(--ink-light);
+}
+
+.date-alert-days {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.date-alert-days.urgent { color: #8b3a22; }
+
+/* ── CHECKLIST ── */
+.checklist-block {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.checklist-head {
+  padding: 10px 20px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checklist-body {
+  padding: 16px 24px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+}
+
+.checklist-item:last-child { border-bottom: none; }
+
+.checklist-box {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--rule-dark);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.checklist-item.done .checklist-box {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.checklist-item.done .checklist-box::after {
+  content: '✓';
+  color: var(--bg);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.checklist-item.done .checklist-text {
+  text-decoration: line-through;
+  color: var(--ink-faint);
+}
+
+.checklist-text {
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.5;
+}
+
+
+/* ── HISTORY TIMELINE ── */
+.history-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  overflow: hidden;
+}
+
+.history-card-head {
+  padding: 10px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--rule);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.timeline {
+  padding: 0;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 8px 1fr auto;
+  gap: 0 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rule);
+  align-items: start;
+}
+
+.timeline-item:last-child { border-bottom: none; }
+
+.timeline-dot-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 5px;
+  height: 100%;
+}
+
+.timeline-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rule-dark);
+  flex-shrink: 0;
+}
+
+.timeline-item:first-child .timeline-dot { background: var(--gold); }
+
+.timeline-line {
+  width: 1px;
+  flex: 1;
+  min-height: 16px;
+  background: var(--rule);
+  margin-top: 4px;
+}
+
+.timeline-item:last-child .timeline-line { display: none; }
+
+.timeline-content { min-width: 0; }
+
+.timeline-date {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.timeline-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+
+.timeline-sub {
+  font-size: 11px;
+  color: var(--ink-light);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.timeline-note {
+  font-size: 11.5px;
+  color: var(--ink);
+  line-height: 1.55;
+  margin-top: 2px;
+}
+
+.timeline-badge {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+
+.timeline-amount {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 11px;
+  color: var(--gold);
+  flex-shrink: 0;
+  padding-top: 5px;
+  white-space: nowrap;
+}
+
+
+/* ── HISTORY TIMELINE ── */
+.history-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.history-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  overflow: hidden;
+}
+
+.history-card-head {
+  padding: 10px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--rule);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.timeline {
+  padding: 4px 0;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0;
+  position: relative;
+}
+
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 79px;
+  top: 28px;
+  bottom: 0;
+  width: 1px;
+  background: var(--rule);
+}
+
+.timeline-date {
+  padding: 14px 12px 14px 16px;
+  font-size: 9px;
+  color: var(--ink-faint);
+  line-height: 1.4;
+  text-align: right;
+  padding-right: 16px;
+}
+
+.timeline-dot-col {
+  position: absolute;
+  left: 74px;
+  top: 18px;
+  width: 10px;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeline-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--rule-dark);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.timeline-item:first-child .timeline-dot {
+  background: var(--ink);
+}
+
+.timeline-body {
+  padding: 12px 16px 12px 20px;
+  border-left: 1px solid var(--rule);
+}
+
+.timeline-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 12px;
+  color: var(--ink);
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+
+.timeline-sub {
+  font-size: 10px;
+  color: var(--ink-faint);
+  margin-bottom: 3px;
+}
+
+.timeline-note {
+  font-size: 11px;
+  color: var(--ink-light);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.timeline-badge {
+  display: inline-block;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid var(--rule-dark);
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+
+/* ── OUTREACH DRAFT ── */
+.outreach-btn {
+  background: transparent;
+  border: 1px solid var(--rule-dark);
+  color: var(--ink-light);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+
+.outreach-btn:hover:not(:disabled) {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.outreach-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.tone-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.tone-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-faint);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.18s;
+}
+
+.tone-btn:hover { border-color: var(--rule-dark); color: var(--ink-light); }
+
+.tone-btn.active {
+  background: rgba(200,168,74,0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.outreach-block {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--gold);
+  margin-top: 12px;
+  overflow: hidden;
+  animation: fadeUp 0.3s ease forwards;
+}
+
+.outreach-block-head {
+  padding: 10px 20px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.outreach-block-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.outreach-copy-btn {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.outreach-body {
+  padding: 20px 24px;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--ink-mid);
+  white-space: pre-wrap;
+}
+/* ── POST-VISIT NOTES ── */
+.post-visit-section {
+  margin-top: 32px;
+  border-top: 2px solid var(--ink);
+  padding-top: 20px;
+}
+
+.post-visit-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.post-visit-textarea {
+  width: 100%;
+  min-height: 90px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 12px 14px;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.post-visit-textarea:focus { border-color: var(--rule-dark); }
+.post-visit-textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+.post-visit-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.post-visit-save-btn {
+  background: transparent;
+  border: 1px solid var(--rule-dark);
+  color: var(--ink-light);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.post-visit-save-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.post-visit-saved-note {
+  background: var(--surface);
+  border-left: 3px solid var(--gold);
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.6;
+  font-style: italic;
+  white-space: pre-wrap;
+}
+
+.post-visit-note-meta {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+
+/* ── CA HANDOVER ── */
+.handover-section {
+  margin-top: 24px;
+}
+
+.handover-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.handover-textarea {
+  width: 100%;
+  min-height: 70px;
+  background: rgba(139,58,34,0.05);
+  border: 1px solid rgba(139,58,34,0.2);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 12px 14px;
+  resize: vertical;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.handover-textarea:focus { border-color: rgba(139,58,34,0.4); }
+.handover-textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+.handover-saved {
+  background: rgba(139,58,34,0.06);
+  border-left: 3px solid #8b3a22;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.6;
+  font-style: italic;
+  white-space: pre-wrap;
+}
+
+.handover-note-meta {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #8b3a22;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+/* ── PAGE TRANSITIONS ── */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.page-enter {
+  animation: fadeSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dash-card {
+  animation: fadeSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dash-card:nth-child(1) { animation-delay: 0.02s; }
+.dash-card:nth-child(2) { animation-delay: 0.06s; }
+.dash-card:nth-child(3) { animation-delay: 0.10s; }
+.dash-card:nth-child(4) { animation-delay: 0.14s; }
+.dash-card:nth-child(5) { animation-delay: 0.18s; }
+.dash-card:nth-child(6) { animation-delay: 0.22s; }
+
+.data-card {
+  animation: fadeSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.data-card:nth-child(1) { animation-delay: 0.03s; }
+.data-card:nth-child(2) { animation-delay: 0.08s; }
+.data-card:nth-child(3) { animation-delay: 0.13s; }
+.data-card:nth-child(4) { animation-delay: 0.18s; }
+.data-card:nth-child(5) { animation-delay: 0.23s; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 8px;
+}
+
+.empty-state-icon {
+  font-size: 22px;
+  opacity: 0.2;
+  margin-bottom: 4px;
+}
+
+.empty-state-text {
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ── GLOBAL SEARCH OVERLAY ── */
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,9,8,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14vh;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.search-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.search-modal {
+  width: 540px;
+  max-width: 90vw;
+  background: #faf8f4;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-12px);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.search-overlay.open .search-modal {
+  transform: translateY(0);
+}
+
+.search-modal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.search-modal-icon {
+  color: rgba(0,0,0,0.25);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.search-modal-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  color: #1a1814;
+  letter-spacing: 0.2px;
+}
+
+.search-modal-input::placeholder { color: rgba(0,0,0,0.25); }
+
+.search-modal-kbd {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: rgba(0,0,0,0.2);
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 3px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.search-results {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.search-result-item:last-child { border-bottom: none; }
+
+.search-result-item:hover, .search-result-item.highlighted {
+  background: rgba(0,0,0,0.03);
+}
+
+.search-result-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.search-result-info { flex: 1; min-width: 0; }
+
+.search-result-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1814;
+  margin-bottom: 2px;
+}
+
+.search-result-name mark {
+  background: rgba(200,168,74,0.25);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.search-result-meta {
+  font-size: 10px;
+  color: rgba(0,0,0,0.35);
+  letter-spacing: 0.3px;
+}
+
+.search-empty {
+  padding: 32px 20px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0,0,0,0.25);
+  font-style: italic;
+  font-family: 'Libre Baskerville', serif;
+}
+
+.search-footer {
+  padding: 10px 20px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.search-footer-hint {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── SIDEBAR ADD BUTTON ── */
+.sidebar-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.sidebar-add-btn:hover { background: rgba(255,255,255,0.04); }
+
+.sidebar-add-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: rgba(255,255,255,0.35);
+  line-height: 1;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.sidebar-add-btn:hover .sidebar-add-icon {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.sidebar-add-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.15s;
+}
+
+.sidebar-add-btn:hover .sidebar-add-label { color: rgba(255,255,255,0.5); }
+
+/* ── ONBOARDING MODAL ── */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,9,8,0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.onboarding-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.onboarding-modal {
+  width: 560px;
+  max-width: 92vw;
+  max-height: 88vh;
+  background: #faf8f4;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(16px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.onboarding-overlay.open .onboarding-modal { transform: translateY(0); }
+
+.onboarding-header {
+  padding: 24px 28px 20px;
+  border-bottom: 2px solid #1a1814;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.onboarding-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  color: #1a1814;
+  margin-bottom: 4px;
+}
+
+.onboarding-subtitle {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.3);
+}
+
+.onboarding-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: rgba(0,0,0,0.25);
+  line-height: 1;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.onboarding-close:hover { color: rgba(0,0,0,0.6); }
+
+/* Progress bar */
+.onboarding-progress {
+  height: 2px;
+  background: rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+.onboarding-progress-fill {
+  height: 100%;
+  background: #c8a84a;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Step content */
+.onboarding-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 28px 8px;
+}
+
+.onboarding-step { display: none; }
+.onboarding-step.active { display: block; animation: fadeSlideIn 0.2s ease both; }
+
+.onboarding-step-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.3);
+  margin-bottom: 20px;
+}
+
+.onboarding-group {
+  margin-bottom: 20px;
+}
+
+.onboarding-field-label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.45);
+  margin-bottom: 7px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.onboarding-field-label span {
+  color: #c8a84a;
+  margin-left: 2px;
+}
+
+.onboarding-input, .onboarding-select {
+  width: 100%;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.12);
+  color: #1a1814;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  padding: 10px 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
+.onboarding-input:focus, .onboarding-select:focus {
+  border-color: rgba(0,0,0,0.35);
+}
+
+.onboarding-input::placeholder { color: rgba(0,0,0,0.2); font-style: italic; }
+
+.onboarding-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.onboarding-hint {
+  font-size: 10px;
+  color: rgba(0,0,0,0.25);
+  font-style: italic;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* Footer */
+.onboarding-footer {
+  padding: 16px 28px 20px;
+  border-top: 1px solid rgba(0,0,0,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.onboarding-step-count {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: rgba(0,0,0,0.25);
+  text-transform: uppercase;
+}
+
+.onboarding-btns { display: flex; gap: 10px; }
+
+.onboarding-btn-back {
+  background: none;
+  border: 1px solid rgba(0,0,0,0.15);
+  color: rgba(0,0,0,0.4);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.onboarding-btn-back:hover { border-color: rgba(0,0,0,0.3); color: rgba(0,0,0,0.7); }
+
+.onboarding-btn-next {
+  background: #1a1814;
+  border: 1px solid #1a1814;
+  color: #e8e2d8;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 9px 22px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.onboarding-btn-next:hover { background: #2a2520; }
+.onboarding-btn-next:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.onboarding-btn-finish {
+  background: #c8a84a;
+  border: 1px solid #c8a84a;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 9px 22px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.onboarding-btn-finish:hover { background: #b8982a; }
+
+/* Success state */
+.onboarding-success {
+  text-align: center;
+  padding: 20px 0 10px;
+}
+
+.onboarding-success-icon {
+  font-size: 32px;
+  margin-bottom: 14px;
+  opacity: 0.7;
+}
+
+.onboarding-success-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: #1a1814;
+  margin-bottom: 8px;
+}
+
+.onboarding-success-sub {
+  font-size: 12px;
+  color: rgba(0,0,0,0.35);
+  font-style: italic;
+}
+
+
+
+/* ── CONTEXT MENU ── */
+.ctx-menu {
+  position: fixed;
+  background: var(--sidebar);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 999;
+  min-width: 180px;
+  padding: 6px 0;
+  animation: fadeSlideIn 0.12s ease both;
+}
+.ctx-item {
+  padding: 9px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 0.3px;
+  transition: background 0.1s, color 0.1s;
+}
+.ctx-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+.ctx-item-icon { font-size: 12px; width: 14px; text-align: center; opacity: 0.7; }
+.ctx-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 0; }
+.ctx-item.danger { color: rgba(180,80,60,0.8); }
+.ctx-item.danger:hover { color: #c47a5a; background: rgba(180,80,60,0.07); }
+
+/* ── ARRIVED BADGE ── */
+.arrived-badge {
+  display: inline-block;
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(100,160,100,0.15);
+  color: #7ab87a;
+  padding: 2px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.flagged-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ── LTV TICKER ── */
+.ltv-ticker-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-bottom: 28px;
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  background: var(--surface);
+}
+.ltv-ticker-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  border-right: 1px solid var(--rule);
+}
+.ltv-ticker-item:last-child { border-right: none; }
+.ltv-ticker-lbl {
+  font-size: 8px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.ltv-ticker-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.ltv-ticker-val span { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--ink-faint); margin-left: 3px; font-weight: 400; }
+
+
+/* ── CA PANEL (tab) ── */
+.dash-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--rule);
+}
+.dash-tab {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+}
+.dash-tab:hover { color: var(--ink-mid); }
+.dash-tab.active { color: var(--ink); border-bottom-color: var(--ink); font-weight: 500; }
+
+.ca-panel { display: none; }
+.ca-panel.visible { display: block; animation: fadeSlideIn 0.18s ease both; }
+.ca-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.ca-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  padding: 16px 14px;
+  text-align: center;
+}
+.ca-card-id {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+.ca-stat {
+  margin-bottom: 8px;
+}
+.ca-stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.ca-stat-lbl {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.ca-bar-wrap {
+  height: 2px;
+  background: var(--rule);
+  margin-top: 10px;
+}
+.ca-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.ca-top-badge {
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 8px;
+}
+
+
+
+/* ── ALERT BADGE ON SIDEBAR ── */
+.sidebar-alert-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c47a5a;
+  flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+.client-row-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+
+/* ── PDF EXPORT ── */
+.export-btn {
+  background: none;
+  border: 1px solid var(--rule-dark);
+  color: var(--ink-faint);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.export-btn:hover { color: var(--ink-mid); border-color: var(--ink-light); }
+
+/* ── TOAST NOTIFICATION ── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+.toast {
+  background: rgba(26,24,20,0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 9px 14px 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 280px;
+  pointer-events: all;
+  cursor: pointer;
+  animation: toastIn 0.2s ease both;
+  transition: opacity 0.18s;
+}
+.toast.out { opacity: 0; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.toast-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.toast-body { flex: 1; min-width: 0; }
+.toast-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toast-msg {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.4;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* appointment countdown chip */
+.appt-countdown {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(200,168,74,0.1);
+  color: var(--gold);
+  padding: 2px 8px;
+  margin-left: 6px;
+  font-family: 'DM Sans', sans-serif;
+}
+.appt-countdown.soon { background: rgba(180,80,60,0.1); color: #c47a5a; }
+
+/* ── ACTION FEEDBACK ── */
+.action-feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 2px solid #7ab87a;
+  animation: fadeSlideIn 0.2s ease both;
+}
+.action-feedback.handover {
+  border-left-color: #c47a5a;
+}
+.action-feedback-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7ab87a;
+  flex-shrink: 0;
+}
+.action-feedback.handover .action-feedback-dot {
+  background: #c47a5a;
+}
+.action-feedback-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+.action-feedback-text strong {
+  color: var(--ink-mid);
+  font-weight: 500;
+}
+
+/* ── RELATIONSHIP SPARKLINE ── */
+.sparkline-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  padding: 20px 24px;
+  margin-bottom: 12px;
+}
+.sparkline-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.sparkline-title {
+  font-size: 8px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-family: 'DM Sans', sans-serif;
+}
+.sparkline-summary {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+.sparkline-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.sparkline-chart {
+  position: relative;
+}
+.sparkline-chart-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+  font-family: 'DM Sans', sans-serif;
+}
+.sparkline-svg {
+  width: 100%;
+  height: 52px;
+  display: block;
+}
+.sparkline-months {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+.sparkline-month-lbl {
+  font-size: 8px;
+  color: var(--ink-faint);
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.3px;
+}
+.sparkline-stat-row {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+}
+.sparkline-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sparkline-stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--ink);
+  line-height: 1;
+}
+.sparkline-stat-lbl {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-family: 'DM Sans', sans-serif;
+}
+.sparkline-trend {
+  font-size: 9px;
+  font-family: 'DM Sans', sans-serif;
+  padding: 2px 8px;
+  letter-spacing: 0.5px;
+}
+.sparkline-trend.up { color: #7ab87a; background: rgba(122,184,122,0.1); }
+.sparkline-trend.flat { color: var(--ink-faint); background: rgba(0,0,0,0.04); }
+.sparkline-trend.down { color: #c47a5a; background: rgba(196,122,90,0.1); }
+
+/* ── PROFILE PDF ICON ── */
+.profile-pdf-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-faint);
+  font-size: 16px;
+  padding: 4px 6px;
+  transition: color 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.profile-pdf-btn:hover { color: var(--ink-mid); }
+.profile-pdf-btn title { display: none; }
+
+/* ── DEMO MODE ── */
+.demo-btn {
+  background: none;
+  border: 1px solid rgba(200,168,74,0.3);
+  color: var(--gold);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.demo-btn:hover { background: rgba(200,168,74,0.08); border-color: var(--gold); }
+.demo-btn.running { border-color: #c47a5a; color: #c47a5a; }
+.demo-btn.running:hover { background: rgba(196,122,90,0.08); }
+
+.demo-pill {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26,24,20,0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(200,168,74,0.25);
+  color: rgba(255,255,255,0.7);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  padding: 7px 18px;
+  z-index: 3000;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: calc(100vw - 40px);
+  box-sizing: border-box;
+  animation: fadeSlideIn 0.2s ease both;
+}
+@media (max-width: 768px) {
+  .demo-pill {
+    white-space: normal;
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    padding: 7px 16px;
+    line-height: 1.5;
+    top: 58px;
+    width: calc(100vw - 40px);
+    left: 20px;
+    transform: none;
+  }
+}
+
+.demo-highlight {
+  outline: 2px solid rgba(200,168,74,0.5) !important;
+  outline-offset: 2px !important;
+  transition: outline 0.2s !important;
+}
+
+/* ── MOBILE LAYOUT ── */
+@media (max-width: 768px) {
+
+  .app {
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar becomes a full-height overlay */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 80vw;
+    max-width: 320px;
+    height: 100vh;
+    z-index: 500;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 4px 0 32px rgba(0,0,0,0.35);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Dim overlay behind open sidebar */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 499;
+  }
+  .sidebar-backdrop.active { display: block; }
+
+  /* Main panel takes full width */
+  .main {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Topbar — add hamburger */
+  .topbar {
+    padding: 14px 16px;
+    flex-shrink: 0;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px 4px 0;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+  .mobile-menu-btn span {
+    display: block;
+    width: 18px;
+    height: 1.5px;
+    background: var(--ink);
+    transition: all 0.2s;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .topbar-name {
+    font-size: 16px;
+  }
+
+  /* Content area scrollable */
+  .content {
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* Data grid — single column */
+  .data-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .data-card.half {
+    grid-column: span 1 !important;
+  }
+
+  /* Dashboard cards — single column */
+  .dash-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* LTV ticker — 2 columns on mobile */
+  .ltv-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* CA performance grid — single column */
+  .ca-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Sparkline — stack charts */
+  .sparkline-wrap {
+    grid-template-columns: 1fr !important;
+    gap: 24px;
+  }
+
+  /* History grid — stack */
+  .history-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Briefing blocks full width */
+  .briefing-block { margin-bottom: 10px; }
+
+  /* Appt pill row with PDF icon */
+  .appt-pill { font-size: 10px; }
+
+
+
+  /* Toast narrower */
+  .toast {
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+
+  /* Global search — full width */
+  .search-overlay { padding: 16px; }
+  .search-box { width: 100% !important; max-width: none !important; }
+
+  /* Onboarding modal — full width */
+  .onboarding-modal {
+    width: 95vw !important;
+    max-width: none !important;
+    padding: 24px 18px !important;
+  }
+
+  /* Hide demo btn label on very small screens */
+  @media (max-width: 380px) {
+    .demo-btn { padding: 6px 8px; }
+  }
+}
+
+/* Hide hamburger on desktop */
+.mobile-menu-btn { display: none; }
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: flex; }
+}
+
+@media (max-width: 768px) {
+  /* Demo — text only, no border, no emoji */
+  .demo-btn {
+    border: none;
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding: 4px 2px;
+    color: var(--ink-faint);
+    background: none;
+  }
+  .demo-btn:hover { background: none; color: var(--ink-mid); }
+  .demo-btn.running { color: #c47a5a; border: none; background: none; }
+  .demo-btn .demo-btn-icon { display: none; }
+  .demo-btn .demo-btn-label { display: inline; }
+
+  /* Briefing button — hide when disabled on mobile (pointless on dashboard) */
+  .gen-btn:disabled { display: none; }
+  .gen-btn { font-size: 9px; padding: 9px 14px; letter-spacing: 2px; }
+  .gen-btn .gen-btn-full { display: none; }
+  .gen-btn .gen-btn-short { display: inline; }
+
+  /* Export btn smaller */
+  .export-btn { font-size: 9px; padding: 7px 10px; letter-spacing: 1px; }
+
+  /* Topbar right — tighter */
+  .topbar > div:last-child { gap: 8px; }
+}
+/* Desktop — hide short label */
+.gen-btn .gen-btn-short { display: none; }
+
+@media (max-width: 768px) {
+  .topbar {
+    align-items: center;
+  }
+  .topbar-left {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .topbar-label {
+    font-size: 8px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .topbar > div:last-child {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar-left {
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .topbar-label {
+    display: none;
+  }
+  .topbar-name {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+  .topbar > div:last-child {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-name">BlackBook</div>
+        <div class="brand-sub">Client Intelligence</div>
+        <div class="sidebar-clock">
+          <div class="sidebar-clock-time" id="sidebarClock">--:--</div>
+        </div>
+      </div>
+      <div class="sidebar-nav">
+        <div class="sidebar-nav-item active" id="dashNavBtn" onclick="goHome()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0"><rect x="0.5" y="0.5" width="5" height="5" stroke="currentColor"/><rect x="7.5" y="0.5" width="5" height="5" stroke="currentColor"/><rect x="0.5" y="7.5" width="5" height="5" stroke="currentColor"/><rect x="7.5" y="7.5" width="5" height="5" stroke="currentColor"/></svg>
+          Overview
+        </div>
+      </div>
+      <div class="sidebar-search" onclick="openSearch()" style="cursor:pointer;" title="Search (/)">
+        <input type="text" id="searchInput" placeholder="Search  ·  Press / " readonly style="cursor:pointer; pointer-events:none;">
+      </div>
+      <div class="client-list" id="clientList"></div>
+      <div class="sidebar-add-btn" onclick="openOnboarding()" title="Onboard new client">
+        <span class="sidebar-add-icon">+</span>
+        <span class="sidebar-add-label">New Client</span>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
+          <div class="topbar-label" id="topbarLabel" style="cursor:pointer;" onclick="goHome()">Dashboard</div>
+          <div class="topbar-name" id="topbarName">Overview</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0;">
+          <button class="demo-btn" id="demoBtn" onclick="toggleDemo()"><span class="demo-btn-label">DEMO</span></button>
+          <button class="export-btn" id="exportBtn" onclick="exportPDF()" style="display:none;">⬇ Export PDF</button>
+          <button class="gen-btn" id="genBtn" onclick="generateBriefing()" disabled style="margin-left:10px;"><span class="gen-btn-full">Create Briefing</span><span class="gen-btn-short">Briefing</span></button>
+        </div>
+      </div>
+
+      <div class="content" id="content"></div>
+    </div>
+
+  </div>
+  <script>
+// ── AVATAR COLOUR MAP ──
+const tierAvBg = {
+  'VVIC':     { bg: 'rgba(232,201,122,0.18)', color: '#e8c97a' },
+  'VIC':      { bg: 'rgba(168,192,144,0.15)', color: '#a8c090' },
+  'Platinum': { bg: 'rgba(184,207,217,0.15)', color: '#b8cfd9' },
+  'Gold':     { bg: 'rgba(200,168,74,0.14)',  color: '#c8a84a' },
+  'Silver':   { bg: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.35)' }
+};
+
+function avatarStyle(tier) {
+  const s = tierAvBg[tier] || tierAvBg['Silver'];
+  return `background:${s.bg};color:${s.color};`;
+}
+
+// ── FEATURE STATE ── (must be before renderDashboard, renderList etc.)
+let arrivedClients = new Set();
+let flaggedClients = new Set();
+window.selectedMood = 'Relaxed';
+let currentDashTab = 'overview';
+
+const clients = [{"id": "C-1001", "name": "Eleanor Vance", "tier": "VVIC", "ltv": "€145,500", "ca": "CA-101", "contact": "WhatsApp", "birthday": "12 April 1982", "partner": "Arthur Vance", "anniversary": "5 September 2010", "sizeTop": "FR 38", "sizeBottom": "FR 40", "shoe": "38.5", "jewelry": "Ring: 52", "colors": "Navy, Emerald, Gold", "avoid": "Fur, Heavy Wool, Stilettos", "beverage": "Champagne", "pet": "Biscuit — Cavalier King Charles", "lastDate": "5 March 2026", "lastType": "Boutique Visit", "lastNote": "Summering in Lake Como. Husband looking for anniversary gifts.", "followUp": "1 April 2026", "lastPurchase": "Med Alligator Tote", "sku": "BAG-L-CROC-09", "purchaseDate": "20 November 2025", "location": "Milan Flagship", "alterations": "No", "aftercare": "20 November 2026", "urgency": "Needed by July", "caAction": "Holding in back of house", "appointment": "1 April 2026"}, {"id": "C-1002", "name": "Matteo Ricci", "tier": "Platinum", "ltv": "€82,300", "ca": "CA-102", "contact": "SMS", "birthday": "22 September 1975", "partner": "Sofia Ricci", "anniversary": "18 June 2005", "sizeTop": "IT 48", "sizeBottom": "IT 48", "shoe": "43", "jewelry": "Wrist: 19cm", "colors": "Charcoal, Burgundy", "avoid": "Logos, Synthetics", "beverage": "Espresso", "pet": "None", "lastDate": "14 February 2026", "lastType": "WhatsApp", "lastNote": "Mentioned charity gala coming up in May.", "followUp": "10 April 2026", "lastPurchase": "Navy Pinstripe Suit", "sku": "SUI-M-PIN-02", "purchaseDate": "10 January 2026", "location": "Rome Boutique", "alterations": "Yes", "aftercare": "10 July 2026", "urgency": "Needed for May Gala", "caAction": "Fabric sourcing from UK mill", "appointment": "10 April 2026"}, {"id": "C-1003", "name": "Sofia Lorenzo", "tier": "Gold", "ltv": "€45,000", "ca": "CA-103", "contact": "Phone", "birthday": "3 November 1990", "partner": "Marco Lorenzo", "anniversary": "12 October 2019", "sizeTop": "IT 40", "sizeBottom": "IT 42", "shoe": "39", "jewelry": "Ring: 54", "colors": "Black, Silver", "avoid": "Florals, Pastels", "beverage": "Sparkling Water", "pet": "Luna — French Bulldog", "lastDate": "28 February 2026", "lastType": "Phone Call", "lastNote": "New baby Clara. Wants comfortable but edgy flats.", "followUp": "22 April 2026", "lastPurchase": "Asymmetric Wool Blazer", "sku": "JKT-W-ASYM-04", "purchaseDate": "5 December 2025", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "5 June 2026", "urgency": "Low urgency", "caAction": "Ready for client pickup", "appointment": "22 April 2026"}, {"id": "C-1004", "name": "James Harrington", "tier": "VIC", "ltv": "€110,000", "ca": "CA-101", "contact": "Email", "birthday": "14 February 1968", "partner": "Claire Harrington", "anniversary": "20 August 1995", "sizeTop": "IT 52", "sizeBottom": "IT 54", "shoe": "44", "jewelry": "Wrist: 20cm", "colors": "Earth tones, Olive", "avoid": "Tight fits, Bold prints", "beverage": "Gin and Tonic", "pet": "None", "lastDate": "20 January 2026", "lastType": "Boutique Visit", "lastNote": "Retiring next year. Buying house in Tuscany. Needs casual wardrobe.", "followUp": "5 April 2026", "lastPurchase": "Suede Loafers", "sku": "SHO-M-LOAF-01", "purchaseDate": "20 January 2026", "location": "London Mayfair", "alterations": "No", "aftercare": "20 July 2026", "urgency": "Needed by Fall 2026", "caAction": "HQ allocating in August", "appointment": "5 April 2026"}, {"id": "C-1005", "name": "Wei Chen", "tier": "VVIC", "ltv": "€320,000", "ca": "CA-104", "contact": "WeChat", "birthday": "8 July 1995", "partner": "None", "anniversary": "N/A", "sizeTop": "FR 34", "sizeBottom": "FR 34", "shoe": "36", "jewelry": "Ring: 48", "colors": "Pink, Neon, Gold", "avoid": "Minimalist, Muted", "beverage": "Iced Matcha", "pet": "None", "lastDate": "1 March 2026", "lastType": "WeChat", "lastNote": "Wants runway look 4 immediately. Traveling to Paris next week.", "followUp": "14 April 2026", "lastPurchase": "Crystal Mini Bag", "sku": "BAG-W-CRY-08", "purchaseDate": "10 February 2026", "location": "Shanghai", "alterations": "No", "aftercare": "10 August 2026", "urgency": "High urgency", "caAction": "Contacted Paris HQ for sample", "appointment": "14 April 2026"}, {"id": "C-1006", "name": "Chloe Dubois", "tier": "Silver", "ltv": "€12,400", "ca": "CA-102", "contact": "Email", "birthday": "19 May 1988", "partner": "Thomas Dubois", "anniversary": "22 April 2017", "sizeTop": "FR 42", "sizeBottom": "FR 44", "shoe": "40", "jewelry": "Ring: 56", "colors": "Camel, Red, Black", "avoid": "Neons, Chunky sneakers", "beverage": "Black Coffee", "pet": "None", "lastDate": "15 February 2026", "lastType": "Email", "lastNote": "Bought first RTW piece. Wants to build capsule wardrobe.", "followUp": "28 April 2026", "lastPurchase": "Silk Trench Coat", "sku": "COA-W-TRN-03", "purchaseDate": "15 February 2026", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "15 August 2026", "urgency": "Low urgency", "caAction": "Available in store", "appointment": "28 April 2026"}, {"id": "C-1007", "name": "Amira Al-Fayed", "tier": "VVIC", "ltv": "€450,000", "ca": "CA-105", "contact": "WhatsApp", "birthday": "30 January 1985", "partner": "Tariq Al-Fayed", "anniversary": "30 December 2010", "sizeTop": "FR 36", "sizeBottom": "FR 38", "shoe": "37", "jewelry": "Neck: 40cm", "colors": "Jewel Tones, Gold", "avoid": "Deep necklines, Sheer", "beverage": "Mint Tea", "pet": "Layla — Saluki", "lastDate": "10 December 2025", "lastType": "Private Styling", "lastNote": "Tariq wants a major jewelry piece for the anniversary next year.", "followUp": "1 October 2026", "lastPurchase": "Custom Embellished Gown", "sku": "GWN-W-CUS-01", "purchaseDate": "10 December 2025", "location": "Dubai Mall", "alterations": "Yes", "aftercare": "10 June 2026", "urgency": "Needed by Dec 2026", "caAction": "Sketches sent to Geneva HQ", "appointment": "1 October 2026"}, {"id": "C-1008", "name": "Liam Gallagher", "tier": "Gold", "ltv": "€38,900", "ca": "CA-104", "contact": "SMS", "birthday": "10 October 1992", "partner": "None", "anniversary": "N/A", "sizeTop": "IT 50", "sizeBottom": "IT 50", "shoe": "42", "jewelry": "N/A", "colors": "Black, Orange", "avoid": "Formal tailoring, Ties", "beverage": "IPA Beer", "pet": "None", "lastDate": "20 February 2026", "lastType": "SMS", "lastNote": "Asked about upcoming artist collab. Highly restricted.", "followUp": "8 April 2026", "lastPurchase": "Chunky Sneakers", "sku": "SHO-M-SNK-05", "purchaseDate": "5 January 2026", "location": "New York Soho", "alterations": "No", "aftercare": "N/A", "urgency": "Critical urgency", "caAction": "Waitlist 3 — Pending drop", "appointment": "8 April 2026"}, {"id": "C-1009", "name": "Harper Quinn", "tier": "Platinum", "ltv": "€95,000", "ca": "CA-101", "contact": "Email", "birthday": "5 December 1979", "partner": "David Quinn", "anniversary": "9 September 2015", "sizeTop": "FR 38", "sizeBottom": "FR 38", "shoe": "38", "jewelry": "Wrist: 16cm", "colors": "Monochromes", "avoid": "Frills, Casual wear", "beverage": "Diet Coke", "pet": "None", "lastDate": "2 March 2026", "lastType": "Email", "lastNote": "Needs boardroom bag fitting 15-inch laptop. No small talk.", "followUp": "16 April 2026", "lastPurchase": "Wool Crepe Midi", "sku": "DRE-W-CRP-02", "purchaseDate": "10 November 2025", "location": "New York 5th Ave", "alterations": "Yes", "aftercare": "10 May 2026", "urgency": "High urgency", "caAction": "Holding 3 options for approval", "appointment": "16 April 2026"}, {"id": "C-1010", "name": "David Rothschild", "tier": "VIC", "ltv": "€175,000", "ca": "CA-103", "contact": "Phone", "birthday": "21 August 1960", "partner": "Elizabeth Rothschild", "anniversary": "12 June 1990", "sizeTop": "IT 54", "sizeBottom": "IT 56", "shoe": "45", "jewelry": "Ring: 64", "colors": "Navy, Brown", "avoid": "Trendy items, Denim", "beverage": "Scotch", "pet": "Winston — Bulldog", "lastDate": "15 December 2025", "lastType": "Boutique Visit", "lastNote": "Forgot his anniversary last year. Make sure he remembers in June.", "followUp": "15 May 2026", "lastPurchase": "Cashmere Cardigan", "sku": "KNI-M-CSH-07", "purchaseDate": "15 December 2025", "location": "London Mayfair", "alterations": "No", "aftercare": "15 June 2026", "urgency": "Low urgency", "caAction": "Out of stock — Checking Milan", "appointment": "15 May 2026"}, {"id": "C-1011", "name": "Priya Patel", "tier": "Gold", "ltv": "€55,000", "ca": "CA-102", "contact": "WhatsApp", "birthday": "15 March 1987", "partner": "Arjun Patel", "anniversary": "14 February 2018", "sizeTop": "FR 40", "sizeBottom": "FR 42", "shoe": "38", "jewelry": "Ring: 54", "colors": "Fuchsia, Saffron", "avoid": "Black, Beige", "beverage": "Chai", "pet": "None", "lastDate": "10 February 2026", "lastType": "Boutique Visit", "lastNote": "Traveling to Maldives for Easter. Wants bold resort wear.", "followUp": "4 April 2026", "lastPurchase": "Silk Kaftan", "sku": "DRE-W-KAF-01", "purchaseDate": "10 February 2026", "location": "Miami Design Dist.", "alterations": "No", "aftercare": "N/A", "urgency": "Needed by April", "caAction": "Ready for fitting", "appointment": "4 April 2026"}, {"id": "C-1012", "name": "Noah Kim", "tier": "Silver", "ltv": "€18,500", "ca": "CA-104", "contact": "Instagram", "birthday": "9 September 1998", "partner": "Chloe Kim", "anniversary": "N/A", "sizeTop": "IT 46", "sizeBottom": "IT 46", "shoe": "41", "jewelry": "N/A", "colors": "White, Black", "avoid": "Logos, Patterns", "beverage": "Sparkling Water", "pet": "None", "lastDate": "25 January 2026", "lastType": "Social DM", "lastNote": "Detail-oriented architecture student. Asked about fabric weaves.", "followUp": "1 April 2026", "lastPurchase": "Poplin Shirt", "sku": "SHI-M-POP-04", "purchaseDate": "25 January 2026", "location": "Seoul Gangnam", "alterations": "No", "aftercare": "25 July 2026", "urgency": "Low urgency", "caAction": "Next season drop", "appointment": "1 April 2026"}, {"id": "C-1013", "name": "Isabella Costa", "tier": "VIC", "ltv": "€105,000", "ca": "CA-105", "contact": "WhatsApp", "birthday": "25 June 1983", "partner": "Lorenzo Costa", "anniversary": "10 May 2012", "sizeTop": "IT 42", "sizeBottom": "IT 44", "shoe": "39", "jewelry": "Ring: 56", "colors": "Coral, Turquoise", "avoid": "Turtlenecks, Dark", "beverage": "Bellini", "pet": "Figo — Maltese", "lastDate": "5 February 2026", "lastType": "WhatsApp", "lastNote": "Needs UV-protective pieces for summer boat trips.", "followUp": "20 April 2026", "lastPurchase": "Woven Tote", "sku": "BAG-W-WOV-02", "purchaseDate": "12 October 2025", "location": "Monaco", "alterations": "No", "aftercare": "12 October 2026", "urgency": "Medium urgency", "caAction": "Reserved from another boutique", "appointment": "20 April 2026"}, {"id": "C-1014", "name": "Thomas Shelby", "tier": "Platinum", "ltv": "€88,000", "ca": "CA-103", "contact": "Phone", "birthday": "11 November 1972", "partner": "Grace Shelby", "anniversary": "5 November 2002", "sizeTop": "IT 50", "sizeBottom": "IT 52", "shoe": "43", "jewelry": "Wrist: 19cm", "colors": "Tweed, Charcoal", "avoid": "Brights, Athleisure", "beverage": "Whiskey", "pet": "None", "lastDate": "20 November 2025", "lastType": "Fitting", "lastNote": "Complained about synthetic blends. Loves heavy vintage fabrics.", "followUp": "11 April 2026", "lastPurchase": "Tweed Suit", "sku": "SUI-M-TWD-01", "purchaseDate": "20 November 2025", "location": "London Mayfair", "alterations": "Yes", "aftercare": "20 May 2026", "urgency": "Low urgency", "caAction": "Sourcing via auction house", "appointment": "11 April 2026"}, {"id": "C-1015", "name": "Yuki Tanaka", "tier": "VVIC", "ltv": "€280,000", "ca": "CA-101", "contact": "Line App", "birthday": "2 April 1991", "partner": "Kenji Tanaka", "anniversary": "10 October 2020", "sizeTop": "FR 34", "sizeBottom": "FR 36", "shoe": "35.5", "jewelry": "Ring: 50", "colors": "Black, Red", "avoid": "Classic cuts, Florals", "beverage": "Green Tea", "pet": "None", "lastDate": "25 February 2026", "lastType": "Line App", "lastNote": "Flying in for fashion week in September. Needs VIP seating.", "followUp": "1 August 2026", "lastPurchase": "Deconstructed Cape", "sku": "COA-W-DEC-05", "purchaseDate": "15 January 2026", "location": "Tokyo Ginza", "alterations": "Yes", "aftercare": "15 July 2026", "urgency": "Needed by Sept FW", "caAction": "Reserved runway sample", "appointment": "1 August 2026"}, {"id": "C-1016", "name": "Oliver Sterling", "tier": "Gold", "ltv": "€42,000", "ca": "CA-102", "contact": "WhatsApp", "birthday": "18 July 1980", "partner": "Victoria Sterling", "anniversary": "20 September 2008", "sizeTop": "IT 48", "sizeBottom": "IT 50", "shoe": "42", "jewelry": "Wrist: 18cm", "colors": "Pastel Blue, Pink", "avoid": "Edgy items, Leather", "beverage": "Iced Tea", "pet": "None", "lastDate": "10 January 2026", "lastType": "Boutique Visit", "lastNote": "Son needs graduation suit in 2028. Spends weekends golfing.", "followUp": "15 April 2026", "lastPurchase": "Cable Knit Sweater", "sku": "KNI-M-CBL-02", "purchaseDate": "10 January 2026", "location": "New York 5th Ave", "alterations": "No", "aftercare": "10 July 2026", "urgency": "Low urgency", "caAction": "In transit to store", "appointment": "15 April 2026"}, {"id": "C-1017", "name": "Zara Ndiaye", "tier": "Platinum", "ltv": "€76,500", "ca": "CA-105", "contact": "Email", "birthday": "20 December 1989", "partner": "None", "anniversary": "N/A", "sizeTop": "FR 38", "sizeBottom": "FR 40", "shoe": "40", "jewelry": "Ring: 54", "colors": "Emerald, Gold, Onyx", "avoid": "Casual wear, Denim", "beverage": "Champagne", "pet": "None", "lastDate": "5 December 2025", "lastType": "Brand Event", "lastNote": "Art curator. Loved history behind the Deco collection.", "followUp": "1 May 2026", "lastPurchase": "Velvet Jacket", "sku": "JKT-W-VEL-01", "purchaseDate": "5 December 2025", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "5 June 2026", "urgency": "Low urgency", "caAction": "Production delayed", "appointment": "1 May 2026"}, {"id": "C-1018", "name": "Benjamin Hayes", "tier": "Silver", "ltv": "€22,000", "ca": "CA-104", "contact": "SMS", "birthday": "28 February 1994", "partner": "Emily Hayes", "anniversary": "20 October 2023", "sizeTop": "IT 48", "sizeBottom": "IT 48", "shoe": "42.5", "jewelry": "N/A", "colors": "Grey, Navy", "avoid": "Suits, Formal shoes", "beverage": "Cold Brew", "pet": "None", "lastDate": "28 February 2026", "lastType": "Boutique Visit", "lastNote": "Tech background. Wants stealth wealth basics. Dislikes shopping.", "followUp": "1 June 2026", "lastPurchase": "Merino Joggers", "sku": "PAN-M-MER-03", "purchaseDate": "28 February 2026", "location": "San Francisco", "alterations": "No", "aftercare": "28 August 2026", "urgency": "Medium urgency", "caAction": "Available in store", "appointment": "1 June 2026"}, {"id": "C-1019", "name": "Elena Rostova", "tier": "VIC", "ltv": "€190,000", "ca": "CA-101", "contact": "Phone", "birthday": "5 October 1978", "partner": "Dmitri Rostov", "anniversary": "15 May 1998", "sizeTop": "FR 40", "sizeBottom": "FR 42", "shoe": "39", "jewelry": "Neck: 42cm", "colors": "Leopard, Red, Gold", "avoid": "Minimalism, Flats", "beverage": "Martini", "pet": "None", "lastDate": "20 December 2025", "lastType": "Phone Call", "lastNote": "Glamorous client. Wants daughter Anastasia to get a matching bag.", "followUp": "15 October 2026", "lastPurchase": "Fur-Trimmed Coat", "sku": "COA-W-FUR-02", "purchaseDate": "20 December 2025", "location": "Geneva", "alterations": "Yes", "aftercare": "20 June 2026", "urgency": "Medium urgency", "caAction": "Sketching custom design", "appointment": "15 October 2026"}, {"id": "C-1020", "name": "Lucas Silva", "tier": "Gold", "ltv": "€51,000", "ca": "CA-103", "contact": "WhatsApp", "birthday": "14 August 1986", "partner": "Maria Silva", "anniversary": "12 December 2015", "sizeTop": "IT 50", "sizeBottom": "IT 52", "shoe": "44", "jewelry": "Wrist: 21cm", "colors": "Royal Blue, White", "avoid": "Restrictive tailoring", "beverage": "Protein Shake", "pet": "None", "lastDate": "30 January 2026", "lastType": "WhatsApp", "lastNote": "Pro athlete. Needs durable weather-proof travel gear.", "followUp": "7 April 2026", "lastPurchase": "Tech Rain Jacket", "sku": "JKT-M-TEC-01", "purchaseDate": "30 January 2026", "location": "Milan Flagship", "alterations": "Yes", "aftercare": "30 July 2026", "urgency": "High urgency", "caAction": "Shipping directly to hotel", "appointment": "7 April 2026"}];
+
+const histories = {"C-1001": {"transactions": [{"date": "20 Nov 2025", "item": "Med Alligator Tote", "sku": "BAG-L-CROC-09", "amount": "€12,400", "location": "Milan Flagship"}, {"date": "14 Jun 2025", "item": "Silk Evening Gown", "sku": "GWN-W-SLK-03", "amount": "€8,200", "location": "Milan Flagship"}, {"date": "02 Mar 2025", "item": "Cashmere Wrap Coat", "sku": "COA-W-CSH-01", "amount": "€6,800", "location": "Paris Flagship"}, {"date": "18 Nov 2024", "item": "Gold Chain Belt", "sku": "ACC-W-BLT-02", "amount": "€1,950", "location": "Milan Flagship"}, {"date": "04 Sep 2024", "item": "Navy Silk Blouse", "sku": "TOP-W-SLK-07", "amount": "€2,100", "location": "Milan Flagship"}], "interactions": [{"date": "05 Mar 2026", "type": "Boutique Visit", "note": "Summering in Lake Como. Husband looking for anniversary gifts."}, {"date": "10 Jan 2026", "type": "WhatsApp", "note": "Asked about new alligator arrivals for spring."}, {"date": "20 Nov 2025", "type": "Boutique Visit", "note": "Purchased tote. Requested monogram service."}, {"date": "03 Oct 2025", "type": "Phone Call", "note": "Enquired about trunk show in Milan."}, {"date": "14 Jun 2025", "type": "Private Styling", "note": "Season opener. Purchased gown for Amalfi event."}]}, "C-1002": {"transactions": [{"date": "10 Jan 2026", "item": "Navy Pinstripe Suit", "sku": "SUI-M-PIN-02", "amount": "€4,800", "location": "Rome Boutique"}, {"date": "15 Sep 2025", "item": "Leather Oxford Shoes", "sku": "SHO-M-OXF-03", "amount": "€1,200", "location": "Rome Boutique"}, {"date": "20 Apr 2025", "item": "Midnight Tuxedo", "sku": "SUI-M-TUX-01", "amount": "€6,200", "location": "Rome Boutique"}, {"date": "08 Dec 2024", "item": "Cashmere Overcoat", "sku": "COA-M-CSH-02", "amount": "€5,400", "location": "Milan Flagship"}, {"date": "22 Jun 2024", "item": "White Linen Suit", "sku": "SUI-M-LIN-04", "amount": "€3,600", "location": "Rome Boutique"}], "interactions": [{"date": "14 Feb 2026", "type": "WhatsApp", "note": "Mentioned charity gala coming up in May."}, {"date": "10 Jan 2026", "type": "Boutique Visit", "note": "Suit purchase. Requested rush alterations."}, {"date": "02 Dec 2025", "type": "Phone Call", "note": "Checking on overcoat delivery timeline."}, {"date": "15 Sep 2025", "type": "Boutique Visit", "note": "Shoes fitted. Discussed autumn wardrobe needs."}, {"date": "20 Apr 2025", "type": "Private Appointment", "note": "Tuxedo commission for opera season."}]}, "C-1003": {"transactions": [{"date": "05 Dec 2025", "item": "Asymmetric Wool Blazer", "sku": "JKT-W-ASYM-04", "amount": "€3,200", "location": "Paris Flagship"}, {"date": "18 Aug 2025", "item": "Draped Jersey Dress", "sku": "DRE-W-JRS-02", "amount": "€2,400", "location": "Paris Flagship"}, {"date": "10 Apr 2025", "item": "Leather Ankle Boots", "sku": "SHO-W-ANK-06", "amount": "€1,800", "location": "Paris Flagship"}, {"date": "22 Nov 2024", "item": "Structured Wool Trousers", "sku": "PAN-W-WOL-03", "amount": "€1,400", "location": "Paris Flagship"}, {"date": "07 Jun 2024", "item": "Silver Chain Necklace", "sku": "JWL-W-NCK-01", "amount": "€2,800", "location": "Paris Flagship"}], "interactions": [{"date": "28 Feb 2026", "type": "Phone Call", "note": "New baby Clara. Wants comfortable but edgy flats."}, {"date": "05 Dec 2025", "type": "Boutique Visit", "note": "Blazer purchase. Wanted relaxed silhouettes during pregnancy."}, {"date": "10 Sep 2025", "type": "WhatsApp", "note": "Asked about new season arrivals."}, {"date": "18 Aug 2025", "type": "Boutique Visit", "note": "Purchased jersey dress. Happy with fit."}, {"date": "10 Apr 2025", "type": "Email", "note": "Boot fitting appointment confirmed."}]}, "C-1004": {"transactions": [{"date": "20 Jan 2026", "item": "Suede Loafers", "sku": "SHO-M-LOAF-01", "amount": "€1,600", "location": "London Mayfair"}, {"date": "05 Oct 2025", "item": "Olive Linen Blazer", "sku": "JKT-M-LIN-02", "amount": "€3,400", "location": "London Mayfair"}, {"date": "12 May 2025", "item": "Earth Tone Polo Set", "sku": "SET-M-POL-01", "amount": "€2,200", "location": "London Mayfair"}, {"date": "18 Dec 2024", "item": "Merino Crewneck", "sku": "KNI-M-MRN-04", "amount": "€1,100", "location": "London Mayfair"}, {"date": "30 Aug 2024", "item": "Tan Leather Belt", "sku": "ACC-M-BLT-01", "amount": "€650", "location": "London Mayfair"}], "interactions": [{"date": "20 Jan 2026", "type": "Boutique Visit", "note": "Retiring next year. Buying house in Tuscany. Needs casual wardrobe."}, {"date": "08 Nov 2025", "type": "Email", "note": "Requested autumn lookbook."}, {"date": "05 Oct 2025", "type": "Boutique Visit", "note": "Linen blazer. Discussed countryside dressing."}, {"date": "12 May 2025", "type": "Boutique Visit", "note": "Polo set for summer. Wife accompanied."}, {"date": "18 Dec 2024", "type": "Phone Call", "note": "Christmas gift request for himself."}]}, "C-1005": {"transactions": [{"date": "10 Feb 2026", "item": "Crystal Mini Bag", "sku": "BAG-W-CRY-08", "amount": "€8,900", "location": "Shanghai"}, {"date": "22 Nov 2025", "item": "Neon Sequin Mini Dress", "sku": "DRE-W-SEQ-03", "amount": "€5,600", "location": "Paris Flagship"}, {"date": "14 Jul 2025", "item": "Pink Logo Sneakers", "sku": "SHO-W-SNK-09", "amount": "€1,400", "location": "Shanghai"}, {"date": "03 Apr 2025", "item": "Gold Charm Bracelet", "sku": "JWL-W-BRC-04", "amount": "€6,200", "location": "Shanghai"}, {"date": "19 Jan 2025", "item": "Runway Look 12 Coat", "sku": "COA-W-RWY-12", "amount": "€14,000", "location": "Paris Flagship"}], "interactions": [{"date": "01 Mar 2026", "type": "WeChat", "note": "Wants runway look 4 immediately. Traveling to Paris."}, {"date": "10 Feb 2026", "type": "Boutique Visit", "note": "Crystal bag purchase. Requested Paris HQ sample."}, {"date": "22 Nov 2025", "type": "Private Styling", "note": "Paris visit. Purchased sequin dress for New Year event."}, {"date": "14 Jul 2025", "type": "WeChat", "note": "Requested new sneaker colourways."}, {"date": "03 Apr 2025", "type": "VIP Event", "note": "Attended brand jewellery launch in Shanghai."}]}, "C-1006": {"transactions": [{"date": "15 Feb 2026", "item": "Silk Trench Coat", "sku": "COA-W-TRN-03", "amount": "€4,200", "location": "Paris Flagship"}, {"date": "10 Oct 2025", "item": "Camel Wool Trousers", "sku": "PAN-W-WOL-02", "amount": "€1,600", "location": "Paris Flagship"}, {"date": "05 Jun 2025", "item": "Red Leather Gloves", "sku": "ACC-W-GLV-01", "amount": "€480", "location": "Paris Flagship"}, {"date": "20 Feb 2025", "item": "Black Crepe Blouse", "sku": "TOP-W-CRP-04", "amount": "€890", "location": "Paris Flagship"}, {"date": "12 Nov 2024", "item": "Camel Tote Bag", "sku": "BAG-W-TOT-05", "amount": "€2,800", "location": "Paris Flagship"}], "interactions": [{"date": "15 Feb 2026", "type": "Email", "note": "First RTW purchase. Wants to build capsule wardrobe."}, {"date": "10 Oct 2025", "type": "Boutique Visit", "note": "Second visit. More confident in her taste."}, {"date": "05 Jun 2025", "type": "Email", "note": "Enquired about summer accessories."}, {"date": "20 Feb 2025", "type": "Boutique Visit", "note": "First visit. Referred by colleague."}, {"date": "12 Nov 2024", "type": "Email", "note": "Online enquiry about bag availability."}]}, "C-1007": {"transactions": [{"date": "10 Dec 2025", "item": "Custom Embellished Gown", "sku": "GWN-W-CUS-01", "amount": "€42,000", "location": "Dubai Mall"}, {"date": "05 Jun 2025", "item": "Emerald Silk Set", "sku": "SET-W-SLK-02", "amount": "€9,800", "location": "Dubai Mall"}, {"date": "18 Feb 2025", "item": "Gold Cuff Bracelet", "sku": "JWL-W-CUF-03", "amount": "€18,500", "location": "Geneva"}, {"date": "14 Oct 2024", "item": "Jewel Tone Cape Coat", "sku": "COA-W-CAP-04", "amount": "€11,200", "location": "Dubai Mall"}, {"date": "20 Mar 2024", "item": "Ruby Embellished Clutch", "sku": "BAG-W-CLT-07", "amount": "€7,400", "location": "Paris Flagship"}], "interactions": [{"date": "10 Dec 2025", "type": "Private Styling", "note": "Tariq wants major jewelry piece for anniversary."}, {"date": "05 Jun 2025", "type": "Private Appointment", "note": "Ramadan styling session. Very pleased with emerald set."}, {"date": "18 Feb 2025", "type": "Boutique Visit", "note": "Geneva visit with Tariq. Purchased cuff together."}, {"date": "14 Oct 2024", "type": "VIP Event", "note": "Attended private collection preview in Dubai."}, {"date": "20 Mar 2024", "type": "Boutique Visit", "note": "Paris visit. First introduction to maison."}]}, "C-1008": {"transactions": [{"date": "05 Jan 2026", "item": "Chunky Sneakers", "sku": "SHO-M-SNK-05", "amount": "€980", "location": "New York Soho"}, {"date": "14 Sep 2025", "item": "Oversized Graphic Tee", "sku": "TOP-M-GRP-03", "amount": "€650", "location": "New York Soho"}, {"date": "02 May 2025", "item": "Black Technical Jacket", "sku": "JKT-M-TEC-02", "amount": "€2,400", "location": "New York Soho"}, {"date": "20 Dec 2024", "item": "Orange Nylon Backpack", "sku": "BAG-M-BCK-01", "amount": "€1,800", "location": "New York Soho"}, {"date": "08 Aug 2024", "item": "Black Cargo Trousers", "sku": "PAN-M-CRG-02", "amount": "€1,200", "location": "New York Soho"}], "interactions": [{"date": "20 Feb 2026", "type": "SMS", "note": "Asked about artist collab. Highly restricted info."}, {"date": "05 Jan 2026", "type": "Boutique Visit", "note": "Sneaker purchase. On waitlist for upcoming drop."}, {"date": "14 Sep 2025", "type": "SMS", "note": "Requested early access to new graphic tees."}, {"date": "02 May 2025", "type": "Boutique Visit", "note": "Technical jacket. Interested in streetwear collabs."}, {"date": "20 Dec 2024", "type": "Boutique Visit", "note": "Holiday shopping. Brought two friends."}]}, "C-1009": {"transactions": [{"date": "10 Nov 2025", "item": "Wool Crepe Midi Dress", "sku": "DRE-W-CRP-02", "amount": "€3,800", "location": "New York 5th Ave"}, {"date": "25 Jun 2025", "item": "Monochrome Blazer", "sku": "JKT-W-MON-01", "amount": "€4,200", "location": "New York 5th Ave"}, {"date": "14 Feb 2025", "item": "White Structured Tote", "sku": "BAG-W-STR-03", "amount": "€5,600", "location": "New York 5th Ave"}, {"date": "10 Sep 2024", "item": "Black Wide-Leg Trousers", "sku": "PAN-W-WID-02", "amount": "€2,100", "location": "New York 5th Ave"}, {"date": "28 Mar 2024", "item": "Grey Cashmere Turtleneck", "sku": "KNI-W-CSH-05", "amount": "€1,800", "location": "New York 5th Ave"}], "interactions": [{"date": "02 Mar 2026", "type": "Email", "note": "Needs boardroom bag for 15-inch laptop. No small talk."}, {"date": "10 Nov 2025", "type": "Boutique Visit", "note": "Midi dress. Efficient appointment, 25 minutes."}, {"date": "25 Jun 2025", "type": "Email", "note": "Requested blazer options ahead of visit."}, {"date": "14 Feb 2025", "type": "Boutique Visit", "note": "Tote purchase. Appreciated structured silhouette."}, {"date": "10 Sep 2024", "type": "Boutique Visit", "note": "Trousers. In and out in 20 minutes."}]}, "C-1010": {"transactions": [{"date": "15 Dec 2025", "item": "Cashmere Cardigan", "sku": "KNI-M-CSH-07", "amount": "€2,800", "location": "London Mayfair"}, {"date": "20 Aug 2025", "item": "Navy Double-Breasted Suit", "sku": "SUI-M-DBL-03", "amount": "€7,400", "location": "London Mayfair"}, {"date": "10 Apr 2025", "item": "Brown Leather Briefcase", "sku": "BAG-M-BRF-01", "amount": "€4,200", "location": "London Mayfair"}, {"date": "05 Dec 2024", "item": "Merino Wool Trousers x2", "sku": "PAN-M-MRN-02", "amount": "€3,200", "location": "London Mayfair"}, {"date": "18 Jun 2024", "item": "Silk Anniversary Scarf", "sku": "ACC-W-SCF-04", "amount": "€680", "location": "London Mayfair"}], "interactions": [{"date": "15 Dec 2025", "type": "Boutique Visit", "note": "Cardigan purchase. Reminded about June anniversary."}, {"date": "20 Aug 2025", "type": "Boutique Visit", "note": "Suit commission. Elizabeth prefers classic gifts."}, {"date": "10 Apr 2025", "type": "Phone Call", "note": "Briefcase enquiry for new board role."}, {"date": "05 Dec 2024", "type": "Boutique Visit", "note": "Trousers. Bought scarf as gift for Elizabeth."}, {"date": "18 Jun 2024", "type": "Phone Call", "note": "Last-minute anniversary gift. Needed same-day."}]}, "C-1011": {"transactions": [{"date": "10 Feb 2026", "item": "Silk Kaftan", "sku": "DRE-W-KAF-01", "amount": "€3,400", "location": "Miami Design Dist."}, {"date": "15 Sep 2025", "item": "Fuchsia Blazer", "sku": "JKT-W-FCH-02", "amount": "€4,100", "location": "Miami Design Dist."}, {"date": "20 Apr 2025", "item": "Saffron Silk Scarf", "sku": "ACC-W-SCF-08", "amount": "€920", "location": "Miami Design Dist."}, {"date": "12 Dec 2024", "item": "Embroidered Evening Bag", "sku": "BAG-W-EMB-03", "amount": "€5,800", "location": "Miami Design Dist."}, {"date": "08 Jun 2024", "item": "Printed Maxi Dress", "sku": "DRE-W-PRT-06", "amount": "€2,900", "location": "Miami Design Dist."}], "interactions": [{"date": "10 Feb 2026", "type": "Boutique Visit", "note": "Maldives trip for Easter. Wants bold resort wear."}, {"date": "15 Sep 2025", "type": "Boutique Visit", "note": "Blazer for Diwali event. Brought Arjun."}, {"date": "20 Apr 2025", "type": "WhatsApp", "note": "Requested scarf options for a birthday gift."}, {"date": "12 Dec 2024", "type": "VIP Event", "note": "Attended charity gala. Purchased bag on the night."}, {"date": "08 Jun 2024", "type": "Boutique Visit", "note": "Summer purchase. Asked about made-to-order options."}]}, "C-1012": {"transactions": [{"date": "25 Jan 2026", "item": "Poplin Shirt", "sku": "SHI-M-POP-04", "amount": "€780", "location": "Seoul Gangnam"}, {"date": "10 Oct 2025", "item": "White Slim Trousers", "sku": "PAN-M-SLM-01", "amount": "€1,200", "location": "Seoul Gangnam"}, {"date": "05 May 2025", "item": "Black Cotton Overshirt", "sku": "SHI-M-OVR-02", "amount": "€960", "location": "Seoul Gangnam"}, {"date": "20 Jan 2025", "item": "Minimalist White Sneakers", "sku": "SHO-M-SNK-01", "amount": "€820", "location": "Seoul Gangnam"}, {"date": "14 Aug 2024", "item": "Fine Knit Crewneck", "sku": "KNI-M-FNK-03", "amount": "€1,100", "location": "Seoul Gangnam"}], "interactions": [{"date": "25 Jan 2026", "type": "Social DM", "note": "Asked about fabric weaves. Architecture student perspective."}, {"date": "10 Oct 2025", "type": "Boutique Visit", "note": "Trousers. Long discussion on tailoring construction."}, {"date": "05 May 2025", "type": "Instagram DM", "note": "Spotted overshirt in editorial. Requested to purchase."}, {"date": "20 Jan 2025", "type": "Boutique Visit", "note": "First in-store visit. Very detail-oriented."}, {"date": "14 Aug 2024", "type": "Instagram DM", "note": "First contact. Asked about materials in knitwear."}]}, "C-1013": {"transactions": [{"date": "12 Oct 2025", "item": "Woven Tote", "sku": "BAG-W-WOV-02", "amount": "€4,600", "location": "Monaco"}, {"date": "22 Jun 2025", "item": "Coral Linen Shirt Dress", "sku": "DRE-W-LIN-04", "amount": "€2,800", "location": "Monaco"}, {"date": "14 Mar 2025", "item": "Turquoise Silk Trousers", "sku": "PAN-W-SLK-03", "amount": "€2,100", "location": "Monaco"}, {"date": "10 Nov 2024", "item": "Gold Hoop Earrings", "sku": "JWL-W-EAR-02", "amount": "€3,200", "location": "Monaco"}, {"date": "04 Jul 2024", "item": "White Broderie Anglaise Dress", "sku": "DRE-W-BRD-01", "amount": "€3,600", "location": "Monaco"}], "interactions": [{"date": "05 Feb 2026", "type": "WhatsApp", "note": "UV-protective pieces for summer boat trips."}, {"date": "12 Oct 2025", "type": "Boutique Visit", "note": "Tote purchase. Discussed summer 2026 collection."}, {"date": "22 Jun 2025", "type": "Boutique Visit", "note": "Shirt dress. Lorenzo joined for first time."}, {"date": "14 Mar 2025", "type": "WhatsApp", "note": "Requested silk trouser options for Monaco GP."}, {"date": "10 Nov 2024", "type": "Boutique Visit", "note": "Earrings as anniversary gift from Lorenzo."}]}, "C-1014": {"transactions": [{"date": "20 Nov 2025", "item": "Tweed Suit", "sku": "SUI-M-TWD-01", "amount": "€8,800", "location": "London Mayfair"}, {"date": "15 Jun 2025", "item": "Heavy Wool Overcoat", "sku": "COA-M-WOL-03", "amount": "€6,400", "location": "London Mayfair"}, {"date": "10 Feb 2025", "item": "Herringbone Waistcoat", "sku": "VST-M-HRB-01", "amount": "€2,200", "location": "London Mayfair"}, {"date": "22 Oct 2024", "item": "Charcoal Flannel Trousers", "sku": "PAN-M-FLN-02", "amount": "€1,800", "location": "London Mayfair"}, {"date": "18 Apr 2024", "item": "Vintage Wool Blazer", "sku": "JKT-M-VNT-04", "amount": "€5,600", "location": "London Mayfair"}], "interactions": [{"date": "20 Nov 2025", "type": "Fitting", "note": "Tweed suit commission. Complained about synthetic blends."}, {"date": "15 Jun 2025", "type": "Boutique Visit", "note": "Overcoat sourced from British mill per request."}, {"date": "10 Feb 2025", "type": "Phone Call", "note": "Waistcoat for Grace birthday dinner."}, {"date": "22 Oct 2024", "type": "Boutique Visit", "note": "Flannel trousers. Requested heavier weight."}, {"date": "18 Apr 2024", "type": "Private Appointment", "note": "First visit. Introduced by club member."}]}, "C-1015": {"transactions": [{"date": "15 Jan 2026", "item": "Deconstructed Cape", "sku": "COA-W-DEC-05", "amount": "€9,200", "location": "Tokyo Ginza"}, {"date": "10 Sep 2025", "item": "Red Avant-Garde Jumpsuit", "sku": "JMP-W-AVG-02", "amount": "€6,800", "location": "Paris Flagship"}, {"date": "20 Apr 2025", "item": "Black Sculptural Bag", "sku": "BAG-W-SCL-01", "amount": "€11,400", "location": "Tokyo Ginza"}, {"date": "05 Dec 2024", "item": "Asymmetric Leather Skirt", "sku": "SKT-W-LTH-03", "amount": "€4,200", "location": "Tokyo Ginza"}, {"date": "10 Jun 2024", "item": "Runway Embellished Heels", "sku": "SHO-W-EMB-08", "amount": "€3,600", "location": "Paris Flagship"}], "interactions": [{"date": "25 Feb 2026", "type": "Line App", "note": "Flying in for fashion week in September. Needs VIP seating."}, {"date": "15 Jan 2026", "type": "Boutique Visit", "note": "Cape purchase. Discussed FW26 show access."}, {"date": "10 Sep 2025", "type": "VIP Event", "note": "Front row at Paris show. Purchased jumpsuit backstage."}, {"date": "20 Apr 2025", "type": "Private Styling", "note": "Tokyo styling session. Kenji accompanied."}, {"date": "05 Dec 2024", "type": "Boutique Visit", "note": "Leather skirt. Requested runway samples."}]}, "C-1016": {"transactions": [{"date": "10 Jan 2026", "item": "Cable Knit Sweater", "sku": "KNI-M-CBL-02", "amount": "€1,400", "location": "New York 5th Ave"}, {"date": "20 Aug 2025", "item": "Pastel Blue Chinos", "sku": "PAN-M-CHN-01", "amount": "€980", "location": "New York 5th Ave"}, {"date": "15 Apr 2025", "item": "Pink Oxford Shirt", "sku": "SHI-M-OXF-06", "amount": "€720", "location": "New York 5th Ave"}, {"date": "05 Dec 2024", "item": "Weekend Holdall", "sku": "BAG-M-HLD-02", "amount": "€3,200", "location": "New York 5th Ave"}, {"date": "22 Jun 2024", "item": "Lightweight Summer Blazer", "sku": "JKT-M-SUM-03", "amount": "€2,800", "location": "New York 5th Ave"}], "interactions": [{"date": "10 Jan 2026", "type": "Boutique Visit", "note": "Sweater. Mentioned son graduation suit for 2028."}, {"date": "20 Aug 2025", "type": "WhatsApp", "note": "Requested chinos for golf weekend."}, {"date": "15 Apr 2025", "type": "Boutique Visit", "note": "Shirt for spring. Victoria accompanied."}, {"date": "05 Dec 2024", "type": "Boutique Visit", "note": "Holdall as gift from Victoria."}, {"date": "22 Jun 2024", "type": "Email", "note": "Summer blazer enquiry ahead of Hamptons trip."}]}, "C-1017": {"transactions": [{"date": "05 Dec 2025", "item": "Velvet Jacket", "sku": "JKT-W-VEL-01", "amount": "€5,800", "location": "Paris Flagship"}, {"date": "18 Jul 2025", "item": "Emerald Silk Blouse", "sku": "TOP-W-SLK-04", "amount": "€2,600", "location": "Paris Flagship"}, {"date": "10 Mar 2025", "item": "Onyx Leather Clutch", "sku": "BAG-W-CLT-04", "amount": "€4,100", "location": "Paris Flagship"}, {"date": "22 Oct 2024", "item": "Gold Geometric Earrings", "sku": "JWL-W-EAR-06", "amount": "€2,900", "location": "Paris Flagship"}, {"date": "14 Jun 2024", "item": "Art Deco Print Scarf", "sku": "ACC-W-SCF-11", "amount": "€1,200", "location": "Paris Flagship"}], "interactions": [{"date": "05 Dec 2025", "type": "Brand Event", "note": "Loved history behind Deco collection. Velvet jacket purchase."}, {"date": "18 Jul 2025", "type": "Boutique Visit", "note": "Blouse for gallery opening. Very knowledgeable about craft."}, {"date": "10 Mar 2025", "type": "Email", "note": "Requested pieces for auction house gala."}, {"date": "22 Oct 2024", "type": "VIP Event", "note": "Attended archive exhibition. Purchased earrings."}, {"date": "14 Jun 2024", "type": "Boutique Visit", "note": "First visit. Introduced herself as curator at Pompidou."}]}, "C-1018": {"transactions": [{"date": "28 Feb 2026", "item": "Merino Joggers", "sku": "PAN-M-MER-03", "amount": "€980", "location": "San Francisco"}, {"date": "15 Nov 2025", "item": "Grey Cashmere Hoodie", "sku": "KNI-M-HDD-01", "amount": "€1,600", "location": "San Francisco"}, {"date": "10 Jun 2025", "item": "Navy Technical Polo", "sku": "TOP-M-TEC-02", "amount": "€780", "location": "San Francisco"}, {"date": "20 Feb 2025", "item": "Stealth Leather Wallet", "sku": "ACC-M-WLT-01", "amount": "€620", "location": "San Francisco"}, {"date": "08 Oct 2024", "item": "Minimal White Tee x3", "sku": "TOP-M-WHT-01", "amount": "€960", "location": "San Francisco"}], "interactions": [{"date": "28 Feb 2026", "type": "Boutique Visit", "note": "Joggers purchase. In and out in 15 minutes."}, {"date": "15 Nov 2025", "type": "SMS", "note": "Requested cashmere hoodie. No store visit needed."}, {"date": "10 Jun 2025", "type": "Boutique Visit", "note": "Polo purchase. Emily chose it."}, {"date": "20 Feb 2025", "type": "SMS", "note": "Wallet for Emily birthday request."}, {"date": "08 Oct 2024", "type": "Boutique Visit", "note": "First visit. Referred by colleague at Series B firm."}]}, "C-1019": {"transactions": [{"date": "20 Dec 2025", "item": "Fur-Trimmed Coat", "sku": "COA-W-FUR-02", "amount": "€14,200", "location": "Geneva"}, {"date": "10 Aug 2025", "item": "Leopard Silk Evening Gown", "sku": "GWN-W-LEP-01", "amount": "€9,800", "location": "Geneva"}, {"date": "15 Apr 2025", "item": "Gold Statement Necklace", "sku": "JWL-W-NCK-05", "amount": "€12,400", "location": "Geneva"}, {"date": "05 Dec 2024", "item": "Red Embellished Heels", "sku": "SHO-W-EMB-03", "amount": "€3,200", "location": "Geneva"}, {"date": "20 Jun 2024", "item": "Custom Leather Gloves", "sku": "ACC-W-GLV-03", "amount": "€1,800", "location": "Geneva"}], "interactions": [{"date": "20 Dec 2025", "type": "Phone Call", "note": "Wants daughter Anastasia to get a matching bag."}, {"date": "10 Aug 2025", "type": "Private Styling", "note": "Gown for UN gala. Arrived with entourage."}, {"date": "15 Apr 2025", "type": "Boutique Visit", "note": "Necklace commission. Very specific brief."}, {"date": "05 Dec 2024", "type": "Boutique Visit", "note": "Heels for Dmitri annual dinner."}, {"date": "20 Jun 2024", "type": "Phone Call", "note": "Custom gloves order. Gift for a friend."}]}, "C-1020": {"transactions": [{"date": "30 Jan 2026", "item": "Tech Rain Jacket", "sku": "JKT-M-TEC-01", "amount": "€3,200", "location": "Milan Flagship"}, {"date": "14 Oct 2025", "item": "Performance Travel Suit", "sku": "SUI-M-PRF-02", "amount": "€4,800", "location": "Milan Flagship"}, {"date": "20 Jun 2025", "item": "Royal Blue Polo Shirt", "sku": "TOP-M-POL-04", "amount": "€880", "location": "Milan Flagship"}, {"date": "10 Mar 2025", "item": "Waterproof Holdall", "sku": "BAG-M-WPR-01", "amount": "€2,400", "location": "Milan Flagship"}, {"date": "05 Nov 2024", "item": "Compression Base Layer Set", "sku": "SET-M-CMP-01", "amount": "€1,200", "location": "Milan Flagship"}], "interactions": [{"date": "30 Jan 2026", "type": "WhatsApp", "note": "Needs weather-proof travel gear. Shipping to hotel."}, {"date": "14 Oct 2025", "type": "Boutique Visit", "note": "Travel suit. Requested non-restrictive fit."}, {"date": "20 Jun 2025", "type": "WhatsApp", "note": "Polo for post-match press appearance."}, {"date": "10 Mar 2025", "type": "Boutique Visit", "note": "Holdall for European tour. Maria accompanied."}, {"date": "05 Nov 2024", "type": "Boutique Visit", "note": "Base layers for winter training camp."}]}};
+
+let selected = null;
+let filtered = [...clients];
+
+function parseDate(str) {
+  if (!str || str === 'N/A') return null;
+  const months = {January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
+  const parts = str.split(' ');
+  if (parts.length === 3) {
+    return new Date(parseInt(parts[2]), months[parts[1]], parseInt(parts[0]));
+  }
+  return null;
+}
+
+function daysUntil(dateStr, refYear) {
+  const d = parseDate(dateStr);
+  if (!d) return null;
+  const today = new Date();
+  const upcoming = new Date(refYear || today.getFullYear(), d.getMonth(), d.getDate());
+  if (upcoming < today) upcoming.setFullYear(upcoming.getFullYear() + 1);
+  return Math.ceil((upcoming - today) / (1000 * 60 * 60 * 24));
+}
+
+function getDateAlerts() {
+  const alerts = [];
+  const today = new Date();
+  clients.forEach(c => {
+    const checks = [
+      { label: 'Birthday', date: c.birthday },
+      { label: 'Anniversary', date: c.anniversary },
+      { label: 'Aftercare due', date: c.aftercare }
+    ];
+    checks.forEach(({ label, date }) => {
+      const days = daysUntil(date);
+      if (days !== null && days <= 30) {
+        alerts.push({ client: c, label, date, days });
+      }
+    });
+  });
+  return alerts.sort((a, b) => a.days - b.days);
+}
+
+function getUpcomingAppointments() {
+  const tierOrder = { 'VVIC': 0, 'VIC': 1, 'Platinum': 2, 'Gold': 3, 'Silver': 4 };
+  const today = new Date();
+  return clients
+    .filter(c => {
+      const d = parseDate(c.appointment);
+      return d && d >= today;
+    })
+    .sort((a, b) => {
+      const tA = tierOrder[a.tier] ?? 5;
+      const tB = tierOrder[b.tier] ?? 5;
+      if (tA !== tB) return tA - tB;
+      return parseDate(a.appointment) - parseDate(b.appointment);
+    })
+    .slice(0, 6);
+}
+
+// ── DASHBOARD ──
+function getGreeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+
+function tickClock() {
+  const now = new Date();
+  const timeEl = document.getElementById('sidebarClock');
+  const greetEl = document.getElementById('liveGreeting');
+  if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  if (greetEl) greetEl.textContent = getGreeting() + '. Here is your client overview.';
+}
+
+function apptCountdown(dateStr) {
+  if (!dateStr || dateStr === '—') return '';
+  const months = {January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
+  const parts = dateStr.split(' ');
+  if (parts.length < 3) return '';
+  const d = parseInt(parts[0]), m = months[parts[1]], y = parseInt(parts[2]);
+  if (isNaN(d)||isNaN(m)||isNaN(y)) return '';
+  const appt = new Date(y,m,d);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((appt-now)/(1000*60*60*24));
+  if (diff < 0) return '';
+  if (diff === 0) return '<span class="appt-countdown soon">Today</span>';
+  if (diff === 1) return '<span class="appt-countdown soon">Tomorrow</span>';
+  if (diff <= 7) return `<span class="appt-countdown soon">In ${diff}d</span>`;
+  if (diff <= 30) return `<span class="appt-countdown">In ${diff}d</span>`;
+  return '';
+}
+
+function ltvTotal() {
+  return clients.reduce((sum, cl) => {
+    const v = parseInt((cl.ltv||'0').replace(/[^0-9]/g,''));
+    return sum + (isNaN(v)?0:v);
+  }, 0);
+}
+
+function renderDashboard() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const upcoming = getUpcomingAppointments();
+  const alerts = getDateAlerts();
+
+  document.getElementById('topbarName').textContent = '';
+  document.getElementById('genBtn').disabled = true;
+  const _eb = document.getElementById('exportBtn');
+  if (_eb) _eb.style.display = 'none';
+
+  const total = ltvTotal();
+  const vvicCount = clients.filter(x=>x.tier==='VVIC').length;
+  const vicCount  = clients.filter(x=>x.tier==='VIC').length;
+  const todayAlerts = alerts.filter(a=>a.days<=1).length;
+
+  const tickerCols = todayAlerts > 0 ? 5 : 4;
+  document.getElementById('content').innerHTML = `
+    <div class="dashboard">
+      <div class="ltv-ticker-bar" id="ltvTicker" style="grid-template-columns:repeat(${tickerCols},1fr);">
+        <div class="ltv-ticker-item">
+          <div class="ltv-ticker-lbl">Total Lifetime Value</div>
+          <div class="ltv-ticker-val" id="tickerLTV">€0 <span>loading</span></div>
+        </div>
+
+        <div class="ltv-ticker-item">
+          <div class="ltv-ticker-lbl">VVIC</div>
+          <div class="ltv-ticker-val">${vvicCount} <span>clients</span></div>
+        </div>
+        <div class="ltv-ticker-item">
+          <div class="ltv-ticker-lbl">VIC</div>
+          <div class="ltv-ticker-val">${vicCount} <span>clients</span></div>
+        </div>
+        ${todayAlerts > 0 ? `<div class="ltv-ticker-item" style="border-right:none;">
+          <div class="ltv-ticker-lbl">Urgent Alerts</div>
+          <div class="ltv-ticker-val" style="color:#8b3a22;">${todayAlerts} <span>today</span></div>
+        </div>` : ''}
+      </div>
+
+      <div class="dash-greeting" style="margin-bottom:20px;">
+        <div class="dash-greeting-time">${dateStr}</div>
+        <div class="dash-greeting-text" id="liveGreeting">${getGreeting()}. Here is your client overview.</div>
+      </div>
+
+      <div class="dash-tabs">
+        <div class="dash-tab active" id="tab-overview" onclick="switchDashTab('overview')">Overview</div>
+        <div class="dash-tab" id="tab-ca" onclick="switchDashTab('ca')">CA Performance</div>
+      </div>
+
+      <div id="dash-overview-panel">
+        <div class="dash-section-label">Upcoming Appointments</div>
+        <div class="dash-cards">
+          ${upcoming.map(cl => {
+            const urgClass = cl.urgency.toLowerCase().includes('critical') || cl.urgency.toLowerCase().includes('high') ? 'urgent' : '';
+            const hasHandover = !!handoverNotes[cl.id];
+            const countdown = apptCountdown(cl.appointment);
+            return `<div class="dash-card" data-id="${cl.id}">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                <span class="tier-pill ${tierClass(cl.tier)}">${cl.tier}</span>
+                ${hasHandover ? '<span style="font-size:9px;color:#8b3a22;letter-spacing:0.5px;">⚠ Handover</span>' : ''}
+                ${arrivedClients.has(cl.id) ? '<span class="arrived-badge">In</span>' : ''}
+              </div>
+              <div class="dash-card-name">${cl.name}${countdown}</div>
+              <div class="dash-card-appt">${cl.appointment} · ${cl.location}</div>
+              <div class="dash-card-alert ${urgClass}">${cl.urgency}</div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        ${alerts.length > 0 ? `
+        <div class="dash-section-label">Important Dates — Next 30 Days</div>
+        <div class="date-alert-list">
+          ${alerts.map(a => `
+            <div class="date-alert-row ${a.days <= 7 ? 'urgent' : ''}" data-id="${a.client.id}">
+              <div class="date-alert-left">
+                <div class="date-alert-name">${a.client.name}</div>
+                <div class="date-alert-detail">${a.label} · ${a.date}</div>
+              </div>
+              <div class="date-alert-days ${a.days <= 7 ? 'urgent' : ''}">${a.days === 0 ? 'Today' : a.days === 1 ? 'Tomorrow' : `In ${a.days} days`}</div>
+            </div>
+          `).join('')}
+        </div>` : ''}
+      </div>
+
+      <div id="dash-ca-panel" class="ca-panel"></div>
+    </div>
+  `;
+
+  animateLTV(total);
+
+  // Event delegation for dashboard clicks
+  document.getElementById('content').addEventListener('click', function(e) {
+    const card = e.target.closest('[data-id]');
+    if (card) selectFromDash(card.dataset.id);
+  }, { once: true });
+
+  // Start live clock immediately and keep it always running
+  tickClock();
+  window._clockInterval = setInterval(tickClock, 30000); // update every 30s, no seconds shown
+}
+
+
+function tierClass(t) {
+  return {'VVIC':'t-vvic','Platinum':'t-platinum','VIC':'t-vic','Gold':'t-gold','Silver':'t-silver'}[t]||'';
+}
+
+function initials(n) {
+  const parts = n.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+// ── IN-MEMORY NOTES STORE ──
+const postVisitNotes = {};   // keyed by client id
+const handoverNotes = {};    // keyed by client id
+
+function savePostVisitNote(id) {
+  const ta = document.getElementById('postVisitInput-' + id);
+  if (!ta) return;
+  const val = ta.value.trim();
+  if (!val) return;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  postVisitNotes[id] = { text: val, date: dateStr };
+  renderPostVisitNote(id);
+  // Show action feedback
+  const container = document.getElementById('postVisitContainer-' + id);
+  if (container) {
+    const fb = document.createElement('div');
+    fb.className = 'action-feedback';
+    fb.innerHTML = '<div class="action-feedback-dot"></div><div class="action-feedback-text"><strong>Note added to client record</strong> · ' + dateStr + ' at ' + timeStr + ' · Visible to all CAs on this account</div>';
+    container.appendChild(fb);
+    setTimeout(() => { fb.style.opacity = '0'; fb.style.transition = 'opacity 0.4s'; setTimeout(() => fb.remove(), 400); }, 5000);
+  }
+}
+
+function renderPostVisitNote(id) {
+  const container = document.getElementById('postVisitContainer-' + id);
+  if (!container) return;
+  const note = postVisitNotes[id];
+  if (note) {
+    container.innerHTML = `
+      <div class="post-visit-note-meta">Note saved · ${note.date}</div>
+      <div class="post-visit-saved-note">${note.text}</div>
+      <button class="post-visit-save-btn" style="margin-top:8px;" onclick="clearPostVisitNote('${id}')">Edit Note</button>
+    `;
+  } else {
+    container.innerHTML = `
+      <textarea class="post-visit-textarea" id="postVisitInput-${id}" placeholder="What happened in this visit? Items shown, client mood, key requests, next steps...">${postVisitNotes[id]?.text||''}</textarea>
+      <div class="post-visit-actions">
+        <button class="post-visit-save-btn" onclick="savePostVisitNote('${id}')">Save Note</button>
+        <span style="font-size:10px;color:var(--ink-faint);font-style:italic;">Saved locally for this session</span>
+      </div>
+    `;
+  }
+}
+
+function clearPostVisitNote(id) {
+  delete postVisitNotes[id];
+  renderPostVisitNote(id);
+}
+
+function saveHandoverNote(id) {
+  const ta = document.getElementById('handoverInput-' + id);
+  if (!ta) return;
+  const val = ta.value.trim();
+  if (!val) return;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const cl = clients.find(x => x.id === id);
+  handoverNotes[id] = { text: val, date: dateStr };
+  renderHandoverNote(id);
+  // Show action feedback
+  const container = document.getElementById('handoverContainer-' + id);
+  if (container) {
+    const fb = document.createElement('div');
+    fb.className = 'action-feedback handover';
+    fb.innerHTML = '<div class="action-feedback-dot"></div><div class="action-feedback-text"><strong>Handover request submitted</strong> · Pending director approval · Note dispatched to floor channel at ' + timeStr + '</div>';
+    container.appendChild(fb);
+    setTimeout(() => { fb.style.opacity = '0'; fb.style.transition = 'opacity 0.4s'; setTimeout(() => fb.remove(), 400); }, 6000);
+  }
+}
+
+function renderHandoverNote(id) {
+  const container = document.getElementById('handoverContainer-' + id);
+  if (!container) return;
+  const note = handoverNotes[id];
+  if (note) {
+    container.innerHTML = `
+      <div class="handover-note-meta">⚠ Handover · ${note.date}</div>
+      <div class="handover-saved">${note.text}</div>
+      <button class="post-visit-save-btn" style="margin-top:8px;border-color:rgba(139,58,34,0.3);color:#8b3a22;" onclick="clearHandoverNote('${id}')">Edit</button>
+    `;
+  } else {
+    container.innerHTML = `
+      <textarea class="handover-textarea" id="handoverInput-${id}" placeholder="Notes for the incoming CA — client preferences, ongoing requests, sensitivities, relationship context..."></textarea>
+      <div class="post-visit-actions" style="margin-top:8px;">
+        <button class="post-visit-save-btn" style="border-color:rgba(139,58,34,0.3);color:#8b3a22;" onclick="saveHandoverNote('${id}')">Save Handover Note</button>
+      </div>
+    `;
+  }
+}
+
+function clearHandoverNote(id) {
+  delete handoverNotes[id];
+  renderHandoverNote(id);
+}
+
+function renderList() {
+  if (!filtered.length) { renderEmptyState(); return; }
+  document.getElementById('clientList').innerHTML = filtered.map(c => `
+    <div class="client-row ${selected?.id===c.id?'active':''}" onclick="select('${c.id}')">
+      <div class="client-row-avatar" style="${avatarStyle(c.tier)}">${initials(c.name)}</div>
+      <div class="client-row-info">
+        <div class="client-row-name">${c.name}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+          <span class="tier-pill ${tierClass(c.tier)}">${c.tier}</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.35);">${c.ltv}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterClients() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  filtered = clients.filter(c => c.name.toLowerCase().includes(q) || c.tier.toLowerCase().includes(q) || c.location.toLowerCase().includes(q));
+  renderList();
+}
+
+function select(id) {
+  selected = clients.find(c=>c.id===id);
+  if (!selected) return;
+  if (window.innerWidth <= 768) closeMobileSidebar();
+  renderList();
+  document.getElementById('topbarLabel').textContent = 'Pre-Visit Briefing';
+  document.getElementById('topbarName').textContent = selected.name;
+  document.getElementById('genBtn').disabled = false;
+  const eb = document.getElementById('exportBtn');
+  if (eb) eb.style.display = 'none';
+  setNavActive(false);
+  renderProfile();
+  animatePage(document.getElementById('content'));
+}
+
+function row(key, val, cls='') {
+  if (val === undefined || val === null) return '';
+  const display = (!val || val === 'N/A' || val === 'None') ? '—' : val;
+  return `<div class="data-row"><span class="data-key">${key}</span><span class="data-val ${cls}">${display}</span></div>`;
+}
+
+function rowRequired(key, val, cls='') {
+  const display = (!val || val === 'N/A' || val === 'None') ? '—' : val;
+  return `<div class="data-row"><span class="data-key">${key}</span><span class="data-val ${cls}">${display}</span></div>`;
+}
+
+function renderProfile() {
+  const c = selected;
+  const urgClass = c.urgency.toLowerCase().includes('critical') ? 'alert' :
+                   c.urgency.toLowerCase().includes('high') ? 'alert' :
+                   c.urgency.toLowerCase().includes('medium') ? 'gold' : '';
+
+  document.getElementById('content').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
+      <div class="appt-pill" style="margin-bottom:0;">
+        <div class="appt-dot"></div>
+        Appointment — ${c.appointment} &nbsp;·&nbsp; ${c.location}
+      </div>
+      <button class="profile-pdf-btn" onclick="exportProfilePDF('${c.id}')" title="Save profile as PDF">🗋</button>
+    </div>
+
+    <div class="data-grid">
+
+      <div class="data-card">
+        <div class="data-card-head">Identity</div>
+        <div class="data-card-body">
+          ${row('Client ID', c.id)}
+          ${row('Tier', `<span class="profile-tier-badge ${tierClass(c.tier)}">${c.tier}</span>`, '')}
+          ${row('Lifetime Value', c.ltv, 'em gold')}
+          ${row('Birthday', c.birthday)}
+          ${rowRequired('Partner', c.partner)}
+          ${rowRequired('Anniversary', c.anniversary)}
+          ${rowRequired('Pet', c.pet)}
+          ${row('Assigned CA', c.ca)}
+          ${row('Preferred Contact', c.contact)}
+          ${row('Beverage', c.beverage)}
+        </div>
+      </div>
+
+      <div class="data-card">
+        <div class="data-card-head">Sizing & Style</div>
+        <div class="data-card-body">
+          ${row('Top Size', c.sizeTop)}
+          ${row('Bottom Size', c.sizeBottom)}
+          ${row('Shoe Size', c.shoe)}
+          ${row('Jewelry / Wrist', c.jewelry)}
+          ${row('Preferred Colours', c.colors)}
+          ${row('Never Show', c.avoid, 'alert')}
+        </div>
+      </div>
+
+      <div class="data-card">
+        <div class="data-card-head">Last Transaction</div>
+        <div class="data-card-body">
+          ${row('Item', c.lastPurchase)}
+          ${row('SKU', c.sku)}
+          ${row('Purchase Date', c.purchaseDate)}
+          ${row('Boutique', c.location)}
+          ${row('Alterations', c.alterations)}
+          ${row('Aftercare Due', c.aftercare)}
+        </div>
+      </div>
+
+      <div class="data-card half">
+        <div class="data-card-head">Current Status</div>
+        <div class="data-card-body">
+          ${row('Urgency', c.urgency, urgClass)}
+          ${row('CA Action', c.caAction)}
+          ${row('Follow-up Due', c.followUp)}
+          ${row('Last Interaction', c.lastDate + ' — ' + c.lastType)}
+        </div>
+      </div>
+
+      <div class="data-card">
+        <div class="data-card-head">Appointment</div>
+        <div class="data-card-body">
+          ${row('Date', c.appointment)}
+          ${row('Location', c.location)}
+          ${row('Urgency', c.urgency, urgClass)}
+        </div>
+      </div>
+
+    </div>
+
+    <div class="interaction-note">
+      <div class="interaction-meta">Last Interaction Note — ${c.lastDate} · ${c.lastType}</div>
+      <div class="interaction-text">"${c.lastNote}"</div>
+    </div>
+
+    ${renderHistory(c.id)}
+
+    ${renderSparkline(c.id)}
+
+    <div class="post-visit-section">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;">
+        <div class="post-visit-label">Post-Visit Notes</div>
+      </div>
+      <div id="postVisitContainer-${c.id}"></div>
+      <div class="handover-section">
+        <div class="handover-label">⚠ CA Handover Note</div>
+        <div id="handoverContainer-${c.id}"></div>
+      </div>
+    </div>
+
+<div id="briefingArea"></div>
+  `;
+
+  // Render notes after DOM is built
+  renderPostVisitNote(c.id);
+  renderHandoverNote(c.id);
+}
+
+function renderHistory(clientId) {
+  const hist = histories[clientId];
+  if (!hist) return '';
+
+  const txnRows = hist.transactions.slice(0,5).map((t, i) => `
+    <div class="timeline-item">
+      <div class="timeline-dot-col">
+        <div class="timeline-dot"></div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-date">${t.date} · ${t.location}</div>
+        <div class="timeline-title">${t.item}</div>
+        <div class="timeline-sub">${t.sku}</div>
+      </div>
+      <div class="timeline-amount">${t.amount}</div>
+    </div>
+  `).join('');
+
+  const intRows = hist.interactions.slice(0,5).map((n, i) => `
+    <div class="timeline-item">
+      <div class="timeline-dot-col">
+        <div class="timeline-dot"></div>
+        <div class="timeline-line"></div>
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-badge">${n.type}</div>
+        <div class="timeline-date">${n.date}</div>
+        <div class="timeline-note">${n.note}</div>
+      </div>
+      <div></div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="section-divider" style="margin: 28px 0 20px;">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Client History</div>
+      <div class="section-divider-line"></div>
+    </div>
+    <div class="history-grid">
+      <div class="history-card">
+        <div class="history-card-head">Transaction History</div>
+        <div class="timeline">${txnRows}</div>
+      </div>
+      <div class="history-card">
+        <div class="history-card-head">Interaction History</div>
+        <div class="timeline">${intRows}</div>
+      </div>
+    </div>
+  `;
+}
+
+async function generateBriefing() {
+  if (!selected) return;
+  const c = selected;
+  const mood = window.selectedMood || 'Relaxed';
+
+  document.getElementById('genBtn').disabled = true;
+  document.getElementById('genBtn').textContent = 'Generating…';
+  document.getElementById('genBtn').style.opacity = '0.6';
+
+  document.getElementById('briefingArea').innerHTML = `
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">AI Briefing</div>
+      <div class="section-divider-line"></div>
+    </div>
+    <div class="loading-sweep"></div>
+    <div style="text-align:center; font-family:'Libre Baskerville',serif; font-style:italic; color:var(--ink-faint); padding: 12px; font-size:13px;">Preparing client intelligence...</div>
+  `;
+
+  const prompt = `You are a discreet, highly intelligent luxury client intelligence system used internally by Client Advisors at a major luxury fashion house. Your tone is warm, precise, and human — never robotic or clinical. Help Client Advisors deliver extraordinary, personalised service.
+
+Generate a pre-visit briefing. Three sections only. No filler.
+
+CLIENT:
+Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv}
+Appointment: ${c.appointment} at ${c.location}
+Birthday: ${c.birthday}${c.partner!=='None'?' | Partner: '+c.partner:''}${c.anniversary!=='N/A'?' | Anniversary: '+c.anniversary:''}
+${c.pet!=='None'?'Pet: '+c.pet:''}
+Sizes: Top ${c.sizeTop} / Bottom ${c.sizeBottom} / Shoe ${c.shoe}${c.jewelry&&c.jewelry!=='N/A'?' / Jewelry: '+c.jewelry:''}
+Preferred colours: ${c.colors} | Never show: ${c.avoid}
+Beverage: ${c.beverage}
+Last contact: ${c.lastDate} (${c.lastType}) — "${c.lastNote}"
+Last purchase: ${c.lastPurchase} (${c.sku}) on ${c.purchaseDate}
+Alterations: ${c.alterations} | Aftercare due: ${c.aftercare}
+Current CA action: ${c.caAction} | Urgency: ${c.urgency}
+
+Client mood/energy today (CA assessment): ${mood} — adjust your briefing tone and what you prioritise accordingly. If Relaxed: warm and exploratory. If Busy: concise, direct, pre-select fewer options. If Celebrating: lean into the moment. If Difficult: flag sensitivities, give CA tools to de-escalate.
+
+Respond ONLY with valid JSON, no markdown, no backticks:
+{
+  "opening": "2-3 sentences. Who this client is and what matters most to them right now. Reference specific personal context naturally — as if briefing a trusted colleague. If they have a pet, weave it in naturally as part of who they are.",
+  "conversation": "2-3 sentences. Exact topics for the Client Advisor to raise and how to frame them. Specific, not generic. Reference real details from their file. If they have a pet and are likely to bring it, note any preparation (treats by the fitting room, etc.).",
+  "action": "2-3 sentences. Precise commercial action to take in this appointment. What to show, confirm, or resolve. Reference the CA action and urgency.",
+  "alerts": ["Any critical alert — dates, sensitivities, restrictions. Only if genuinely important. Max 2."],
+  "tags": ["3-4 short descriptor tags for this client profile"]
+}`;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    if (!data.content) {
+      const errMsg = data.error?.message || 'API error — check your key and proxy setup';
+      throw new Error(errMsg);
+    }
+    const text = data.content.map(b=>b.text||'').join('');
+    let parsed;
+    try {
+      parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    } catch(e) {
+      throw new Error('Invalid response format — please try again');
+    }
+
+    const checklistItems = parsed.checklist || [];
+    const checklistHtml = checklistItems.length > 0 ? `
+      <div class="section-divider" style="margin-top:28px;">
+        <div class="section-divider-line"></div>
+        <div class="section-divider-label">Preparation Checklist</div>
+        <div class="section-divider-line"></div>
+      </div>
+      <div class="checklist-block briefing-reveal">
+        <div class="checklist-head">
+          <div class="brief-block-num">iv.</div>
+          <div class="brief-block-title">Before They Arrive</div>
+        </div>
+        <div class="checklist-body" id="checklistBody">
+          ${checklistItems.map((item, i) => `
+            <div class="checklist-item" id="ci-${i}" onclick="toggleCheck(${i})">
+              <div class="checklist-box"></div>
+              <div class="checklist-text">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : '';
+
+    document.getElementById('briefingArea').innerHTML = `
+      <div class="section-divider">
+        <div class="section-divider-line"></div>
+        <div class="section-divider-label">AI Briefing</div>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="briefing-reveal">
+        <div class="brief-block">
+          <div class="brief-block-head">
+            <div class="brief-block-num">i.</div>
+            <div class="brief-block-title">Client Intelligence</div>
+          </div>
+          <div class="brief-block-body">${parsed.opening}</div>
+        </div>
+
+        <div class="brief-block">
+          <div class="brief-block-head">
+            <div class="brief-block-num">ii.</div>
+            <div class="brief-block-title">Conversation Guide</div>
+          </div>
+          <div class="brief-block-body">${parsed.conversation}</div>
+        </div>
+
+        <div class="brief-block">
+          <div class="brief-block-head">
+            <div class="brief-block-num">iii.</div>
+            <div class="brief-block-title">Action This Visit</div>
+          </div>
+          <div class="brief-block-body">${parsed.action}</div>
+        </div>
+
+        ${parsed.alerts&&parsed.alerts.filter(a=>a).length>0?`
+        <div class="tags-row">
+          ${parsed.alerts.filter(a=>a).map(a=>`<span class="tag alert">⚠ ${a}</span>`).join('')}
+        </div>`:''}
+
+        <div class="tags-row">
+          ${parsed.tags.map(t=>`<span class="tag gold">${t}</span>`).join('')}
+        </div>
+      </div>
+
+      ${checklistHtml}
+
+      <div class="section-divider" style="margin-top:28px;">
+        <div class="section-divider-line"></div>
+        <div class="section-divider-label">Client Outreach</div>
+        <div class="section-divider-line"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;">Tone</div>
+        <div class="tone-selector">
+          <button class="tone-btn active" id="tone-formal" onclick="setTone('Formal')">Formal</button>
+          <button class="tone-btn" id="tone-warm" onclick="setTone('Warm')">Warm</button>
+          <button class="tone-btn" id="tone-playful" onclick="setTone('Playful')">Playful</button>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <button class="outreach-btn" id="outreachBtn" onclick="generateOutreach()">Draft WhatsApp Message</button>
+        <span style="font-size:11px; color:var(--ink-faint); font-style:italic;">Personalised outreach based on this client's profile</span>
+      </div>
+      <div id="outreachArea"></div>
+    `;
+
+  } catch(err) {
+    document.getElementById('briefingArea').innerHTML = `<div style="color:#8b3a22;padding:16px;font-size:13px;">Something went wrong. Please try again.</div>`;
+    console.error(err);
+  } finally {
+    document.getElementById('genBtn').disabled = false;
+    document.getElementById('genBtn').textContent = 'Create Briefing';
+    document.getElementById('genBtn').style.opacity = '';
+    document.getElementById('exportBtn').style.display = '';
+    const briefingEl = document.getElementById('briefingArea');
+    if (briefingEl) {
+      setTimeout(() => {
+        briefingEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    }
+  }
+}
+
+
+function goHome() {
+  selected = null;
+  if (window.innerWidth <= 768) closeMobileSidebar();
+  renderList();
+  document.getElementById('topbarLabel').textContent = 'Dashboard';
+  document.getElementById('topbarName').textContent = 'Overview';
+  document.getElementById('genBtn').disabled = true;
+  setNavActive(true);
+  renderDashboard();
+  animatePage(document.getElementById('content'));
+}
+
+function selectFromDash(id) {
+  select(id);
+  setNavActive(false);
+}
+
+function setNavActive(isDash) {
+  const btn = document.getElementById('dashNavBtn');
+  if (btn) btn.classList.toggle('active', isDash);
+}
+
+function toggleCheck(i) {
+  const el = document.getElementById('ci-' + i);
+  if (el) el.classList.toggle('done');
+}
+
+let selectedTone = 'Formal';
+
+function setTone(tone) {
+  selectedTone = tone;
+  ['Formal','Warm','Playful'].forEach(t => {
+    const btn = document.getElementById('tone-' + t.toLowerCase());
+    if (btn) btn.classList.toggle('active', t === tone);
+  });
+}
+
+async function generateOutreach() {
+  if (!selected) return;
+  const c = selected;
+  const btn = document.getElementById('outreachBtn');
+  btn.disabled = true;
+  btn.textContent = 'Drafting...';
+
+  document.getElementById('outreachArea').innerHTML = `
+    <div class="loading-sweep" style="margin-top:12px;"></div>
+  `;
+
+  const toneGuide = {
+    'Formal': 'Refined and professional. Complete sentences. No contractions. Reads like a personal letter from a senior advisor.',
+    'Warm': 'Friendly but polished. Relaxed sentence rhythm. Light use of contractions. Feels like a note from someone who genuinely knows them.',
+    'Playful': 'Light and conversational. Short sentences. A touch of personality. Still tasteful — never flippant or overly casual.'
+  }[selectedTone] || 'Warm but professional.';
+
+  const prompt = `You are a luxury Client Advisor assistant. Write a single, short WhatsApp message to send to a client ahead of their upcoming appointment.
+
+Tone: ${selectedTone}. ${toneGuide}
+
+Additional rules:
+- Never use emojis unless the client's preferred contact is Instagram or WeChat.
+- Never reference prices.
+- Maximum 4 sentences. Should feel handwritten, not templated.
+- Reference one specific personal detail (upcoming occasion, last conversation, something they mentioned).
+
+CLIENT:
+Name: ${c.name} | Tier: ${c.tier}
+Appointment: ${c.appointment} at ${c.location}
+Preferred contact: ${c.contact}
+Last note: "${c.lastNote}"
+${c.partner !== 'None' ? 'Partner: ' + c.partner : ''}
+${c.anniversary !== 'N/A' ? 'Anniversary: ' + c.anniversary : ''}
+${c.pet !== 'None' ? 'Pet: ' + c.pet : ''}
+Beverage preference: ${c.beverage}
+
+Respond with ONLY the message text. No subject line, no label, no explanation.`;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(b => b.text || '').join('').trim();
+
+    document.getElementById('outreachArea').innerHTML = `
+      <div class="outreach-block">
+        <div class="outreach-block-head">
+          <div class="outreach-block-label">WhatsApp Draft — ${c.name} <span style="opacity:0.5;font-weight:400;">(${selectedTone})</span></div>
+          <button class="outreach-copy-btn" onclick="copyOutreach()">Copy</button>
+        </div>
+        <div class="outreach-body" id="outreachText">${text}</div>
+      </div>
+    `;
+  } catch(err) {
+    document.getElementById('outreachArea').innerHTML = `<div style="color:#8b3a22;padding:12px;font-size:12px;">Could not generate draft. Please try again.</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Draft WhatsApp Message';
+  }
+}
+
+function copyOutreach() {
+  const el = document.getElementById('outreachText');
+  if (el) {
+    navigator.clipboard.writeText(el.textContent.trim());
+    const btn = document.querySelector('.outreach-copy-btn');
+    if (btn) { btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 2000); }
+  }
+}
+
+renderList();
+renderDashboard();
+
+// Wire up buttons after DOM is ready
+document.getElementById('genBtn').addEventListener('click', generateBriefing);
+document.getElementById('dashNavBtn').addEventListener('click', goHome);
+
+
+
+// ── PAGE TRANSITION ──
+function animatePage(el) {
+  if (!el) return;
+  el.classList.remove('page-enter');
+  void el.offsetWidth; // reflow
+  el.classList.add('page-enter');
+}
+
+// ── EMPTY STATE ──
+function renderEmptyState() {
+  document.getElementById('clientList').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-state-icon">◎</div>
+      <div class="empty-state-text">No clients found</div>
+    </div>
+  `;
+}
+
+// ── GLOBAL SEARCH ──
+let searchHighlight = -1;
+
+function openSearch() {
+  const overlay = document.getElementById('searchOverlay');
+  overlay.classList.add('open');
+  setTimeout(() => {
+    const inp = document.getElementById('globalSearchInput');
+    if (inp) { inp.value = ''; inp.focus(); }
+    runGlobalSearch();
+  }, 60);
+}
+
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+  searchHighlight = -1;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('searchOverlay')) closeSearch();
+}
+
+function highlight(text, q) {
+  if (!q) return text;
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+function runGlobalSearch() {
+  const q = document.getElementById('globalSearchInput').value.trim().toLowerCase();
+  const results = q
+    ? clients.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.tier.toLowerCase().includes(q) ||
+        c.location.toLowerCase().includes(q) ||
+        c.lastPurchase.toLowerCase().includes(q) ||
+        c.lastNote.toLowerCase().includes(q)
+      )
+    : clients.slice(0, 8);
+
+  searchHighlight = -1;
+  const container = document.getElementById('globalSearchResults');
+
+  if (!results.length) {
+    container.innerHTML = `<div class="search-empty">No clients match "${q}"</div>`;
+    return;
+  }
+
+  const av = tier => {
+    const s = tierAvBg[tier] || tierAvBg['Silver'];
+    return `background:${s.bg};color:${s.color};`;
+  };
+
+  container.innerHTML = results.map((c, i) => `
+    <div class="search-result-item" data-id="${c.id}" onclick="searchSelect('${c.id}')">
+      <div class="search-result-avatar" style="${av(c.tier)}">${initials(c.name)}</div>
+      <div class="search-result-info">
+        <div class="search-result-name">${highlight(c.name, q)}</div>
+        <div class="search-result-meta">${c.tier} · ${c.ltv} · ${c.location}</div>
+      </div>
+      <span class="tier-pill ${tierClass(c.tier)}" style="font-size:8px;">${c.tier}</span>
+    </div>
+  `).join('');
+}
+
+function handleSearchKey(e) {
+  const items = document.querySelectorAll('.search-result-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    searchHighlight = Math.min(searchHighlight + 1, items.length - 1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    searchHighlight = Math.max(searchHighlight - 1, 0);
+  } else if (e.key === 'Enter') {
+    if (searchHighlight >= 0 && items[searchHighlight]) {
+      searchSelect(items[searchHighlight].dataset.id);
+    } else if (items.length === 1) {
+      searchSelect(items[0].dataset.id);
+    }
+    return;
+  } else if (e.key === 'Escape') {
+    closeSearch(); return;
+  }
+  items.forEach((el, i) => el.classList.toggle('highlighted', i === searchHighlight));
+  if (items[searchHighlight]) items[searchHighlight].scrollIntoView({ block: 'nearest' });
+}
+
+function searchSelect(id) {
+  closeSearch();
+  select(id);
+}
+
+// Keyboard shortcut: / opens search
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) {
+    e.preventDefault();
+    openSearch();
+  }
+  if (e.key === 'Escape') closeSearch();
+});
+
+
+// ── ONBOARDING ──
+let obStep = 1;
+const OB_TOTAL = 4;
+
+const obStepLabels = [
+  'Step 1 of 4 — Identity',
+  'Step 2 of 4 — Sizing & Style',
+  'Step 3 of 4 — Boutique & Status',
+  'Step 4 of 4 — First Interaction'
+];
+
+function openOnboarding() {
+  obStep = 1;
+  // Reset all fields
+  ['ob-name','ob-birthday','ob-partner','ob-anniversary','ob-pet','ob-beverage',
+   'ob-sizeTop','ob-sizeBottom','ob-shoe','ob-jewelry','ob-colors','ob-avoid',
+   'ob-appointment','ob-ltv','ob-caAction','ob-lastNote','ob-lastPurchase','ob-followUp'
+  ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['ob-tier','ob-contact','ob-location','ob-ca','ob-urgency','ob-lastType'
+  ].forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+  obRender();
+  document.getElementById('onboardingOverlay').classList.add('open');
+  setTimeout(() => { const el = document.getElementById('ob-name'); if(el) el.focus(); }, 250);
+}
+
+function closeOnboarding() {
+  document.getElementById('onboardingOverlay').classList.remove('open');
+}
+
+function handleOnboardingOverlayClick(e) {
+  if (e.target === document.getElementById('onboardingOverlay')) closeOnboarding();
+}
+
+function obRender() {
+  // Show/hide steps
+  for (let i = 1; i <= OB_TOTAL; i++) {
+    const el = document.getElementById('ob-step-' + i);
+    if (el) el.classList.toggle('active', i === obStep);
+  }
+  // Progress bar
+  document.getElementById('onboardingProgress').style.width = ((obStep / OB_TOTAL) * 100) + '%';
+  // Labels
+  document.getElementById('onboardingStepLabel').textContent = obStepLabels[obStep - 1];
+  document.getElementById('onboardingStepCount').textContent = 'Step ' + obStep + ' of ' + OB_TOTAL;
+  // Buttons
+  document.getElementById('obBtnBack').style.display = obStep > 1 ? '' : 'none';
+  document.getElementById('obBtnNext').style.display = obStep < OB_TOTAL ? '' : 'none';
+  document.getElementById('obBtnFinish').style.display = obStep === OB_TOTAL ? '' : 'none';
+}
+
+function obValidateStep() {
+  if (obStep === 1) {
+    const name = document.getElementById('ob-name').value.trim();
+    const tier = document.getElementById('ob-tier').value;
+    if (!name) { document.getElementById('ob-name').focus(); return false; }
+    if (!tier) { document.getElementById('ob-tier').focus(); return false; }
+  }
+  if (obStep === 3) {
+    const loc = document.getElementById('ob-location').value;
+    if (!loc) { document.getElementById('ob-location').focus(); return false; }
+  }
+  if (obStep === 4) {
+    const note = document.getElementById('ob-lastNote').value.trim();
+    if (!note) { document.getElementById('ob-lastNote').focus(); return false; }
+  }
+  return true;
+}
+
+function obNext() {
+  if (!obValidateStep()) return;
+  if (obStep < OB_TOTAL) { obStep++; obRender(); }
+}
+
+function obBack() {
+  if (obStep > 1) { obStep--; obRender(); }
+}
+
+function obFinish() {
+  if (!obValidateStep()) return;
+
+  const g = id => (document.getElementById(id)?.value.trim() || '');
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const newId = 'C-' + (2000 + clients.length + 1);
+  const newClient = {
+    id: newId,
+    name: g('ob-name'),
+    tier: g('ob-tier') || 'Silver',
+    ltv: g('ob-ltv') || '€0',
+    ca: g('ob-ca') || 'CA-101',
+    contact: g('ob-contact') || 'WhatsApp',
+    birthday: g('ob-birthday') || '—',
+    partner: g('ob-partner') || 'None',
+    anniversary: g('ob-anniversary') || 'N/A',
+    pet: g('ob-pet') || 'None',
+    beverage: g('ob-beverage') || '—',
+    sizeTop: g('ob-sizeTop') || '—',
+    sizeBottom: g('ob-sizeBottom') || '—',
+    shoe: g('ob-shoe') || '—',
+    jewelry: g('ob-jewelry') || 'N/A',
+    colors: g('ob-colors') || '—',
+    avoid: g('ob-avoid') || '—',
+    location: g('ob-location'),
+    appointment: g('ob-appointment') || '—',
+    urgency: g('ob-urgency') || 'Low urgency',
+    caAction: g('ob-caAction') || '—',
+    lastPurchase: g('ob-lastPurchase') || 'No purchase yet',
+    sku: '—',
+    purchaseDate: '—',
+    alterations: 'N/A',
+    aftercare: 'N/A',
+    lastDate: todayStr,
+    lastType: g('ob-lastType') || 'Boutique Visit',
+    lastNote: g('ob-lastNote'),
+    followUp: g('ob-followUp') || '—',
+  };
+
+  // Add to clients and histories
+  clients.push(newClient);
+  histories[newId] = { transactions: [], interactions: [{
+    date: todayStr,
+    type: newClient.lastType,
+    note: newClient.lastNote
+  }]};
+  filtered = [...clients];
+
+  // Show success then close
+  const body = document.querySelector('.onboarding-body');
+  const footer = document.querySelector('.onboarding-footer');
+  body.innerHTML = `
+    <div class="onboarding-success">
+      <div class="onboarding-success-icon">◎</div>
+      <div class="onboarding-success-title">${newClient.name}</div>
+      <div class="onboarding-success-sub">Added to BlackBook · ${newClient.tier} · ${newClient.location}</div>
+    </div>
+  `;
+  footer.innerHTML = `
+    <div></div>
+    <button class="onboarding-btn-finish" onclick="closeOnboarding(); select('${newId}');">Open Profile →</button>
+  `;
+  document.getElementById('onboardingProgress').style.width = '100%';
+
+  renderList();
+}
+
+
+// ── FEATURE STATE (declared here, populated after DOM ready) ──
+// NOTE: real declarations are hoisted to top of script — see below
+
+
+
+
+
+// ── ALERT DOT HELPER ──
+function hasUpcomingAlert(client, days) {
+  const months = {January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
+  function parseDMY(str) {
+    if (!str || str==='N/A' || str==='—') return null;
+    const p = str.split(' ');
+    if (p.length < 3) return null;
+    const m = months[p[1]]; if (m===undefined) return null;
+    return new Date(parseInt(p[2]), m, parseInt(p[0]));
+  }
+  const now = new Date(); now.setHours(0,0,0,0);
+  const check = (str) => {
+    const d = parseDMY(str); if (!d) return false;
+    const d2 = new Date(now.getFullYear(), d.getMonth(), d.getDate());
+    const diff = Math.round((d2-now)/(1000*60*60*24));
+    return diff >= 0 && diff <= days;
+  };
+  return check(client.birthday) || check(client.anniversary) || check(client.aftercare) || check(client.followUp);
+}
+
+// ── CONTEXT MENU ──
+let ctxMenu = null;
+function showCtxMenu(e, clientId) {
+  e.preventDefault();
+  e.stopPropagation();
+  removeCtxMenu();
+  const cl = clients.find(x=>x.id===clientId);
+  if (!cl) return;
+  const isArrived = arrivedClients.has(clientId);
+  const isFlagged = flaggedClients.has(clientId);
+  const menu = document.createElement('div');
+  menu.className = 'ctx-menu';
+  menu.style.left = Math.min(e.clientX, window.innerWidth-200)+'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight-180)+'px';
+  menu.innerHTML = `
+    <div class="ctx-item" onclick="ctxArrive('${clientId}')">
+      <span class="ctx-item-icon">${isArrived?'✓':'◎'}</span>${isArrived?'Mark as Departed':'Mark as Arrived'}
+    </div>
+    <div class="ctx-item" onclick="ctxFlag('${clientId}')">
+      <span class="ctx-item-icon">${isFlagged?'★':'☆'}</span>${isFlagged?'Remove Follow-up Flag':'Flag for Follow-up'}
+    </div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" onclick="select('${clientId}');removeCtxMenu();">
+      <span class="ctx-item-icon">→</span>Open Profile
+    </div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item danger" onclick="ctxDuplicate('${clientId}')">
+      <span class="ctx-item-icon">⊕</span>Duplicate Profile
+    </div>
+  `;
+  document.body.appendChild(menu);
+  ctxMenu = menu;
+  setTimeout(() => document.addEventListener('click', removeCtxMenu, {once:true}), 10);
+}
+function removeCtxMenu() {
+  if (ctxMenu) { ctxMenu.remove(); ctxMenu = null; }
+}
+function ctxArrive(id) {
+  removeCtxMenu();
+  if (arrivedClients.has(id)) {
+    arrivedClients.delete(id);
+    showToast('◎', 'Client Departed', clients.find(x=>x.id===id)?.name + ' marked as departed');
+  } else {
+    arrivedClients.add(id);
+    showToast('✓', 'Client Arrived', clients.find(x=>x.id===id)?.name + ' is now in the boutique');
+  }
+  renderList();
+  if (selected?.id === id) renderDashboard();
+  else renderDashboard();
+}
+function ctxFlag(id) {
+  removeCtxMenu();
+  const name = clients.find(x=>x.id===id)?.name;
+  if (flaggedClients.has(id)) {
+    flaggedClients.delete(id);
+    showToast('☆', 'Flag Removed', name + ' removed from follow-up list');
+  } else {
+    flaggedClients.add(id);
+    showToast('★', 'Follow-up Flagged', name + ' added to follow-up list');
+  }
+  renderList();
+}
+function ctxDuplicate(id) {
+  removeCtxMenu();
+  const orig = clients.find(x=>x.id===id);
+  if (!orig) return;
+  const newId = 'C-' + (2000 + clients.length + 1);
+  const copy = {...orig, id: newId, name: orig.name + ' (Copy)'};
+  clients.push(copy);
+  histories[newId] = JSON.parse(JSON.stringify(histories[id]||{transactions:[],interactions:[]}));
+  filtered = [...clients];
+  renderList();
+  showToast('⊕', 'Profile Duplicated', orig.name + ' — copy created');
+}
+
+// ── LTV TICKER ANIMATION ──
+function animateLTV(target) {
+  const el = document.getElementById('tickerLTV');
+  if (!el) return;
+  let current = 0;
+  const step = Math.ceil(target / 60);
+  const interval = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.innerHTML = '€' + current.toLocaleString('de-DE') + ' <span>total</span>';
+    if (current >= target) clearInterval(interval);
+  }, 16);
+}
+
+// ── CA PERFORMANCE PANEL ──
+function switchDashTab(tab) {
+  currentDashTab = tab;
+  document.getElementById('tab-overview').classList.toggle('active', tab==='overview');
+  document.getElementById('tab-ca').classList.toggle('active', tab==='ca');
+  document.getElementById('dash-overview-panel').style.display = tab==='overview' ? '' : 'none';
+  const caPanel = document.getElementById('dash-ca-panel');
+  if (tab === 'ca') {
+    caPanel.classList.add('visible');
+    renderCAPanel(caPanel);
+  } else {
+    caPanel.classList.remove('visible');
+  }
+}
+
+function renderCAPanel(el) {
+  const cas = ['CA-101','CA-102','CA-103','CA-104','CA-105'];
+  const stats = cas.map(ca => {
+    const group = clients.filter(x=>x.ca===ca);
+    const ltv = group.reduce((s,x)=>s+parseInt((x.ltv||'0').replace(/[^0-9]/g,'')),0);
+    const vvic = group.filter(x=>x.tier==='VVIC').length;
+    const appts = group.filter(x=>x.appointment&&x.appointment!=='—').length;
+    return {ca, count:group.length, ltv, vvic, appts};
+  });
+  const maxLTV = Math.max(...stats.map(s=>s.ltv));
+  const topCA = stats.reduce((a,b)=>b.ltv>a.ltv?b:a);
+
+  el.innerHTML = `
+    <div class="dash-section-label">Client Advisor Portfolio Overview</div>
+    <div class="ca-grid">
+      ${stats.map(s => `
+        <div class="ca-card">
+          <div class="ca-card-id">${s.ca}</div>
+          <div class="ca-stat">
+            <div class="ca-stat-val">${s.count}</div>
+            <div class="ca-stat-lbl">Clients</div>
+          </div>
+          <div class="ca-stat">
+            <div class="ca-stat-val" style="font-size:16px;">€${(s.ltv/1000).toFixed(0)}k</div>
+            <div class="ca-stat-lbl">Total Lifetime Value</div>
+          </div>
+          <div class="ca-stat">
+            <div class="ca-stat-val" style="font-size:16px;">${s.vvic}</div>
+            <div class="ca-stat-lbl">VVIC Clients</div>
+          </div>
+          <div class="ca-bar-wrap"><div class="ca-bar-fill" style="width:${Math.round((s.ltv/maxLTV)*100)}%"></div></div>
+          ${s.ca===topCA.ca?'<div class="ca-top-badge">Top Portfolio ↑</div>':''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ── EXPORT PDF ──
+function exportPDF() {
+  if (!selected) return;
+  const cl = selected;
+  const briefing = document.getElementById('briefingArea');
+  if (!briefing || !briefing.textContent.trim()) {
+    showToast('!', 'No Briefing', 'Generate a briefing first, then export');
+    return;
+  }
+  const dateStr = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const html = '<!DOCTYPE html><html><head>'
+    + '<meta charset="utf-8">'
+    + '<title>BlackBook — ' + cl.name + '</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">'
+    + '<style>'
+    + '* { margin:0; padding:0; box-sizing:border-box; }'
+    + 'body { font-family:"DM Sans",sans-serif; color:#1a1814; background:white; padding:40px 48px; font-size:12px; max-width:720px; margin:0 auto; }'
+    + 'h1 { font-family:"Playfair Display",serif; font-size:24px; font-weight:400; margin-bottom:4px; }'
+    + '.sub { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(0,0,0,0.3); margin-bottom:28px; }'
+    + 'hr { border:none; border-top:2px solid #1a1814; margin:20px 0; }'
+    + 'p { font-size:12px; color:#333; line-height:1.7; margin-bottom:16px; }'
+    + '.briefing-block { background:#f9f6f0; border:1px solid #e8e2d8; padding:18px 22px; margin-bottom:14px; }'
+    + '.briefing-label { font-size:8px; letter-spacing:3px; text-transform:uppercase; color:rgba(0,0,0,0.3); margin-bottom:8px; }'
+    + '.briefing-text { font-size:12px; color:#1a1814; line-height:1.7; }'
+    + '.tag { display:inline-block; font-size:9px; letter-spacing:1px; background:#f2ede6; padding:3px 10px; margin-right:4px; color:#666; }'
+    + '.footer { margin-top:32px; font-size:9px; color:rgba(0,0,0,0.2); letter-spacing:1px; text-transform:uppercase; border-top:1px solid #eee; padding-top:12px; }'
+    + '@media print { body { padding:20px; } }'
+    + '</style>'
+    + '</head><body>'
+    + '<h1>' + cl.name + '</h1>'
+    + '<div class="sub">BlackBook Client Briefing &middot; ' + cl.tier + ' &middot; ' + cl.location + ' &middot; ' + dateStr + '</div>'
+    + '<hr>'
+    + briefing.innerHTML
+    + '<div class="footer">Confidential &mdash; BlackBook Intelligence &middot; For internal CA use only</div>'
+    + '<script>window.onload=function(){window.print();}<\/script>'
+    + '</body></html>';
+  // Download as HTML file (iframe-safe)
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = cl.name.replace(/\s+/g, '_') + '_BlackBook_Briefing.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('⬇', 'Briefing downloaded', 'Open the file in your browser to print as PDF');
+}
+
+// ── TOAST NOTIFICATIONS ──
+function showToast(icon, title, msg, duration=3500) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = '<div class="toast-dot"></div><div class="toast-body"><div class="toast-title">' + title + '</div>' + (msg ? '<div class="toast-msg">' + msg + '</div>' : '') + '</div>';
+  t.addEventListener('click', () => t.remove());
+  container.appendChild(t);
+  setTimeout(() => {
+    t.classList.add('out');
+    setTimeout(() => t.remove(), 200);
+  }, duration);
+}
+
+// ── SIMULATED INCOMING MESSAGES ──
+const incomingMessages = [
+  { icon: '💬', client: 'C-1005', channel: 'WeChat', msg: 'Just landed in Paris. Can we push to tomorrow morning?' },
+  { icon: '📱', client: 'C-1001', channel: 'WhatsApp', msg: 'Will Arthur be joining? He wants to look at the new belts.' },
+  { icon: '📧', client: 'C-1009', channel: 'Email', msg: 'Please confirm you have the structured tote options ready.' },
+  { icon: '💬', client: 'C-1011', channel: 'WhatsApp', msg: 'Arjun is coming too — he wants to see the Maldives linen.' },
+  { icon: '📱', client: 'C-1008', channel: 'SMS', msg: 'Any news on the drop? Still on the list?' },
+  { icon: '💬', client: 'C-1015', channel: 'Line', msg: 'Kenji prefers a private room if available.' },
+  { icon: '📧', client: 'C-1002', channel: 'SMS', msg: 'Running 15 minutes late. Start pulling the navy options.' },
+  { icon: '💬', client: 'C-1007', channel: 'WhatsApp', msg: 'Layla is coming with me today. Hope that is fine.' },
+];
+let msgIndex = 0;
+
+function triggerIncomingMessage() {
+  const m = incomingMessages[msgIndex % incomingMessages.length];
+  msgIndex++;
+  const cl = clients.find(x=>x.id===m.client);
+  if (!cl) return;
+  showToast(m.icon, cl.name + ' — ' + m.channel, m.msg, 6000);
+}
+
+// Auto-fire a few messages during demo — first after 8s, then random intervals
+setTimeout(() => triggerIncomingMessage(), 8000);
+setTimeout(() => triggerIncomingMessage(), 22000);
+setTimeout(() => triggerIncomingMessage(), 45000);
+setInterval(() => {
+  if (Math.random() > 0.5) triggerIncomingMessage();
+}, 55000);
+
+
+// ── RELATIONSHIP SPARKLINE ──
+function renderSparkline(clientId) {
+  const hist = histories[clientId];
+  const cl = clients.find(x => x.id === clientId);
+  if (!hist || !cl) return '';
+
+  const now = new Date();
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ label: d.toLocaleDateString('en-GB', { month: 'short' }), year: d.getFullYear(), month: d.getMonth() });
+  }
+
+  // Count interactions per month
+  function parseInteractionDate(str) {
+    if (!str) return null;
+    const monthMap = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const p = str.split(' ');
+    if (p.length < 3) return null;
+    const m = monthMap[p[1]]; if (m === undefined) return null;
+    return { year: parseInt(p[2]), month: m };
+  }
+
+  const interactionCounts = months.map(m => {
+    return hist.interactions.filter(i => {
+      const d = parseInteractionDate(i.date);
+      return d && d.year === m.year && d.month === m.month;
+    }).length;
+  });
+
+  // Sum spend per month
+  const spendByMonth = months.map(m => {
+    return hist.transactions.filter(t => {
+      const d = parseInteractionDate(t.date);
+      return d && d.year === m.year && d.month === m.month;
+    }).reduce((s, t) => s + parseInt((t.amount || '0').replace(/[^0-9]/g, '')), 0);
+  });
+
+  function buildSVG(data, color, fillColor) {
+    const W = 300, H = 52, pad = 4;
+    const max = Math.max(...data, 1);
+    const pts = data.map((v, i) => {
+      const x = pad + (i / (data.length - 1)) * (W - pad * 2);
+      const y = H - pad - (v / max) * (H - pad * 2);
+      return [x, y];
+    });
+
+    // Build smooth path
+    let path = 'M ' + pts[0][0] + ' ' + pts[0][1];
+    for (let i = 1; i < pts.length; i++) {
+      const [x0, y0] = pts[i-1], [x1, y1] = pts[i];
+      const cx = (x0 + x1) / 2;
+      path += ' C ' + cx + ' ' + y0 + ' ' + cx + ' ' + y1 + ' ' + x1 + ' ' + y1;
+    }
+
+    // Fill path
+    const fillPath = path + ' L ' + pts[pts.length-1][0] + ' ' + H + ' L ' + pts[0][0] + ' ' + H + ' Z';
+
+    // Last point highlight
+    const last = pts[pts.length - 1];
+
+    return '<svg class="sparkline-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+      '<defs><linearGradient id="sg_' + clientId + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="' + fillColor + '" stop-opacity="0.35"/>' +
+      '<stop offset="100%" stop-color="' + fillColor + '" stop-opacity="0.02"/>' +
+      '</linearGradient></defs>' +
+      '<path d="' + fillPath + '" fill="url(#sg_' + clientId + ')" />' +
+      '<path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="3" fill="' + color + '" />' +
+      '</svg>';
+  }
+
+  const interSVG = buildSVG(interactionCounts, '#c8a84a', '#c8a84a');
+  const spendSVG = buildSVG(spendByMonth, '#a8c090', '#a8c090');
+
+  // Stats
+  const totalInteractions = hist.interactions.length;
+  const totalSpend = hist.transactions.reduce((s, t) => s + parseInt((t.amount || '0').replace(/[^0-9]/g, '')), 0);
+  const avgSpend = hist.transactions.length ? Math.round(totalSpend / hist.transactions.length) : 0;
+  const daysSinceLast = (() => {
+    const monthMap = {January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
+    const p = (cl.lastDate || '').split(' ');
+    if (p.length < 3) return '—';
+    const m = monthMap[p[1]]; if (m === undefined) return '—';
+    const d = new Date(parseInt(p[2]), m, parseInt(p[0]));
+    return Math.round((now - d) / (1000 * 60 * 60 * 24));
+  })();
+
+  // Trend: compare last 3 months interactions vs prior 3
+  const recent = interactionCounts.slice(-3).reduce((a,b)=>a+b,0);
+  const prior = interactionCounts.slice(-6,-3).reduce((a,b)=>a+b,0);
+  const trend = recent > prior ? 'up' : recent < prior ? 'down' : 'flat';
+  const trendLabel = trend === 'up' ? '↑ Strengthening' : trend === 'down' ? '↓ Cooling' : '→ Steady';
+
+  const monthLabels = [months[0].label, months[3].label, months[6].label, months[9].label, months[11].label];
+
+  return '<div class="sparkline-card">' +
+    '<div class="sparkline-head">' +
+    '<div class="sparkline-title">Relationship Overview — 12 months</div>' +
+    '<span class="sparkline-trend ' + trend + '">' + trendLabel + '</span>' +
+    '</div>' +
+    '<div class="sparkline-wrap">' +
+    '<div class="sparkline-chart">' +
+    '<div class="sparkline-chart-label">Interaction Frequency</div>' +
+    interSVG +
+    '<div class="sparkline-months">' + monthLabels.map(l => '<span class="sparkline-month-lbl">' + l + '</span>').join('') + '</div>' +
+    '</div>' +
+    '<div class="sparkline-chart">' +
+    '<div class="sparkline-chart-label">Spend Activity</div>' +
+    spendSVG +
+    '<div class="sparkline-months">' + monthLabels.map(l => '<span class="sparkline-month-lbl">' + l + '</span>').join('') + '</div>' +
+    '</div>' +
+    '</div>' +
+    '<div class="sparkline-stat-row">' +
+    '<div class="sparkline-stat"><div class="sparkline-stat-val">' + totalInteractions + '</div><div class="sparkline-stat-lbl">Interactions</div></div>' +
+    '<div class="sparkline-stat"><div class="sparkline-stat-val">€' + (avgSpend/1000).toFixed(1) + 'k</div><div class="sparkline-stat-lbl">Avg. Transaction</div></div>' +
+    '<div class="sparkline-stat"><div class="sparkline-stat-val">' + (typeof daysSinceLast === 'number' ? daysSinceLast + 'd' : '—') + '</div><div class="sparkline-stat-lbl">Since Last Contact</div></div>' +
+    '<div class="sparkline-stat"><div class="sparkline-stat-val">' + hist.transactions.length + '</div><div class="sparkline-stat-lbl">Transactions</div></div>' +
+    '</div>' +
+    '</div>';
+}
+
+// ── PROFILE PDF EXPORT ──
+function exportProfilePDF(clientId) {
+  const cl = clients.find(x => x.id === clientId);
+  if (!cl) return;
+  const hist = histories[clientId] || { transactions: [], interactions: [] };
+  const note = postVisitNotes[clientId];
+  const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const lastTx = hist.transactions[0];
+  const html = '<!DOCTYPE html><html><head>'
+    + '<meta charset="utf-8">'
+    + '<title>' + cl.name + ' — BlackBook Profile</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">'
+    + '<style>'
+    + '* { margin:0; padding:0; box-sizing:border-box; }'
+    + 'body { font-family:"DM Sans",sans-serif; color:#1a1814; background:white; padding:36px 44px; font-size:11px; max-width:680px; margin:0 auto; }'
+    + 'header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #1a1814; padding-bottom:14px; margin-bottom:20px; }'
+    + 'h1 { font-family:"Playfair Display",serif; font-size:22px; font-weight:400; margin-bottom:3px; }'
+    + '.sub { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(0,0,0,0.3); }'
+    + '.meta { text-align:right; }'
+    + '.meta-val { font-family:"Playfair Display",serif; font-size:18px; color:#1a1814; }'
+    + '.meta-lbl { font-size:8px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(0,0,0,0.3); margin-top:2px; }'
+    + '.grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }'
+    + '.card { border:1px solid #e8e2d8; border-top:2px solid #1a1814; padding:14px 16px; }'
+    + '.card-title { font-size:8px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(0,0,0,0.3); margin-bottom:10px; }'
+    + '.row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #f0ebe3; font-size:10px; }'
+    + '.row:last-child { border-bottom:none; }'
+    + '.row-key { color:rgba(0,0,0,0.4); }'
+    + '.row-val { color:#1a1814; font-weight:400; text-align:right; max-width:55%; }'
+    + '.avoid { color:#8b3a22; }'
+    + '.note-box { border:1px solid #e8e2d8; border-left:3px solid #c8a84a; padding:12px 14px; margin-bottom:16px; font-size:11px; color:#333; line-height:1.6; font-style:italic; }'
+    + '.footer { font-size:8px; color:rgba(0,0,0,0.2); letter-spacing:1px; text-transform:uppercase; border-top:1px solid #eee; padding-top:10px; margin-top:16px; display:flex; justify-content:space-between; }'
+    + '</style>'
+    + '</head><body>'
+    + '<header>'
+    + '<div><h1>' + cl.name + '</h1><div class="sub">' + cl.tier + ' · ' + cl.location + ' · CA ' + cl.ca + '</div></div>'
+    + '<div class="meta"><div class="meta-val">' + cl.ltv + '</div><div class="meta-lbl">Lifetime Value</div></div>'
+    + '</header>'
+    + '<div class="grid">'
+    + '<div class="card"><div class="card-title">Identity</div>'
+    + '<div class="row"><span class="row-key">Birthday</span><span class="row-val">' + cl.birthday + '</span></div>'
+    + (cl.partner && cl.partner !== 'None' ? '<div class="row"><span class="row-key">Partner</span><span class="row-val">' + cl.partner + '</span></div>' : '')
+    + (cl.anniversary && cl.anniversary !== 'N/A' ? '<div class="row"><span class="row-key">Anniversary</span><span class="row-val">' + cl.anniversary + '</span></div>' : '')
+    + (cl.pet && cl.pet !== 'None' ? '<div class="row"><span class="row-key">Pet</span><span class="row-val">' + cl.pet + '</span></div>' : '')
+    + '<div class="row"><span class="row-key">Contact</span><span class="row-val">' + cl.contact + '</span></div>'
+    + '<div class="row"><span class="row-key">Beverage</span><span class="row-val">' + cl.beverage + '</span></div>'
+    + '</div>'
+    + '<div class="card"><div class="card-title">Sizing & Style</div>'
+    + '<div class="row"><span class="row-key">Top</span><span class="row-val">' + cl.sizeTop + '</span></div>'
+    + '<div class="row"><span class="row-key">Bottom</span><span class="row-val">' + cl.sizeBottom + '</span></div>'
+    + '<div class="row"><span class="row-key">Shoe</span><span class="row-val">' + cl.shoe + '</span></div>'
+    + '<div class="row"><span class="row-key">Colours</span><span class="row-val">' + cl.colors + '</span></div>'
+    + '<div class="row"><span class="row-key">Never show</span><span class="row-val avoid">' + cl.avoid + '</span></div>'
+    + '</div></div>'
+    + '<div class="grid">'
+    + '<div class="card"><div class="card-title">Current Status</div>'
+    + '<div class="row"><span class="row-key">Appointment</span><span class="row-val">' + cl.appointment + '</span></div>'
+    + '<div class="row"><span class="row-key">Urgency</span><span class="row-val">' + cl.urgency + '</span></div>'
+    + '<div class="row"><span class="row-key">CA Action</span><span class="row-val">' + cl.caAction + '</span></div>'
+    + '<div class="row"><span class="row-key">Follow-up</span><span class="row-val">' + cl.followUp + '</span></div>'
+    + '</div>'
+    + '<div class="card"><div class="card-title">Last Transaction</div>'
+    + '<div class="row"><span class="row-key">Item</span><span class="row-val">' + cl.lastPurchase + '</span></div>'
+    + '<div class="row"><span class="row-key">Date</span><span class="row-val">' + cl.purchaseDate + '</span></div>'
+    + '<div class="row"><span class="row-key">SKU</span><span class="row-val">' + cl.sku + '</span></div>'
+    + '<div class="row"><span class="row-key">Aftercare</span><span class="row-val">' + cl.aftercare + '</span></div>'
+    + '</div></div>'
+    + (note ? '<div class="note-box">' + note.text + '<div style="margin-top:8px;font-size:9px;color:rgba(0,0,0,0.3);font-style:normal;letter-spacing:1px;text-transform:uppercase;">Post-visit note · ' + note.date + '</div></div>' : '')
+    + '<div class="footer"><span>BlackBook Client Profile · Confidential</span><span>' + dateStr + '</span></div>'
+    + '<script>window.onload=function(){window.print();}<\/script>'
+    + '</body></html>';
+
+  // Download as HTML file (iframe-safe — no window.open needed)
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = cl.name.replace(/\s+/g, '_') + '_BlackBook_Profile.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('⊡', cl.name, 'Profile downloaded — open in browser to print');
+}
+
+
+// ── DEMO MODE ──
+let demoRunning = false;
+let demoTimeouts = [];
+
+function demoDelay(ms) {
+  return new Promise(resolve => {
+    const t = setTimeout(resolve, ms);
+    demoTimeouts.push(t);
+  });
+}
+
+function demoPill(text) {
+  let pill = document.getElementById('demoPill');
+  if (!pill) {
+    pill = document.createElement('div');
+    pill.id = 'demoPill';
+    pill.className = 'demo-pill';
+    document.body.appendChild(pill);
+  }
+  pill.innerHTML = text;
+}
+
+function demoHighlight(el) {
+  document.querySelectorAll('.demo-highlight').forEach(e => e.classList.remove('demo-highlight'));
+  if (el) el.classList.add('demo-highlight');
+}
+
+function stopDemo() {
+  demoRunning = false;
+  demoTimeouts.forEach(clearTimeout);
+  demoTimeouts = [];
+  document.querySelectorAll('.demo-highlight').forEach(e => e.classList.remove('demo-highlight'));
+  const pill = document.getElementById('demoPill');
+  if (pill) pill.remove();
+  const btn = document.getElementById('demoBtn');
+  if (btn) { btn.innerHTML = '<span class="demo-btn-label">DEMO</span>'; btn.classList.remove('running'); }
+  goHome();
+}
+
+function toggleDemo() {
+  if (demoRunning) { stopDemo(); return; }
+  startDemo();
+}
+
+async function startDemo() {
+  demoRunning = true;
+  const btn = document.getElementById('demoBtn');
+  btn.innerHTML = '<span class="demo-btn-label">STOP</span>';
+  btn.classList.add('running');
+
+  // ── STEP 1: Dashboard overview ──
+  goHome();
+  demoPill('Client portfolio at a glance');
+  await demoDelay(2200);
+
+  if (!demoRunning) return;
+
+  // ── STEP 2: Highlight LTV ticker ──
+  const ticker = document.getElementById('ltvTicker');
+  demoHighlight(ticker);
+  demoPill('Total lifetime value across all active clients');
+  await demoDelay(2200);
+
+  if (!demoRunning) return;
+
+  // ── STEP 3: Highlight date alerts if any, else upcoming cards ──
+  const alertRow = document.querySelector('.date-alert-row');
+  const dashCard = document.querySelector('.dash-card');
+  demoHighlight(alertRow || dashCard);
+  demoPill('Upcoming appointments sorted by tier priority');
+  await demoDelay(2000);
+
+  if (!demoRunning) return;
+
+  // ── STEP 4: CA Performance tab ──
+  switchDashTab('ca');
+  demoHighlight(document.getElementById('dash-ca-panel'));
+  demoPill('CA performance — portfolio value by advisor');
+  await demoDelay(2400);
+
+  if (!demoRunning) return;
+  switchDashTab('overview');
+
+  // ── STEP 5: Open search ──
+  await demoDelay(600);
+  openSearch();
+  demoPill('Instant client lookup across all records');
+  await demoDelay(1000);
+
+  if (!demoRunning) return;
+
+  // Type "Wei" into search
+  const inp = document.getElementById('globalSearchInput');
+  if (inp) {
+    const chars = 'Wei';
+    for (let i = 0; i <= chars.length; i++) {
+      inp.value = chars.slice(0, i);
+      inp.dispatchEvent(new Event('input'));
+      await demoDelay(120);
+      if (!demoRunning) return;
+    }
+  }
+  await demoDelay(900);
+  if (!demoRunning) return;
+  closeSearch();
+
+  // ── STEP 6: Open VVIC client — Wei Chen ──
+  await demoDelay(400);
+  select('C-1005');
+  demoPill('Full client intelligence profile');
+  await demoDelay(500);
+
+  if (!demoRunning) return;
+
+  // Highlight identity card
+  const idCard = document.querySelector('.data-card');
+  demoHighlight(idCard);
+  demoPill('Sizes, preferences, partner details, pet — all in one place');
+  await demoDelay(2200);
+
+  if (!demoRunning) return;
+
+  // ── STEP 7: Scroll to sparkline ──
+  const sparkline = document.querySelector('.sparkline-card');
+  if (sparkline) {
+    demoHighlight(sparkline);
+    sparkline.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    demoPill('12-month relationship overview — interaction frequency & spend');
+    await demoDelay(2800);
+  }
+
+  if (!demoRunning) return;
+
+  // ── STEP 9: Show briefing step — skip actual generation (needs Vercel proxy) ──
+  document.getElementById('content').scrollTo({ top: 0, behavior: 'smooth' });
+  await demoDelay(600);
+  const genBtn = document.getElementById('genBtn');
+  demoHighlight(genBtn);
+  demoPill('One click generates a full AI pre-visit briefing');
+  await demoDelay(2000);
+
+  if (!demoRunning) return;
+
+  // Show a static briefing placeholder so demo continues cleanly
+  demoPill('Generating briefing for Wei Chen…');
+  demoHighlight(null);
+  const briefingArea = document.getElementById('briefingArea');
+  if (briefingArea) {
+    briefingArea.innerHTML = `
+      <div class="section-divider" style="margin-top:28px;">
+        <div class="section-divider-line"></div>
+        <div class="section-divider-label">Pre-Visit Intelligence</div>
+        <div class="section-divider-line"></div>
+      </div>
+      <div class="briefing-block briefing-reveal">
+        <div class="brief-block-head"><div class="brief-block-num">i.</div><div class="brief-block-title">Client Intelligence</div></div>
+        <div class="brief-block-body">Wei Chen is a VVIC client with €320,000 lifetime value at Shanghai. His last interaction was a private viewing of the AW25 collection where he requested early access to the SS26 knitwear line. He responds exclusively via WeChat and expects same-day replies. No partner or anniversary on file — focus on his personal wardrobe, not gifting.</div>
+      </div>
+      <div class="briefing-block briefing-reveal">
+        <div class="brief-block-head"><div class="brief-block-num">ii.</div><div class="brief-block-title">Conversation Guide</div></div>
+        <div class="brief-block-body">Open by referencing his interest in the SS26 knitwear — confirm whether the pieces he flagged have arrived. Mention the new cashmere outerwear line arriving next month and offer a first-look. Avoid any discussion of accessories he has previously declined. Offer Iced Matcha on arrival without being asked.</div>
+      </div>
+      <div class="briefing-block briefing-reveal">
+        <div class="brief-block-head"><div class="brief-block-num">iii.</div><div class="brief-block-title">Action This Visit</div></div>
+        <div class="brief-block-body">Confirm alterations timeline on the FR 34 jacket from the February transaction. Propose a made-to-measure consultation for the autumn season. If the visit goes well, introduce the private client event in May.</div>
+      </div>
+    `;
+    document.getElementById('exportBtn').style.display = '';
+  }
+  await demoDelay(1200);
+  let briefingLoaded = true;
+
+  if (!demoRunning) return;
+
+  // ── STEP 10: Highlight briefing ──
+  const briefingBlock = document.querySelector('.briefing-block');
+  if (briefingBlock) {
+    briefingBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await demoDelay(400);
+    demoHighlight(briefingBlock);
+    demoPill('Client intelligence — personalised, specific, actionable');
+    await demoDelay(2800);
+  }
+
+  if (!demoRunning) return;
+
+  // ── STEP 11: Draft WhatsApp message ──
+  const outreachBtn = document.getElementById('outreachBtn');
+  if (outreachBtn) {
+    outreachBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    demoHighlight(outreachBtn);
+    demoPill('Draft a personalised outreach message in seconds');
+    await demoDelay(1800);
+    if (!demoRunning) return;
+    outreachBtn.click();
+    demoPill('Generating WhatsApp draft…');
+    // Wait for draft to appear
+    let wWaited = 0;
+    while (wWaited < 12000) {
+      await demoDelay(400);
+      wWaited += 400;
+      if (!demoRunning) return;
+      const draft = document.getElementById('outreachText');
+      if (draft && draft.textContent.trim().length > 20) break;
+    }
+    const draft = document.getElementById('outreachText');
+    if (draft) {
+      draft.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await demoDelay(500);
+      demoHighlight(draft.closest('.outreach-block') || draft);
+      demoPill('Personalised message — tone-matched to the client');
+      await demoDelay(2800);
+    }
+  }
+
+  if (!demoRunning) return;
+
+  // ── STEP 12: Post-visit note ──
+  const postSection = document.querySelector('.post-visit-section');
+  if (postSection) {
+    postSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await demoDelay(700);
+    const ta = document.getElementById('postVisitInput-C-1005');
+    if (ta) {
+      demoHighlight(ta);
+      demoPill('Logging the visit — what happened, next steps');
+      const noteText = 'Client very engaged with the new cashmere collection. Requested preview of AW26 outerwear. Follow up with lookbook next week.';
+      let i = 0;
+      for (const ch of noteText) {
+        ta.value += ch;
+        i++;
+        if (i % 5 === 0) await demoDelay(18);
+        if (!demoRunning) return;
+      }
+      await demoDelay(600);
+      savePostVisitNote('C-1005');
+      demoPill('Note saved to client record');
+      await demoDelay(2000);
+    }
+  }
+
+  if (!demoRunning) return;
+
+  // ── STEP 13: Handover note ──
+  const handoverSection = document.querySelector('.handover-section');
+  if (handoverSection) {
+    handoverSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await demoDelay(700);
+    const hta = document.getElementById('handoverInput-C-1005');
+    if (hta) {
+      demoHighlight(hta);
+      demoPill('CA handover — relationship context for the next advisor');
+      const handoverText = 'Wei prefers direct communication, no upselling. Always have Evian still water ready. His PA books all appointments — cc her on any outreach.';
+      for (const ch of handoverText) {
+        hta.value += ch;
+        await demoDelay(16);
+        if (!demoRunning) return;
+      }
+      await demoDelay(600);
+      saveHandoverNote('C-1005');
+      demoPill('Handover request submitted — pending director approval');
+      await demoDelay(2200);
+    }
+  }
+
+  if (!demoRunning) return;
+
+  // ── STEP 14: New client onboarding — show sidebar + button first ──
+  document.getElementById('content').scrollTo({ top: 0, behavior: 'smooth' });
+  await demoDelay(500);
+  goHome();
+  await demoDelay(500);
+
+  // Open sidebar so the + New Client button is visible
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  sidebar.classList.add('mobile-open');
+  if (backdrop) backdrop.classList.add('active');
+  demoPill('Client roster — searchable, sortable, always at hand');
+  await demoDelay(1800);
+
+  if (!demoRunning) return;
+
+  // Scroll sidebar to bottom to reveal + New Client button
+  const clientList = document.getElementById('clientList');
+  if (clientList) clientList.scrollTo({ top: clientList.scrollHeight, behavior: 'smooth' });
+  await demoDelay(700);
+
+  const addBtn = document.querySelector('.sidebar-add-btn');
+  if (addBtn) {
+    demoHighlight(addBtn);
+    demoPill('Onboard a new client — 4-step intake form');
+    await demoDelay(1600);
+    if (!demoRunning) return;
+
+    // Close sidebar then open modal
+    sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.remove('active');
+    await demoDelay(400);
+    openOnboarding();
+    await demoDelay(2000);
+    if (!demoRunning) return;
+    demoPill('Identity, sizing, boutique assignment — structured from day one');
+    await demoDelay(2200);
+    closeOnboarding();
+    demoHighlight(null);
+  }
+
+  if (!demoRunning) return;
+
+  // ── STEP 15: Incoming message toast ──
+  await demoDelay(500);
+  demoPill('Live boutique — clients messaging in real time');
+  triggerIncomingMessage();
+  await demoDelay(3000);
+
+  if (!demoRunning) return;
+
+  // ── STEP 16: Context menu ──
+  const firstRow = document.querySelector('.client-row');
+  if (firstRow) {
+    demoHighlight(firstRow);
+    demoPill('Right-click any client — mark arrived, flag for follow-up');
+    const rect = firstRow.getBoundingClientRect();
+    showCtxMenu({ preventDefault: ()=>{}, stopPropagation: ()=>{}, clientX: rect.right - 20, clientY: rect.top + 10 }, firstRow.dataset.id);
+    await demoDelay(2200);
+    removeCtxMenu();
+  }
+
+  if (!demoRunning) return;
+
+  // ── DONE ──
+  demoHighlight(null);
+  demoPill('BlackBook — client intelligence for luxury retail');
+  await demoDelay(2800);
+
+  stopDemo();
+}
+
+
+// ── MOBILE SIDEBAR ──
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const isOpen = sidebar.classList.contains('mobile-open');
+  if (isOpen) {
+    sidebar.classList.remove('mobile-open');
+    backdrop.classList.remove('active');
+  } else {
+    sidebar.classList.add('mobile-open');
+    backdrop.classList.add('active');
+  }
+}
+
+function closeMobileSidebar() {
+  document.querySelector('.sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebarBackdrop').classList.remove('active');
+}
+
+
+
+// Global clock — always running
+tickClock();
+setInterval(tickClock, 30000);
+</script>
+
+  <!-- Global Search Overlay -->
+  <div class="search-overlay" id="searchOverlay" onclick="handleOverlayClick(event)">
+    <div class="search-modal" id="searchModal">
+      <div class="search-modal-input-row">
+        <span class="search-modal-icon">⌕</span>
+        <input class="search-modal-input" id="globalSearchInput" placeholder="Search clients, tier, location..." autocomplete="off" oninput="runGlobalSearch()" onkeydown="handleSearchKey(event)">
+        <span class="search-modal-kbd">Esc</span>
+      </div>
+      <div class="search-results" id="globalSearchResults"></div>
+      <div class="search-footer">
+        <span class="search-footer-hint">↑↓ Navigate</span>
+        <span class="search-footer-hint">↵ Open</span>
+        <span class="search-footer-hint">Esc Close</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onboarding Modal -->
+  <div class="onboarding-overlay" id="onboardingOverlay" onclick="handleOnboardingOverlayClick(event)">
+    <div class="onboarding-modal" id="onboardingModal">
+
+      <div class="onboarding-header">
+        <div>
+          <div class="onboarding-title">New Client</div>
+          <div class="onboarding-subtitle" id="onboardingStepLabel">Step 1 of 4 — Identity</div>
+        </div>
+        <button class="onboarding-close" onclick="closeOnboarding()">×</button>
+      </div>
+
+      <div class="onboarding-progress">
+        <div class="onboarding-progress-fill" id="onboardingProgress" style="width:25%"></div>
+      </div>
+
+      <div class="onboarding-body">
+
+        <!-- Step 1: Identity -->
+        <div class="onboarding-step active" id="ob-step-1">
+          <div class="onboarding-step-label">Who is this client?</div>
+
+          <div class="onboarding-two-col">
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Full Name <span>*</span></div>
+              <input class="onboarding-input" id="ob-name" placeholder="Eleanor Vance" autocomplete="off">
+            </div>
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Tier <span>*</span></div>
+              <select class="onboarding-select" id="ob-tier">
+                <option value="">Select tier</option>
+                <option value="VVIC">VVIC</option>
+                <option value="VIC">VIC</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Gold">Gold</option>
+                <option value="Silver">Silver</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="onboarding-two-col">
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Birthday</div>
+              <input class="onboarding-input" id="ob-birthday" placeholder="12 April 1982">
+            </div>
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Preferred Contact</div>
+              <select class="onboarding-select" id="ob-contact">
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Phone">Phone</option>
+                <option value="Email">Email</option>
+                <option value="SMS">SMS</option>
+                <option value="WeChat">WeChat</option>
+                <option value="Instagram">Instagram</option>
+                <option value="Line App">Line App</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="onboarding-two-col">
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Partner</div>
+              <input class="onboarding-input" id="ob-partner" placeholder="Name or leave blank">
+            </div>
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Anniversary</div>
+              <input class="onboarding-input" id="ob-anniversary" placeholder="5 September 2010">
+            </div>
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">Pet</div>
+            <input class="onboarding-input" id="ob-pet" placeholder="Biscuit — Cavalier King Charles (or leave blank)">
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">Beverage Preference</div>
+            <input class="onboarding-input" id="ob-beverage" placeholder="Champagne, Espresso, Sparkling Water...">
+          </div>
+        </div>
+
+        <!-- Step 2: Sizing & Style -->
+        <div class="onboarding-step" id="ob-step-2">
+          <div class="onboarding-step-label">Sizing & style preferences</div>
+
+          <div class="onboarding-two-col">
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Top Size</div>
+              <input class="onboarding-input" id="ob-sizeTop" placeholder="IT 42 / FR 38 / US 8">
+            </div>
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Bottom Size</div>
+              <input class="onboarding-input" id="ob-sizeBottom" placeholder="IT 44 / FR 40">
+            </div>
+          </div>
+
+          <div class="onboarding-two-col">
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Shoe Size</div>
+              <input class="onboarding-input" id="ob-shoe" placeholder="38.5 / 42">
+            </div>
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Jewelry / Wrist</div>
+              <input class="onboarding-input" id="ob-jewelry" placeholder="Ring: 54 / Wrist: 18cm">
+            </div>
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">Preferred Colours</div>
+            <input class="onboarding-input" id="ob-colors" placeholder="Navy, Emerald, Gold">
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">Never Show</div>
+            <input class="onboarding-input" id="ob-avoid" placeholder="Fur, Logos, Tight fits...">
+            <div class="onboarding-hint">Items or styles this client actively dislikes. CA will be warned.</div>
+          </div>
+        </div>
+
+        <!-- Step 3: Boutique & Status -->
+        <div class="onboarding-step" id="ob-step-3">
+          <div class="onboarding-step-label">Boutique details & current status</div>
+
+          <div class="onboarding-two-col">
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Home Boutique <span>*</span></div>
+              <select class="onboarding-select" id="ob-location">
+                <option value="">Select boutique</option>
+                <option value="Milan Flagship">Milan Flagship</option>
+                <option value="Rome Boutique">Rome Boutique</option>
+                <option value="Paris Flagship">Paris Flagship</option>
+                <option value="London Mayfair">London Mayfair</option>
+                <option value="New York 5th Ave">New York 5th Ave</option>
+                <option value="New York Soho">New York Soho</option>
+                <option value="Dubai Mall">Dubai Mall</option>
+                <option value="Shanghai">Shanghai</option>
+                <option value="Tokyo Ginza">Tokyo Ginza</option>
+                <option value="Seoul Gangnam">Seoul Gangnam</option>
+                <option value="Monaco">Monaco</option>
+                <option value="Geneva">Geneva</option>
+                <option value="Miami Design Dist.">Miami Design Dist.</option>
+                <option value="San Francisco">San Francisco</option>
+              </select>
+            </div>
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Assigned CA</div>
+              <select class="onboarding-select" id="ob-ca">
+                <option value="CA-101">CA-101</option>
+                <option value="CA-102">CA-102</option>
+                <option value="CA-103">CA-103</option>
+                <option value="CA-104">CA-104</option>
+                <option value="CA-105">CA-105</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="onboarding-two-col">
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Appointment Date</div>
+              <input class="onboarding-input" id="ob-appointment" placeholder="15 April 2026">
+            </div>
+            <div class="onboarding-group">
+              <div class="onboarding-field-label">Estimated LTV</div>
+              <input class="onboarding-input" id="ob-ltv" placeholder="€0 — new client">
+            </div>
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">Urgency</div>
+            <select class="onboarding-select" id="ob-urgency">
+              <option value="Low urgency">Low urgency</option>
+              <option value="Medium urgency">Medium urgency</option>
+              <option value="High urgency">High urgency</option>
+              <option value="Critical urgency">Critical urgency</option>
+            </select>
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">CA Action / Notes</div>
+            <input class="onboarding-input" id="ob-caAction" placeholder="e.g. Holding items in back of house">
+          </div>
+        </div>
+
+        <!-- Step 4: First Interaction -->
+        <div class="onboarding-step" id="ob-step-4">
+          <div class="onboarding-step-label">First interaction note</div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">How did this client come to us?</div>
+            <select class="onboarding-select" id="ob-lastType">
+              <option value="Boutique Visit">Boutique Visit — walked in</option>
+              <option value="Referral">Referral — existing client</option>
+              <option value="WhatsApp">WhatsApp enquiry</option>
+              <option value="Email">Email enquiry</option>
+              <option value="Phone Call">Phone call</option>
+              <option value="VIP Event">VIP Event</option>
+              <option value="Private Styling">Private Styling session</option>
+              <option value="Instagram DM">Instagram DM</option>
+            </select>
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">First impression note <span>*</span></div>
+            <input class="onboarding-input" id="ob-lastNote" placeholder="What struck you about this client? What did they want? Tone, energy, key requests...">
+            <div class="onboarding-hint">This becomes the CA's first briefing note. Write it as you'd tell a colleague — natural, specific, human.</div>
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">Last Purchase (if any)</div>
+            <input class="onboarding-input" id="ob-lastPurchase" placeholder="Leave blank if no purchase yet">
+          </div>
+
+          <div class="onboarding-group">
+            <div class="onboarding-field-label">Follow-up Date</div>
+            <input class="onboarding-input" id="ob-followUp" placeholder="1 May 2026">
+          </div>
+        </div>
+
+      </div><!-- end body -->
+
+      <div class="onboarding-footer">
+        <div class="onboarding-step-count" id="onboardingStepCount">Step 1 of 4</div>
+        <div class="onboarding-btns">
+          <button class="onboarding-btn-back" id="obBtnBack" onclick="obBack()" style="display:none">Back</button>
+          <button class="onboarding-btn-next" id="obBtnNext" onclick="obNext()">Continue</button>
+          <button class="onboarding-btn-finish" id="obBtnFinish" onclick="obFinish()" style="display:none">Add to BlackBook</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="toast-container" id="toastContainer"></div>
+</body>
+</html>

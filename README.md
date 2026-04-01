@@ -16,7 +16,7 @@
 4. [Codebase Structure](#4-codebase-structure)
 5. [API & Prompt Architecture](#5-api--prompt-architecture)
 6. [CA Login & Session System](#6-ca-login--session-system)
-7. [Airtable Integration — Current Status & Next Steps](#7-airtable-integration--current-status--next-steps)
+7. [Airtable Integration — Live](#7-airtable-integration--live)
 8. [Future Roadmap](#8-future-roadmap)
 9. [Environment Variables](#9-environment-variables)
 10. [Deployment](#10-deployment)
@@ -75,14 +75,34 @@ Drafts outreach messages per client's preferred channel.
 - Max 4 sentences. No emojis unless WeChat/Instagram. No prices. References one specific personal detail.
 
 ### Gift Intelligence
-6 AI-selected gift items per client based on profile, occasion, live inventory.
+6 AI-selected gift items per client based on profile, occasion, and live Airtable inventory.
 
 - **Occasion types:** Birthday, Anniversary, Evergreen
-- **Spend guidance by tier:** VVIC prioritises €3,000+. VIC €1,500–6,000. Platinum €800–3,500. Gold €500–2,500. Silver €200–1,500.
+- **Spend guidance by tier:** VVIC prioritises €3,000+. VIC €1,500–6,000. Platinum €800–3,500. Gold €500–2,500. Silver €200–1,500. All logic uses `PriceNum` field — no legacy tier codes.
 - **Selection rules:** Colour match, avoid list enforced, category diversity (max 2 per category), gender match, stock awareness, size compatibility.
-- **Each item includes:** Reason written in warm insider tone referencing specific profile detail.
-- **Ship Now / Reserve:** CA can action items directly. Stock decrements in session.
-- **Live catalog:** Being migrated from hardcoded array to live Airtable fetch (see Section 7).
+- **Each item includes:** Reason written in warm insider tone referencing a specific profile detail.
+- **Ship Now / Reserve:** CA can action items directly. Ship Now decrements stock in Airtable via a live PATCH write-back. Session stock updates immediately.
+- **AI Cost Optimisation:** Before the catalog is sent to Claude, it is pre-filtered by client gender (W/U or M/U) and stripped of heavy fields (`img`, `sku`, `colors`). Only `id`, `name`, `category`, `priceNum`, and `description` are sent. Reduces payload size by ~60% on average.
+- **Live catalog:** Fetched from Airtable on app initialisation via a server-side proxy. No hardcoded items remain in the frontend.
+
+### Shop Dashboard
+Full in-memory catalog view for browsing and curating — no additional API calls.
+
+- Accessible via the "Catalog" button in the sidebar navigation.
+- Displays all 142 items from `masterCatalog` in a responsive 4-column grid (3-col at 1200px, 2-col mobile).
+- **Each card shows:** Product image, name, price (formatted in €), stock count. Low stock (≤2) shown in terracotta. Sold-out cards grayed out with a "Sold Out" badge.
+- **Search bar:** Real-time filtering by item name or category.
+- **Filter row:** Four dropdowns — Department (All / Womenswear / Menswear), Category (dynamically extracted from `masterCatalog`), Color (dynamically extracted), Sort (Default / Price: Low to High / Price: High to Low). All filter state is held in memory; the grid re-renders on every change without any API call.
+- **Save to Client:** Each card has a "Save to Client ＋" button. Clicking opens a minimalist modal listing all clients by name and tier. Selecting a client pushes the item ID into that client's `lookbook` array and shows a toast confirmation.
+
+### Client Curation — Lookbook
+Per-client in-memory moodboard built from the live catalog.
+
+- Every client object carries a `lookbook: []` array initialised on page load.
+- Items saved via the Shop Dashboard appear as a "Curated Lookbook" section on the client's profile, rendered after the relationship sparkline and before the Communication section.
+- Lookbook renders as a 4-column mini-grid of product cards (square image, name, price).
+- Empty state: a subtle "No items curated yet" message.
+- State is session-only until Supabase persistence is added (see Section 8b).
 
 ### Important Dates
 - Birthday and anniversary alerts with 30-day countdown.
@@ -106,6 +126,7 @@ Drafts outreach messages per client's preferred channel.
 - Sizing: sizeTop, sizeBottom, shoe, jewelry
 - Style: colors (preferred), avoid (never show)
 - CRM: lastDate, lastType, lastNote, lastPurchase, sku, purchaseDate, urgency, caAction, appointment, followUp, alterations, aftercare
+- Curation: lookbook (array of catalog item IDs)
 
 **Profile cards:**
 - **Client:** ID, tier badge, LTV, assigned CA, preferred contact
@@ -114,6 +135,7 @@ Drafts outreach messages per client's preferred channel.
 - **Last Transaction:** Item, SKU, date, boutique, alterations, aftercare
 - **Current Status:** Urgency, CA action (dominant), follow-up due, last interaction (dimmed)
 - **Appointment:** Date, location, Google Calendar sync indicator, aftercare follow-up with + Add button
+- **Curated Lookbook:** Mini-grid of catalog items saved from the Shop Dashboard
 
 **Interaction history:** Last interaction note displayed prominently. Previous 3 interactions shown below. Full transaction log accessible.
 
@@ -159,7 +181,7 @@ Never move prompt text into `index.html` or any frontend file. Every AI call goe
 Avoid comments in `index.html` that explain how AI scoring, tier matching, or gift selection logic works. Comments should describe UI structure only.
 
 **Rule 4 — Catalog fetch is server-side proxied.**
-The Airtable API key must never be called directly from the frontend. All Airtable requests route through `/api/chat.js` as a `type: 'catalog'` request.
+The Airtable API key must never be called directly from the frontend. All Airtable requests route through `/api/chat.js` as a `type: 'catalog'` request. The Shop Dashboard reads from `masterCatalog` in memory — it never makes its own Airtable call.
 
 **Rule 5 — Maintain single-file frontend discipline.**
 `index.html` is the entire frontend. Do not split into multiple JS or CSS files. Keeps deployment simple and reduces inspection surface area.
@@ -173,9 +195,9 @@ The JSON field names used in AI responses (`opening`, `conversation`, `action`, 
 
 ```
 final/
-├── index.html          ← Entire frontend (~7,700 lines, single file)
+├── index.html          ← Entire frontend (~7,845 lines, single file)
 ├── api/
-│   └── chat.js         ← Vercel serverless backend (all AI prompts live here)
+│   └── chat.js         ← Vercel serverless backend (all AI prompts + Airtable proxy)
 ```
 
 ### index.html Architecture
@@ -200,18 +222,17 @@ final/
 
 **Typography:**
 - `Playfair Display` — serif, client names, section headers, greeting
-- `Libre Baskerville` — serif, data values in profile cards
-- `DM Sans` — sans-serif, all UI labels, buttons, metadata
+- `Libre Baskerville` — serif, data values in profile cards and product names
+- `DM Sans` — sans-serif, all UI labels, buttons, metadata, filter controls
 
 **Layout:** Fixed sidebar (260px) + scrollable content area. Mobile-responsive with collapsible sidebar.
 
-**Key Data Structures (current stable — pre-Airtable):**
+**Key Data Structures:**
 ```javascript
-const clients = [...]           // 20 client objects, ~line 3575
+const clients = [...]           // 20 client objects — each carries a lookbook: [] array
 const histories = {...}         // interaction + transaction history, keyed by client ID
-const masterCatalog = [...]     // 56 items T1-001 to T6-015 — TO BE REPLACED
-const prebuiltGiftSelections = {...}  // per-client pre-generated gifts — TO BE REMOVED
-const catalogById = {}          // lookup map built from masterCatalog
+let masterCatalog = []          // populated on init via fetchCatalogFromAirtable()
+const catalogById = {}          // lookup map built from masterCatalog after fetch
 ```
 
 **CA System:**
@@ -240,31 +261,67 @@ const flaggedClients = new Set();
 const arrivedClients = new Set();
 ```
 
+**Shop Dashboard State:**
+```javascript
+window._shopQuery          = '';      // live search input value
+window._shopFilterGender   = 'All';   // 'All' | 'Women' | 'Men'
+window._shopFilterCategory = 'All';   // dynamic — any category string from masterCatalog
+window._shopFilterColor    = 'All';   // dynamic — any color string from masterCatalog
+window._shopSortPrice      = 'None';  // 'None' | 'asc' | 'desc'
+```
+
 **Key Functions:**
 | Function | Description |
 |---|---|
 | `renderDashboard()` | Builds full dashboard with stats, appointment cards, important dates, needs attention |
-| `renderProfile()` | Builds client profile with all data cards, history, briefing area, gift section |
+| `renderProfile()` | Builds client profile with all data cards, history, briefing area, gift section, lookbook |
 | `renderList()` | Renders sidebar client list filtered to active CA |
 | `generateBriefing()` | POST `/api/chat` type:briefing |
 | `generateAIDebrief(id)` | POST `/api/chat` type:debrief |
 | `generateCommDraft(clientId)` | POST `/api/chat` type:message |
+| `generateGiftIntelligence(clientId, occasion)` | Applies pre-filter, then POST `/api/chat` type:gifts. Caches result in `aiGiftCache` |
+| `fetchCatalogFromAirtable()` | POST `/api/chat` type:catalog — populates `masterCatalog` and `catalogById` on init |
+| `goShop()` | Clears selected client, updates nav state, calls `renderList()` + `renderShopDashboard()` |
+| `renderShopDashboard()` | Applies all shop filter state to `masterCatalog`, renders product grid + filter controls |
+| `renderShopCard(item)` | Returns HTML string for a single catalog card with sold-out logic |
+| `openClientPicker(itemId)` | Appends client selection modal to body; dismisses on backdrop click |
+| `saveToClient(itemId, clientId)` | Pushes item ID into `client.lookbook`, shows toast, refreshes profile if open |
+| `renderLookbook(clientId)` | Returns "Curated Lookbook" section HTML — mini-grid or empty state |
 | `loginCA()` | Handles CA selection, filters dashboard, personalises greeting |
 | `toggleVoiceNote(id)` | Web Speech API mic toggle |
 | `logActivity(clientId, type, title, detail)` | Stamps active CA name on every log entry |
-| `fetchCatalogFromAirtable()` | Fetches live catalog — defined, needs wiring (see Section 7) |
 | `apptCountdown(dateStr)` | Returns styled countdown chip HTML |
 | `getBriefingAppointmentContext(c)` | Returns urgency string for briefing prompt |
 | `buildLoginScreen()` | Populates CA selector on dark login screen |
-| `selectCARow(id)` | Highlights selected CA row, enables Enter button |
 
 ---
 
 ## 5. API & Prompt Architecture
 
-All AI calls route through `/api/chat.js` on Vercel. The frontend never builds prompts.
+All AI and Airtable calls route through `/api/chat.js` on Vercel. The frontend never builds prompts or holds API keys.
 
 ### Request Types
+
+**`type: 'catalog'`**
+```javascript
+// Frontend sends:
+{ type: 'catalog' }
+
+// chat.js paginates through Airtable with offset until all records fetched.
+// Returns:
+{ catalog: [{ id, airtableId, name, category, gender, price, priceNum, stock, sku, colors, img, description }, ...] }
+// 142 items (80W + 62M) on first load
+```
+
+**`type: 'stock'`**
+```javascript
+// Frontend sends (fire-and-forget after Ship Now action):
+{ type: 'stock', airtableId: 'recXXX', newStock: 2 }
+
+// chat.js issues PATCH to Airtable Catalog table.
+// Returns:
+{ ok: true }
+```
 
 **`type: 'briefing'`**
 ```javascript
@@ -273,11 +330,11 @@ All AI calls route through `/api/chat.js` on Vercel. The frontend never builds p
 
 // Returns JSON:
 {
-  opening: "...",      // Client Intelligence section
-  conversation: "...", // Conversation Guide section
-  action: "...",       // Action Items section
-  alerts: ["..."],     // Critical flags, max 2
-  tags: ["...","..."]  // 3-4 descriptor tags
+  opening: "...",       // Client Intelligence section
+  conversation: "...",  // Conversation Guide section
+  action: "...",        // Action Items section
+  alerts: ["..."],      // Critical flags, max 2
+  tags: ["...","..."]   // 3-4 descriptor tags
 }
 // max_tokens: 1000
 ```
@@ -293,8 +350,10 @@ All AI calls route through `/api/chat.js` on Vercel. The frontend never builds p
 
 **`type: 'gifts'`**
 ```javascript
-// Frontend sends:
-{ type: 'gifts', client: c, occasion: 'Birthday', catalog: masterCatalog }
+// Frontend sends (after pre-filter):
+{ type: 'gifts', client: c, occasion: 'Birthday', catalog: aiCatalog }
+// aiCatalog is gender-filtered (W/U or M/U) and field-stripped (id, name, category, priceNum, description only)
+// img, sku, colors are removed before the API call — reduces payload ~60%
 
 // Returns JSON array:
 [{ id: "W-001", reason: "..." }, ...]  // exactly 6 items
@@ -317,17 +376,8 @@ All AI calls route through `/api/chat.js` on Vercel. The frontend never builds p
 // max_tokens: 600
 ```
 
-**`type: 'catalog'`** *(to be added — see Section 7)*
-```javascript
-// Frontend sends:
-{ type: 'catalog' }
-
-// Returns:
-{ catalog: [...] }  // full Airtable catalog array
-```
-
 ### Model
-`claude-sonnet-4-20250514` — hardcoded server-side.
+`claude-sonnet-4-20250514` — hardcoded server-side. Never exposed to the frontend.
 
 ---
 
@@ -347,12 +397,22 @@ All AI calls route through `/api/chat.js` on Vercel. The frontend never builds p
 
 ---
 
-## 7. Airtable Integration — Current Status & Next Steps
+## 7. Airtable Integration — Live
 
-### Current Status
-The Airtable base is live and populated. The connection code exists in `index.html` (`fetchCatalogFromAirtable()`) but the previous integration attempt was reverted because the gift generation trigger was not properly wired — the UI showed "No gift selections yet" with no way to generate them.
+The Airtable integration is fully complete. All steps described in the previous version of this document as "next steps" have been implemented and are live.
 
-**The project is currently on the stable pre-Airtable backup.**
+### What is Live
+
+| Feature | Status |
+|---|---|
+| `type: 'catalog'` endpoint in `chat.js` | Live — paginated fetch, all 142 records |
+| `fetchCatalogFromAirtable()` called on app init | Live — runs before first gift request |
+| Hardcoded `masterCatalog` and `prebuiltGiftSelections` | Removed entirely |
+| Gift prompt uses `PriceNum` + gender rules (not legacy tier codes) | Live |
+| Gift generation guard (empty catalog check) | Live |
+| `renderGiftSection` shows "Generate" button when cache is empty | Live |
+| `type: 'stock'` write-back on Ship Now | Live — PATCH to Airtable on every ship action |
+| Pre-filter for AI payload (gender + field strip) | Live — runs inside `generateGiftIntelligence` |
 
 ### Airtable Base
 - **Base ID:** `applcdHUp1qAiquUl`
@@ -368,208 +428,36 @@ The Airtable base is live and populated. The connection code exists in `index.ht
 | Category | Multiple select | Bag, RTW, Footwear, Jewellery, Accessory, Outerwear, Leather Goods |
 | Gender | Single select | W, M, U |
 | Price | Single line text | e.g. €3,600 |
-| PriceNum | Number | e.g. 3600, for AI price logic |
-| Stock | Number | Integer |
+| PriceNum | Number | e.g. 3600 — used for AI spend guidance and sort |
+| Stock | Number | Integer — decremented live on Ship Now |
 | Colors | Single line text | Comma-separated |
-| Image | URL | Prada CDN URLs — plan to migrate to Cloudinary |
+| Image | URL | CDN URLs — plan to migrate to Cloudinary |
 | Description | Single line text | Short descriptor for AI context |
 
-### Step-by-Step Integration Instructions
+### AI Payload Optimisation Detail
 
-**Step 1 — Add catalog endpoint to chat.js**
+Before calling Claude for gift recommendations, `generateGiftIntelligence` applies two filters client-side:
 
-Add this block before the `if (!type || !c)` guard so it runs without a client object:
+1. **Gender filter:** Reduces 142 items to ~70–80 relevant to the client's gender.
+2. **Field strip:** Maps the filtered array to `{ id, name, category, priceNum, description }` only. Removes `img`, `sku`, and `colors`.
 
-```javascript
-if (type === 'catalog') {
-  try {
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    let allRecords = [];
-    let offset = null;
-
-    do {
-      const url = `https://api.airtable.com/v0/${baseId}/Catalog${offset ? `?offset=${offset}` : ''}`;
-      const atRes = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${apiKey}` }
-      });
-      const atData = await atRes.json();
-      if (atData.error) throw new Error(atData.error.message);
-      allRecords = allRecords.concat(atData.records || []);
-      offset = atData.offset || null;
-    } while (offset);
-
-    const catalog = allRecords.map(r => ({
-      id:          r.fields.ID || r.id,
-      airtableId:  r.id,
-      name:        r.fields.Name || '',
-      category:    Array.isArray(r.fields.Category) ? r.fields.Category : [r.fields.Category].filter(Boolean),
-      gender:      r.fields.Gender || 'U',
-      price:       r.fields.Price || '',
-      priceNum:    r.fields.PriceNum || 0,
-      stock:       r.fields.Stock || 0,
-      sku:         r.fields.SKU || '',
-      colors:      r.fields.Colors ? r.fields.Colors.split(',').map(c => c.trim()) : [],
-      img:         r.fields.Image || '',
-      description: r.fields.Description || ''
-    }));
-
-    return res.status(200).json({ catalog });
-  } catch(err) {
-    console.error('Airtable fetch error:', err);
-    return res.status(500).json({ error: 'Failed to fetch catalog from Airtable' });
-  }
-}
+A `console.log` statement in the function reports the reduction:
+```
+[Gift Catalog] Full: 142 → Gender-filtered: 80 → AI payload: 80 items (img + sku + colors stripped)
 ```
 
-**Step 2 — Update gifts prompt in chat.js**
-
-Replace the old tier-based spend guide with price-based logic:
-
-```javascript
-const spendGuide = {
-  'VVIC':     'Prioritise items above €3,000. Mix statement pieces (bags, coats, fine jewellery) with one or two refined accessories. No item below €500 unless exceptional personal match.',
-  'VIC':      'Focus on €1,500–€6,000. One hero piece above €3,000 with complementary items at €1,000–€2,500.',
-  'Platinum': 'Sweet spot is €800–€3,500. One elevated piece if occasion warrants.',
-  'Gold':     '€500–€2,500 range. Aspirational but not overextended.',
-  'Silver':   '€200–€1,500. Achievable and relevant to where this relationship currently is.'
-}[c.tier] || 'Mix price points thoughtfully based on occasion and relationship stage.';
-```
-
-Also update the response format example from `"id": "T#-###"` to `"id": "..."` since IDs are now W-001/M-001 format.
-
-Add `- Use PriceNum field for price logic, not any tier field` to selection rules.
-Add `- Gender: W items for women, M items for men, U fine for either` to selection rules.
-
-**Step 3 — Replace masterCatalog in index.html**
-
-Replace the entire `const masterCatalog = [...]` block, the `const prebuiltGiftSelections = {...}` block, and the `masterCatalog.forEach(...)` line with:
-
-```javascript
-// ── CATALOG — loaded live from Airtable ──────────────────────────────────
-let masterCatalog = [];
-const catalogById = {};
-
-async function fetchCatalogFromAirtable() {
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'catalog' })
-    });
-    const data = await res.json();
-    if (data.catalog && Array.isArray(data.catalog)) {
-      masterCatalog = data.catalog;
-      masterCatalog.forEach(item => { catalogById[item.id] = item; });
-      console.log(`Catalog loaded: ${masterCatalog.length} items from Airtable`);
-    }
-  } catch(err) {
-    console.error('Failed to load catalog from Airtable:', err);
-  }
-}
-```
-
-**Step 4 — Wire catalog fetch on app init**
-
-```javascript
-buildLoginScreen();
-fetchCatalogFromAirtable(); // async — catalog ready before first gift request
-renderList();
-renderDashboard();
-```
-
-**Step 5 — Fix renderGiftSection (critical — this was the failure point)**
-
-Replace the existing `renderGiftSection` function entirely:
-
-```javascript
-function renderGiftSection(clientId, occasion) {
-  const occasionLabel = occasion || 'Important Date';
-  const selections = aiGiftCache[clientId] || [];
-
-  if (selections.length === 0) {
-    const grid = document.getElementById('giftGrid-' + clientId);
-    if (grid) {
-      grid.innerHTML = `
-        <div style="grid-column:1/-1;padding:24px;text-align:center;">
-          <div style="color:var(--ink-faint);font-size:12px;margin-bottom:16px;">
-            No gift selections yet — generate a personalised selection from live inventory.
-          </div>
-          <button class="post-visit-save-btn" onclick="openGiftSection('${clientId}','${occasionLabel}')">
-            Generate Gift Intelligence
-          </button>
-        </div>`;
-    }
-    return;
-  }
-
-  populateGiftGrid(clientId, selections, occasionLabel);
-}
-```
-
-**Step 6 — Guard against empty catalog on gift generation**
-
-In the gift generation function (where it calls `/api/chat` with `type: 'gifts'`), add:
-
-```javascript
-if (!masterCatalog.length) {
-  showToast('!', 'Catalog loading', 'Please wait a moment and try again');
-  return;
-}
-```
-
-**Step 7 — Stock write-back on Ship Now**
-
-Add `type: 'stock'` to chat.js:
-
-```javascript
-if (type === 'stock') {
-  const { airtableId, newStock } = req.body;
-  const url = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Catalog/${airtableId}`;
-  await fetch(url, {
-    method: 'PATCH',
-    headers: {
-      'Authorization': `Bearer ${process.env.AIRTABLE_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ fields: { Stock: newStock } })
-  });
-  return res.status(200).json({ ok: true });
-}
-```
-
-Update the Ship Now action in `index.html` to call this endpoint with the item's `airtableId` and decremented stock value.
-
-### Verification After Deploy
-Open browser console on Vercel URL. Should see:
+### Verification
+Open browser console on the live Vercel URL. On page load you should see:
 ```
 Catalog loaded: 142 items from Airtable
 ```
-Then test gift intelligence on any client. Selections should use W-001/M-001 IDs and reference real Prada items.
+Then test gift intelligence on any client. All 6 selections will reference real catalog items with W-001/M-001 IDs. Ship Now will decrement stock in Airtable immediately.
 
 ---
 
 ## 8. Future Roadmap
 
-### 8a. Inventory / Shop Section
-
-**Concept:** A visual catalog section where CAs browse live inventory for appointment preparation and inspiration. First feature that will look and feel like luxury retail rather than a data tool.
-
-**UI Structure:**
-- Compact catalog strip on the dashboard — 4-6 featured items as horizontal scroll
-- "View All" expands to full catalog page
-- Filter by Category, Gender, Price range
-- Items: product image (full bleed), name, price, stock indicator, category tag
-- Low stock (≤2) highlighted
-- CA can pull any item into a client's gift section or flag it for an upcoming appointment
-
-**Implementation notes:**
-- Catalog is already fetched on load — shop section just renders it visually
-- Filter state managed client-side, no additional API calls
-- Lazy-load images to avoid blocking dashboard render
-- Images currently Prada CDN URLs — plan to migrate to Cloudinary for permanence
-
-### 8b. Supabase Integration
+### 8a. Supabase Integration
 
 **Why Supabase:** PostgreSQL database + auth + real-time in one. Enables persistent memory, proper CA logins, multi-boutique isolation, and the audit trails enterprise buyers require.
 
@@ -582,21 +470,22 @@ Then test gift intelligence on any client. Selections should use W-001/M-001 IDs
 
 **Database Schema:**
 ```sql
-clients         (id, name, tier, ltv, ca_id, contact, location, birthday, partner, 
-                 anniversary, pet, beverage, size_top, size_bottom, shoe, jewelry,
-                 colors, avoid, last_date, last_type, last_note, last_purchase, 
-                 sku, urgency, ca_action, appointment, follow_up, alterations, aftercare)
+clients          (id, name, tier, ltv, ca_id, contact, location, birthday, partner,
+                  anniversary, pet, beverage, size_top, size_bottom, shoe, jewelry,
+                  colors, avoid, last_date, last_type, last_note, last_purchase,
+                  sku, urgency, ca_action, appointment, follow_up, alterations, aftercare)
 
-interactions    (id, client_id, date, type, note, ca_id, created_at)
-transactions    (id, client_id, date, item, sku, amount, location)
+interactions     (id, client_id, date, type, note, ca_id, created_at)
+transactions     (id, client_id, date, item, sku, amount, location)
 post_visit_notes (id, client_id, text, ca_id, ai_generated, created_at)
-activity_logs   (id, client_id, type, title, detail, ca_id, created_at)
-advisor_notes   (id, client_id, text, ca_id, created_at)
-ca_profiles     (id, name, location, email)
+activity_logs    (id, client_id, type, title, detail, ca_id, created_at)
+advisor_notes    (id, client_id, text, ca_id, created_at)
+ca_profiles      (id, name, location, email)
+lookbook_items   (id, client_id, catalog_item_id, ca_id, created_at)
 ```
 
 **Memory (what Supabase unlocks):**
-Currently all session data resets on page refresh. With Supabase: CA accepts a debrief → writes to `interactions` table → next CA opens same client, sees that debrief in the history. The relationship memory is real and shared across the team.
+Currently all session data resets on page refresh. With Supabase: CA accepts a debrief → writes to `interactions` table → next CA opens same client, sees that debrief in the history. The `lookbook_items` table persists client curation across sessions. The relationship memory is real and shared across the team.
 
 **Multi-Boutique Architecture:**
 Each boutique gets their own Supabase schema (or separate project) and their own Airtable base:
@@ -612,7 +501,7 @@ Per-boutique Vercel env vars control which database and catalog each deployment 
 4. CAs receive magic link invitations, first login creates their Supabase session
 5. From that point: catalog updates in Airtable by boutique manager, client data syncs from Salesforce nightly, all CA activity persists in Supabase
 
-### 8c. CRM Integration Strategy
+### 8b. CRM Integration Strategy
 
 **The problem in luxury retail today:** CAs toggle between Salesforce on desktop, a stock system on another screen, personal WhatsApp, and their own memory. The interaction history, preferences, and CA notes are scattered across systems — or live only in the advisor's head.
 
@@ -636,7 +525,7 @@ Per-boutique Vercel env vars control which database and catalog each deployment 
 **Commercial positioning:**
 The pitch to a buyer: "We don't replace your CRM. We sit on top of what you already have and give your CAs the intelligence layer they need in the moment." This is easier to sell than replacement, faster to onboard, and lower risk for the boutique's IT team.
 
-### 8d. Slack / Teams Notifications
+### 8c. Slack / Teams Notifications
 
 - When AI Debrief accepted: post summary to boutique's floor channel — "Sophie logged a visit with Eleanor Vance. Follow-up scheduled 1 April. New preference: sparkling water instead of champagne."
 - 48 hours before client birthday/anniversary: ping assigned CA
@@ -644,18 +533,25 @@ The pitch to a buyer: "We don't replace your CRM. We sit on top of what you alre
 - When handover submitted: notify floor channel
 - Implementation: Slack webhook URL stored as Vercel env var, triggered server-side from `chat.js`
 
-### 8e. Outfit Recommendations
+### 8d. Outfit Recommendations
 
 - **Hard dependency:** Real product images in catalog (Cloudinary migration)
 - **Prompt logic:** Given client profile + live catalog, suggest 2-3 pieces that work together as a look for the upcoming appointment occasion
-- **Placement:** Inside briefing as "Suggested Look" section (Section iv), or as separate tab on profile alongside Gift Intelligence
+- **Placement:** Inside briefing as "Suggested Look" section, or as separate tab alongside Gift Intelligence
 - **Requirement:** Sufficient catalog depth per gender category to make combinations feel intentional — 30+ well-photographed items minimum before this feature lands well
 
-### 8f. Google Calendar Real Connection
+### 8e. Google Calendar Real Connection
 
 - Currently simulated via sync indicator and animated dot
 - Real implementation: OAuth connection, read actual CA calendar, display real appointments in profile
 - Appointment data feeds into `getBriefingAppointmentContext()` automatically — no manual date entry
+
+### 8f. Outfit Builder in Shop Dashboard
+
+- Extend Shop Dashboard with a "Build a Look" mode
+- CA selects 2-3 items from the catalog and assigns them as a curated outfit to a client
+- Looks stored alongside the Lookbook on the client profile
+- Requires Cloudinary image migration for stable image URLs
 
 ---
 
@@ -712,4 +608,4 @@ Vercel is connected to the `main` branch of `github.com/mertturanweb/blackbook`.
 
 ---
 
-*Document version: April 2026. Reflects stable pre-Airtable codebase state. Last updated by Mert Turan.*
+*Document version: April 2026. Reflects live production codebase with Airtable integration, Shop Dashboard, Client Lookbook, and AI cost optimisation. Last updated by Mert Turan.*

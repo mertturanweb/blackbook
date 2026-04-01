@@ -11,18 +11,18 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #f2ede6;
-  --bg2: #e8e2d8;
-  --surface: #f8f5f0;
-  --ink: #181814;
-  --ink-mid: #42423c;
-  --ink-light: #6e6c64;
-  --ink-faint: #a8a59c;
-  --rule: #d4cfc5;
-  --rule-dark: #b8b4a8;
-  --gold: #7a5e28;
-  --gold-light: #a07c3e;
-  --gold-pale: #ece0c4;
+  --bg: #f7f4ef;
+  --bg2: #ede9e1;
+  --surface: #faf8f4;
+  --ink: #1c1c18;
+  --ink-mid: #4a4a44;
+  --ink-light: #7a7870;
+  --ink-faint: #b0ada4;
+  --rule: #ddd9d0;
+  --rule-dark: #c4c0b6;
+  --gold: #8a6d35;
+  --gold-light: #b89050;
+  --gold-pale: #f0e8d0;
   --sidebar-w: 260px;
 }
 
@@ -619,7 +619,7 @@ html, body {
 .dashboard { }
 
 .dash-greeting {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .dash-greeting-time {
@@ -627,15 +627,14 @@ html, body {
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--ink-faint);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .dash-greeting-text {
   font-family: 'Playfair Display', serif;
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 400;
   color: var(--ink);
-  line-height: 1.2;
 }
 
 .dash-section-label {
@@ -657,20 +656,17 @@ html, body {
 }
 
 .dash-card {
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--rule);
   border-top: 2px solid var(--ink);
   padding: 18px 20px;
   cursor: pointer;
   transition: border-top-color 0.15s, box-shadow 0.15s;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
 }
 
 .dash-card:hover {
   border-top-color: var(--gold);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 }
 
 .dash-card-tier {
@@ -682,48 +678,13 @@ html, body {
 
 .dash-card-name {
   font-family: 'Playfair Display', serif;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--ink);
-  margin-bottom: 2px;
-}
-
-.dash-card-ltv {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--ink-mid);
-  margin-bottom: 10px;
-  letter-spacing: 0.3px;
-}
-
-.dash-card-divider {
-  height: 1px;
-  background: var(--rule);
-  margin-bottom: 10px;
-}
-
-.dash-card-meta-row {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-bottom: 10px;
-}
-
-.dash-card-meta-item {
-  font-size: 10px;
-  color: var(--ink-faint);
-  display: flex;
-  gap: 5px;
-}
-
-.dash-card-meta-item strong {
-  color: var(--ink-mid);
-  font-weight: 400;
-  min-width: 48px;
-  flex-shrink: 0;
+  margin-bottom: 4px;
 }
 
 .dash-card-countdown {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 .dash-card-countdown .appt-countdown {
   font-size: 8px;
@@ -733,14 +694,6 @@ html, body {
   border-radius: 2px;
   font-style: normal;
   font-weight: 500;
-}
-.appt-countdown.soon.pulse-once {
-  animation: pulseOnce 1.2s ease 0.4s both;
-}
-@keyframes pulseOnce {
-  0%   { box-shadow: 0 0 0 0 rgba(196,122,90,0.5); }
-  50%  { box-shadow: 0 0 0 6px rgba(196,122,90,0); }
-  100% { box-shadow: 0 0 0 0 rgba(196,122,90,0); }
 }
 
 .dash-card-appt {
@@ -753,8 +706,6 @@ html, body {
   font-size: 10px;
   color: var(--gold);
   font-style: italic;
-  margin-top: auto;
-  padding-top: 8px;
 }
 
 .dash-card-alert.urgent { color: #8b3a22; }
@@ -762,52 +713,44 @@ html, body {
 .date-alert-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 8px;
   margin-bottom: 32px;
-  border: 1px solid var(--rule);
-  border-top: 2px solid var(--ink);
-  background: #fff;
 }
 
 .date-alert-row {
-  border-left: 3px solid transparent;
-  padding: 13px 18px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--gold);
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: background 0.12s;
-  border-bottom: 1px solid var(--rule);
+  transition: background 0.15s;
 }
-.date-alert-row:last-child { border-bottom: none; }
+
 .date-alert-row:hover { background: var(--bg2); }
-.date-alert-row.urgent { border-left-color: #c47a5a; background: rgba(196,122,90,0.03); }
-.date-alert-row:not(.urgent) { border-left-color: var(--gold-light); }
+.date-alert-row.urgent { border-left-color: #c47a5a; }
 
 .date-alert-left { }
 
 .date-alert-name {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
   color: var(--ink);
   margin-bottom: 2px;
-  letter-spacing: 0.1px;
 }
 
 .date-alert-detail {
-  font-size: 10px;
-  color: var(--ink-faint);
-  letter-spacing: 0.3px;
+  font-size: 11px;
+  color: var(--ink-light);
 }
 
 .date-alert-days {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
   color: var(--gold);
   white-space: nowrap;
-  letter-spacing: 0.5px;
 }
 
 .date-alert-days.urgent { color: #8b3a22; }
@@ -2139,73 +2082,11 @@ html, body {
   font-size: 8px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  background: rgba(100,180,100,0.15);
-  color: #6dbf6d;
+  background: rgba(100,160,100,0.15);
+  color: #7ab87a;
   padding: 2px 7px;
   margin-left: 6px;
   vertical-align: middle;
-}
-/* Green presence dot on sidebar avatar */
-.client-row-avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
-}
-.arrived-dot {
-  position: absolute;
-  bottom: 1px;
-  right: 1px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #4cbb6e;
-  border: 2px solid #1a1814;
-  animation: arrivedPulse 2s ease-in-out infinite;
-  z-index: 2;
-}
-@keyframes arrivedPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(76,187,110,0.5); }
-  50%       { box-shadow: 0 0 0 4px rgba(76,187,110,0); }
-}
-/* Follow-up star on sidebar row */
-.followup-star {
-  font-size: 9px;
-  color: var(--gold);
-  margin-left: auto;
-  padding-left: 6px;
-  flex-shrink: 0;
-  line-height: 1;
-}
-/* Flagged section on dashboard */
-.flagged-section-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 8px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin: 24px 0 10px;
-}
-.flagged-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: 1px solid rgba(200,168,74,0.2);
-  background: rgba(200,168,74,0.04);
-  margin-bottom: 6px;
-  cursor: pointer;
-}
-.flagged-card:hover { background: rgba(200,168,74,0.08); }
-.flagged-card-name {
-  font-family: 'Libre Baskerville', serif;
-  font-size: 12px;
-  color: var(--ink);
-}
-.flagged-card-meta {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 9px;
-  color: var(--ink-faint);
-  margin-top: 2px;
-  letter-spacing: 0.3px;
 }
 .flagged-dot {
   display: inline-block;
@@ -2221,17 +2102,17 @@ html, body {
 .ltv-ticker-bar {
   display: grid;
   gap: 0;
-  margin-bottom: 36px;
+  margin-bottom: 28px;
   border: 1px solid var(--rule);
   border-top: 2px solid var(--ink);
   font-family: 'DM Sans', sans-serif;
-  background: #fff;
+  background: var(--surface);
 }
 .ltv-ticker-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 20px 24px;
+  gap: 4px;
+  padding: 16px 20px;
   border-right: 1px solid var(--rule);
   box-sizing: border-box;
   min-width: 0;
@@ -2244,20 +2125,20 @@ html, body {
 }
 .ltv-ticker-lbl {
   font-size: 8px;
-  letter-spacing: 2.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 .ltv-ticker-val {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(18px, 2.2vw, 28px);
+  font-size: clamp(14px, 2vw, 22px);
   font-weight: 400;
   color: var(--ink);
-  letter-spacing: -0.3px;
+  letter-spacing: 0.3px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
-.ltv-ticker-val span { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--ink-faint); margin-left: 4px; font-weight: 400; letter-spacing: 1px; }
+.ltv-ticker-val span { font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--ink-faint); margin-left: 3px; font-weight: 400; }
 
 
 /* ── CA PANEL (tab) ── */
@@ -2833,24 +2714,10 @@ html, body {
     grid-template-columns: 1fr !important;
   }
 
-  /* LTV ticker — 2 columns on mobile, override inline style */
+  /* LTV ticker — 2 columns on mobile */
   .ltv-grid {
     grid-template-columns: 1fr 1fr !important;
     gap: 10px !important;
-  }
-  .ltv-ticker-bar {
-    grid-template-columns: 1fr 1fr !important;
-    overflow: hidden !important;
-  }
-  .ltv-ticker-item {
-    border-right: 1px solid var(--rule) !important;
-    border-bottom: 1px solid var(--rule) !important;
-  }
-  .ltv-ticker-item:nth-child(2n) {
-    border-right: none !important;
-  }
-  .dash-cards {
-    grid-template-columns: 1fr !important;
   }
 
   /* CA performance grid — single column */
@@ -3457,129 +3324,6 @@ body { background-color: #f5f1ea !important; color: #1a1814 !important; }
     to   { transform: rotate(360deg); }
   }
 }
-
-/* ── GIFT SELECTION SECTION ── */
-.gift-section { margin: 32px 0 0; }
-.gift-section-head { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
-.gift-section-title { font-family:'DM Sans',sans-serif; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); }
-.gift-occasion-tag { font-family:'DM Sans',sans-serif; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--rule); padding:2px 8px; }
-.gift-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-@media (max-width:768px) { .gift-grid { grid-template-columns:repeat(2,1fr); gap:8px; } }
-.gift-card { border:1px solid var(--rule); background:var(--surface); overflow:hidden; position:relative; transition:border-color 0.15s; }
-.gift-card:hover { border-color:var(--rule-dark); }
-.gift-card.actioned { opacity:0.5; pointer-events:none; }
-.gift-card-visual {
-  width: 100%;
-  aspect-ratio: 1/1;
-  position: relative;
-  background: #f5f2ed;
-  overflow: hidden;
-  border-bottom: 1px solid var(--rule);
-}
-.gift-card-visual img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.gift-card-visual-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 10px;
-  background: linear-gradient(to top, rgba(245,242,237,0.95) 60%, transparent);
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-.gift-card-visual-price {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ink);
-}
-.gift-card-visual-stock {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 8px;
-  letter-spacing: 0.5px;
-  color: var(--ink-faint);
-}
-.gift-card-visual-stock.low { color: #c47a5a; }
-.gift-card-visual-category { display: none; }
-.gift-card-visual-name { display: none; }
-.gift-card-visual-rule { display: none; }
-.gift-card-body { padding:10px 12px 12px; }
-.gift-card-category { font-family:'DM Sans',sans-serif; font-size:7px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-faint); margin-bottom:4px; }
-.gift-card-name { font-family:'Libre Baskerville',serif; font-size:11px; color:var(--ink); line-height:1.4; margin-bottom:4px; }
-.gift-card-price { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--ink-mid); margin-bottom:4px; }
-.gift-card-stock { font-family:'DM Sans',sans-serif; font-size:9px; color:var(--ink-faint); margin-bottom:8px; }
-.gift-card-stock.low { color:#c47a5a; }
-.gift-card-reason { font-family:'DM Sans',sans-serif; font-size:9px; color:var(--ink-faint); line-height:1.5; border-top:1px solid var(--rule); padding-top:8px; margin-bottom:10px; font-style:italic; }
-.stylist-note { font-family:'DM Sans',sans-serif; font-size:10px; font-style:italic; color:var(--ink-faint); line-height:1.5; border-top:1px solid var(--rule); padding-top:8px; margin-bottom:10px; }
-.recs-context-row { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
-.recs-select { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--ink); background:var(--surface); border:1px solid var(--rule); padding:7px 28px 7px 12px; outline:none; cursor:pointer; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23181814' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; transition:border-color 0.15s; }
-.recs-select:focus { border-color:var(--rule-dark); }
-.gift-card-actions { display:flex; gap:6px; }
-.gift-action-btn { flex:1; font-family:'DM Sans',sans-serif; font-size:8px; letter-spacing:1px; text-transform:uppercase; padding:6px 4px; border:1px solid var(--rule); background:none; color:var(--ink-mid); cursor:pointer; transition:all 0.15s; }
-.gift-action-btn:hover { border-color:var(--ink-mid); color:var(--ink); }
-.gift-action-btn.ship { border-color:rgba(76,187,110,0.4); color:#4cbb6e; }
-.gift-action-btn.ship:hover { background:rgba(76,187,110,0.08); }
-.gift-actioned-label { font-family:'DM Sans',sans-serif; font-size:9px; letter-spacing:1px; text-transform:uppercase; text-align:center; padding:8px; color:var(--ink-faint); border-top:1px solid var(--rule); margin-top:4px; }
-.gift-actioned-label.shipped { color:#4cbb6e; }
-.gift-actioned-label.reserved { color:var(--gold); }
-
-/* ── SHOP DASHBOARD ─────────────────────────────────────────────────────── */
-.shop-topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
-.shop-back-btn { font-family:'DM Sans',sans-serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-faint); background:none; border:1px solid var(--rule); padding:7px 14px; cursor:pointer; transition:all 0.15s; }
-.shop-back-btn:hover { border-color:var(--ink-mid); color:var(--ink); }
-.shop-search { font-family:'DM Sans',sans-serif; font-size:12px; color:var(--ink); background:var(--surface); border:1px solid var(--rule); padding:8px 14px; outline:none; width:260px; transition:border-color 0.15s; }
-.shop-search:focus { border-color:var(--rule-dark); }
-.shop-search::placeholder { color:var(--ink-faint); }
-.shop-meta { font-family:'DM Sans',sans-serif; font-size:9px; color:var(--ink-faint); letter-spacing:1.5px; text-transform:uppercase; }
-.shop-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-@media (max-width:1200px) { .shop-grid { grid-template-columns:repeat(3,1fr); } }
-@media (max-width:768px) { .shop-grid { grid-template-columns:repeat(2,1fr); gap:10px; } .shop-search { width:100%; } }
-.shop-card { background:var(--surface); border:1px solid var(--rule); overflow:hidden; transition:border-color 0.15s; position:relative; }
-.shop-card:hover { border-color:var(--rule-dark); }
-.shop-card.sold-out { opacity:0.45; }
-.shop-card-img { aspect-ratio:3/4; width:100%; background:#f5f2ed; position:relative; overflow:hidden; }
-.shop-card-img img { width:100%; height:100%; object-fit:cover; display:block; }
-.shop-sold-out-badge { position:absolute; top:10px; left:10px; background:var(--ink); color:var(--bg); font-family:'DM Sans',sans-serif; font-size:7px; letter-spacing:2px; text-transform:uppercase; padding:4px 8px; }
-.shop-card-body { padding:10px 12px 12px; }
-.shop-card-cat { font-family:'DM Sans',sans-serif; font-size:7px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-faint); margin-bottom:4px; }
-.shop-card-name { font-family:'Libre Baskerville',serif; font-size:11px; color:var(--ink); line-height:1.4; margin-bottom:4px; }
-.shop-card-price { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:500; color:var(--ink-mid); margin-bottom:3px; }
-.shop-card-stock { font-family:'DM Sans',sans-serif; font-size:9px; color:var(--ink-faint); margin-bottom:10px; }
-.shop-card-stock.low { color:#c47a5a; }
-.shop-save-btn { width:100%; font-family:'DM Sans',sans-serif; font-size:8px; letter-spacing:1.5px; text-transform:uppercase; padding:7px; border:1px solid var(--rule); background:none; color:var(--ink-faint); cursor:pointer; transition:all 0.15s; }
-.shop-save-btn:hover { border-color:var(--gold); color:var(--gold); }
-.shop-filter-row { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
-.shop-select { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--ink); background:var(--surface); border:1px solid var(--rule); padding:8px 28px 8px 12px; outline:none; cursor:pointer; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23181814' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; transition:border-color 0.15s; }
-.shop-select:focus { border-color:var(--rule-dark); }
-@media (max-width:768px) { .shop-filter-row { gap:8px; } .shop-select { font-size:10px; padding:7px 24px 7px 10px; } }
-.client-picker-overlay { position:fixed; inset:0; background:rgba(24,24,20,0.5); z-index:2000; display:flex; align-items:center; justify-content:center; }
-.client-picker-modal { background:var(--surface); border:1px solid var(--rule-dark); width:320px; max-height:480px; display:flex; flex-direction:column; overflow:hidden; }
-.client-picker-head { padding:16px 20px 12px; border-bottom:1px solid var(--rule); display:flex; align-items:baseline; justify-content:space-between; }
-.client-picker-title { font-family:'DM Sans',sans-serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--ink-light); }
-.client-picker-close { background:none; border:none; font-size:16px; color:var(--ink-faint); cursor:pointer; padding:0; line-height:1; }
-.client-picker-close:hover { color:var(--ink); }
-.client-picker-list { overflow-y:auto; flex:1; }
-.client-picker-item { display:flex; align-items:center; gap:10px; padding:10px 20px; border-bottom:1px solid var(--rule); cursor:pointer; transition:background 0.1s; }
-.client-picker-item:last-child { border-bottom:none; }
-.client-picker-item:hover { background:var(--bg2); }
-.client-picker-name { font-family:'DM Sans',sans-serif; font-size:12px; color:var(--ink); flex:1; }
-.client-picker-tier { font-family:'DM Sans',sans-serif; font-size:7px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-faint); }
-/* ── LOOKBOOK (in client profile) ───────────────────────────────────────── */
-.lookbook-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:8px; }
-@media (max-width:768px) { .lookbook-grid { grid-template-columns:repeat(2,1fr); } }
-.lookbook-mini-card { background:var(--bg2); border:1px solid var(--rule); overflow:hidden; }
-.lookbook-mini-img { aspect-ratio:1/1; width:100%; background:#f5f2ed; overflow:hidden; }
-.lookbook-mini-img img { width:100%; height:100%; object-fit:cover; display:block; }
-.lookbook-mini-body { padding:7px 9px 8px; }
-.lookbook-mini-name { font-family:'Libre Baskerville',serif; font-size:9px; color:var(--ink); line-height:1.35; margin-bottom:2px; }
-.lookbook-mini-price { font-family:'DM Sans',sans-serif; font-size:9px; color:var(--ink-faint); }
-
 </style>
 <!-- Signature meta -->
 <meta name="author" content="Mert Turan">
@@ -3596,23 +3340,6 @@ function closeDemoEnd(){var m=document.getElementById('demoEndModal');if(m)m.sty
 </script>
 </head>
 <body>
-
-  <!-- ── LOGIN SCREEN ── -->
-  <div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-direction:column;">
-    <div style="text-align:center;margin-bottom:48px;">
-      <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:400;color:#e8e2d8;letter-spacing:2px;margin-bottom:4px;">BlackBook</div>
-      <div style="font-size:9px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.2);">Client Intelligence</div>
-    </div>
-
-    <div style="width:320px;">
-      <div style="font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;">Select Advisor</div>
-      <div id="caList" style="display:flex;flex-direction:column;gap:2px;margin-bottom:32px;"></div>
-      <button onclick="loginCA()" id="loginBtn" style="width:100%;background:none;border:1px solid rgba(255,255,255,0.15);color:#e8e2d8;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;padding:14px;cursor:pointer;transition:border-color 0.15s;opacity:0.4;pointer-events:none;" onmouseenter="this.style.borderColor='rgba(255,255,255,0.4)'" onmouseleave="this.style.borderColor='rgba(255,255,255,0.15)'">Enter</button>
-    </div>
-
-    <div style="position:absolute;bottom:28px;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.12);text-transform:uppercase;">Built by Mert Turan</div>
-  </div>
-
   <div class="app">
     <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
     <div id="mobileBackBtn" class="hidden">
@@ -3640,10 +3367,6 @@ function closeDemoEnd(){var m=document.getElementById('demoEndModal');if(m)m.sty
         <div class="sidebar-nav-item active" id="dashNavBtn" onclick="goHome()">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0"><rect x="0.5" y="0.5" width="5" height="5" stroke="currentColor"/><rect x="7.5" y="0.5" width="5" height="5" stroke="currentColor"/><rect x="0.5" y="7.5" width="5" height="5" stroke="currentColor"/><rect x="7.5" y="7.5" width="5" height="5" stroke="currentColor"/></svg>
           Overview
-        </div>
-        <div class="sidebar-nav-item" id="shopNavBtn" onclick="goShop()">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0"><rect x="0.5" y="1.5" width="12" height="2.5" rx="0.5" stroke="currentColor"/><rect x="0.5" y="5.5" width="12" height="2.5" rx="0.5" stroke="currentColor"/><rect x="0.5" y="9.5" width="12" height="2.5" rx="0.5" stroke="currentColor"/></svg>
-          Catalog
         </div>
       </div>
       <div class="sidebar-search" onclick="openSearch()" style="cursor:pointer;" title="Search (/)">
@@ -3719,11 +3442,9 @@ let flaggedClients = new Set();
 window.selectedMood = 'Relaxed';
 let currentDashTab = 'overview';
 
-const clients = [{"id": "C-1001", "name": "Eleanor Vance", "tier": "VVIC", "ltv": "€145,500", "ca": "CA-101", "contact": "WhatsApp", "birthday": "12 April 1982", "partner": "Arthur Vance", "anniversary": "5 September 2010", "sizeTop": "FR 38", "sizeBottom": "FR 40", "shoe": "38.5", "jewelry": "Ring: 52", "colors": "Navy, Emerald, Gold", "avoid": "Fur, Heavy Wool, Stilettos", "beverage": "Champagne", "pet": "Biscuit — Cavalier King Charles", "lastDate": "5 March 2026", "lastType": "Boutique Visit", "lastNote": "Summering in Lake Como. Husband looking for anniversary gifts.", "followUp": "1 April 2026", "lastPurchase": "Med Alligator Tote", "sku": "BAG-L-CROC-09", "purchaseDate": "20 November 2025", "location": "Milan Flagship", "alterations": "No", "aftercare": "20 November 2026", "urgency": "Needed by July", "caAction": "Holding in back of house", "appointment": "25 March 2026"}, {"id": "C-1002", "name": "Matteo Ricci", "tier": "Platinum", "ltv": "€82,300", "ca": "CA-102", "contact": "SMS", "birthday": "22 September 1975", "partner": "Sofia Ricci", "anniversary": "18 June 2005", "sizeTop": "IT 48", "sizeBottom": "IT 48", "shoe": "43", "jewelry": "Wrist: 19cm", "colors": "Charcoal, Burgundy", "avoid": "Logos, Synthetics", "beverage": "Espresso", "pet": "None", "lastDate": "14 February 2026", "lastType": "WhatsApp", "lastNote": "Mentioned charity gala coming up in May.", "followUp": "10 April 2026", "lastPurchase": "Navy Pinstripe Suit", "sku": "SUI-M-PIN-02", "purchaseDate": "10 January 2026", "location": "Rome Boutique", "alterations": "Yes", "aftercare": "10 July 2026", "urgency": "Needed for May Gala", "caAction": "Fabric sourcing from UK mill", "appointment": "10 April 2026"}, {"id": "C-1003", "name": "Sofia Lorenzo", "tier": "Gold", "ltv": "€45,000", "ca": "CA-103", "contact": "Phone", "birthday": "3 November 1990", "partner": "Marco Lorenzo", "anniversary": "12 October 2019", "sizeTop": "IT 40", "sizeBottom": "IT 42", "shoe": "39", "jewelry": "Ring: 54", "colors": "Black, Silver", "avoid": "Florals, Pastels", "beverage": "Sparkling Water", "pet": "Luna — French Bulldog", "lastDate": "28 February 2026", "lastType": "Phone Call", "lastNote": "New baby Clara. Wants comfortable but edgy flats.", "followUp": "22 April 2026", "lastPurchase": "Asymmetric Wool Blazer", "sku": "JKT-W-ASYM-04", "purchaseDate": "5 December 2025", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "5 June 2026", "urgency": "Low urgency", "caAction": "Ready for client pickup", "appointment": "22 April 2026"}, {"id": "C-1004", "name": "James Harrington", "tier": "VIC", "ltv": "€110,000", "ca": "CA-101", "contact": "Email", "birthday": "14 February 1968", "partner": "Claire Harrington", "anniversary": "20 August 1995", "sizeTop": "IT 52", "sizeBottom": "IT 54", "shoe": "44", "jewelry": "Wrist: 20cm", "colors": "Earth tones, Olive", "avoid": "Tight fits, Bold prints", "beverage": "Gin and Tonic", "pet": "None", "lastDate": "20 January 2026", "lastType": "Boutique Visit", "lastNote": "Retiring next year. Buying house in Tuscany. Needs casual wardrobe.", "followUp": "5 April 2026", "lastPurchase": "Suede Loafers", "sku": "SHO-M-LOAF-01", "purchaseDate": "20 January 2026", "location": "London Mayfair", "alterations": "No", "aftercare": "20 July 2026", "urgency": "Needed by Fall 2026", "caAction": "HQ allocating in August", "appointment": "5 April 2026"}, {"id": "C-1005", "name": "Wei Chen", "tier": "VVIC", "ltv": "€320,000", "ca": "CA-104", "contact": "WeChat", "birthday": "8 July 1995", "partner": "None", "anniversary": "N/A", "sizeTop": "FR 34", "sizeBottom": "FR 34", "shoe": "36", "jewelry": "Ring: 48", "colors": "Pink, Neon, Gold", "avoid": "Minimalist, Muted", "beverage": "Iced Matcha", "pet": "None", "lastDate": "1 March 2026", "lastType": "WeChat", "lastNote": "Wants runway look 4 immediately. Traveling to Paris next week.", "followUp": "14 April 2026", "lastPurchase": "Crystal Mini Bag", "sku": "BAG-W-CRY-08", "purchaseDate": "10 February 2026", "location": "Shanghai", "alterations": "No", "aftercare": "10 August 2026", "urgency": "High urgency", "caAction": "Contacted Paris HQ for sample", "appointment": "14 April 2026"}, {"id": "C-1006", "name": "Chloe Dubois", "tier": "Silver", "ltv": "€12,400", "ca": "CA-102", "contact": "Email", "birthday": "19 May 1988", "partner": "Thomas Dubois", "anniversary": "22 April 2017", "sizeTop": "FR 42", "sizeBottom": "FR 44", "shoe": "40", "jewelry": "Ring: 56", "colors": "Camel, Red, Black", "avoid": "Neons, Chunky sneakers", "beverage": "Black Coffee", "pet": "None", "lastDate": "15 February 2026", "lastType": "Email", "lastNote": "Bought first RTW piece. Wants to build capsule wardrobe.", "followUp": "28 April 2026", "lastPurchase": "Silk Trench Coat", "sku": "COA-W-TRN-03", "purchaseDate": "15 February 2026", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "15 August 2026", "urgency": "Low urgency", "caAction": "Available in store", "appointment": "28 April 2026"}, {"id": "C-1007", "name": "Amira Al-Fayed", "tier": "VVIC", "ltv": "€450,000", "ca": "CA-105", "contact": "WhatsApp", "birthday": "30 January 1985", "partner": "Tariq Al-Fayed", "anniversary": "30 December 2010", "sizeTop": "FR 36", "sizeBottom": "FR 38", "shoe": "37", "jewelry": "Neck: 40cm", "colors": "Jewel Tones, Gold", "avoid": "Deep necklines, Sheer", "beverage": "Mint Tea", "pet": "Layla — Saluki", "lastDate": "10 December 2025", "lastType": "Private Styling", "lastNote": "Tariq wants a major jewelry piece for the anniversary next year.", "followUp": "1 October 2026", "lastPurchase": "Custom Embellished Gown", "sku": "GWN-W-CUS-01", "purchaseDate": "10 December 2025", "location": "Dubai Mall", "alterations": "Yes", "aftercare": "10 June 2026", "urgency": "Needed by Dec 2026", "caAction": "Sketches sent to Geneva HQ", "appointment": "1 October 2026"}, {"id": "C-1008", "name": "Liam Gallagher", "tier": "Gold", "ltv": "€38,900", "ca": "CA-104", "contact": "SMS", "birthday": "10 October 1992", "partner": "None", "anniversary": "N/A", "sizeTop": "IT 50", "sizeBottom": "IT 50", "shoe": "42", "jewelry": "N/A", "colors": "Black, Orange", "avoid": "Formal tailoring, Ties", "beverage": "IPA Beer", "pet": "None", "lastDate": "20 February 2026", "lastType": "SMS", "lastNote": "Asked about upcoming artist collab. Highly restricted.", "followUp": "8 April 2026", "lastPurchase": "Chunky Sneakers", "sku": "SHO-M-SNK-05", "purchaseDate": "5 January 2026", "location": "New York Soho", "alterations": "No", "aftercare": "N/A", "urgency": "Critical urgency", "caAction": "Waitlist 3 — Pending drop", "appointment": "8 April 2026"}, {"id": "C-1009", "name": "Harper Quinn", "tier": "Platinum", "ltv": "€95,000", "ca": "CA-101", "contact": "Email", "birthday": "5 December 1979", "partner": "David Quinn", "anniversary": "9 September 2015", "sizeTop": "FR 38", "sizeBottom": "FR 38", "shoe": "38", "jewelry": "Wrist: 16cm", "colors": "Monochromes", "avoid": "Frills, Casual wear", "beverage": "Diet Coke", "pet": "None", "lastDate": "2 March 2026", "lastType": "Email", "lastNote": "Needs boardroom bag fitting 15-inch laptop. No small talk.", "followUp": "16 April 2026", "lastPurchase": "Wool Crepe Midi", "sku": "DRE-W-CRP-02", "purchaseDate": "10 November 2025", "location": "New York 5th Ave", "alterations": "Yes", "aftercare": "10 May 2026", "urgency": "High urgency", "caAction": "Holding 3 options for approval", "appointment": "16 April 2026"}, {"id": "C-1010", "name": "David Rothschild", "tier": "VIC", "ltv": "€175,000", "ca": "CA-103", "contact": "Phone", "birthday": "21 August 1960", "partner": "Elizabeth Rothschild", "anniversary": "12 June 1990", "sizeTop": "IT 54", "sizeBottom": "IT 56", "shoe": "45", "jewelry": "Ring: 64", "colors": "Navy, Brown", "avoid": "Trendy items, Denim", "beverage": "Scotch", "pet": "Winston — Bulldog", "lastDate": "15 December 2025", "lastType": "Boutique Visit", "lastNote": "Forgot his anniversary last year. Make sure he remembers in June.", "followUp": "15 May 2026", "lastPurchase": "Cashmere Cardigan", "sku": "KNI-M-CSH-07", "purchaseDate": "15 December 2025", "location": "London Mayfair", "alterations": "No", "aftercare": "15 June 2026", "urgency": "Low urgency", "caAction": "Out of stock — Checking Milan", "appointment": "15 May 2026"}, {"id": "C-1011", "name": "Priya Patel", "tier": "Gold", "ltv": "€55,000", "ca": "CA-102", "contact": "WhatsApp", "birthday": "21 March 1987", "partner": "Arjun Patel", "anniversary": "14 February 2018", "sizeTop": "FR 40", "sizeBottom": "FR 42", "shoe": "38", "jewelry": "Ring: 54", "colors": "Fuchsia, Saffron", "avoid": "Black, Beige", "beverage": "Chai", "pet": "None", "lastDate": "10 February 2026", "lastType": "Boutique Visit", "lastNote": "Birthday on 21 March — Arjun planning a surprise. Traveling to Maldives for Easter. Wants bold resort wear.", "followUp": "4 April 2026", "lastPurchase": "Silk Kaftan", "sku": "DRE-W-KAF-01", "purchaseDate": "10 February 2026", "location": "Miami Design Dist.", "alterations": "No", "aftercare": "N/A", "urgency": "Needed by April", "caAction": "Ready for fitting", "appointment": "4 April 2026"}, {"id": "C-1012", "name": "Noah Kim", "tier": "Silver", "ltv": "€18,500", "ca": "CA-104", "contact": "Instagram", "birthday": "9 September 1998", "partner": "Chloe Kim", "anniversary": "N/A", "sizeTop": "IT 46", "sizeBottom": "IT 46", "shoe": "41", "jewelry": "N/A", "colors": "White, Black", "avoid": "Logos, Patterns", "beverage": "Sparkling Water", "pet": "None", "lastDate": "25 January 2026", "lastType": "Social DM", "lastNote": "Detail-oriented architecture student. Asked about fabric weaves.", "followUp": "1 April 2026", "lastPurchase": "Poplin Shirt", "sku": "SHI-M-POP-04", "purchaseDate": "25 January 2026", "location": "Seoul Gangnam", "alterations": "No", "aftercare": "25 July 2026", "urgency": "Low urgency", "caAction": "Next season drop", "appointment": "1 April 2026"}, {"id": "C-1013", "name": "Isabella Costa", "tier": "VIC", "ltv": "€105,000", "ca": "CA-105", "contact": "WhatsApp", "birthday": "25 June 1983", "partner": "Lorenzo Costa", "anniversary": "25 March 2012", "sizeTop": "IT 42", "sizeBottom": "IT 44", "shoe": "39", "jewelry": "Ring: 56", "colors": "Coral, Turquoise", "avoid": "Turtlenecks, Dark", "beverage": "Bellini", "pet": "Figo — Maltese", "lastDate": "5 February 2026", "lastType": "WhatsApp", "lastNote": "Needs UV-protective pieces for summer boat trips.", "followUp": "20 April 2026", "lastPurchase": "Woven Tote", "sku": "BAG-W-WOV-02", "purchaseDate": "12 October 2025", "location": "Monaco", "alterations": "No", "aftercare": "12 October 2026", "urgency": "Medium urgency", "caAction": "Reserved from another boutique", "appointment": "20 April 2026"}, {"id": "C-1014", "name": "Thomas Shelby", "tier": "Platinum", "ltv": "€88,000", "ca": "CA-103", "contact": "Phone", "birthday": "11 November 1972", "partner": "Grace Shelby", "anniversary": "5 November 2002", "sizeTop": "IT 50", "sizeBottom": "IT 52", "shoe": "43", "jewelry": "Wrist: 19cm", "colors": "Tweed, Charcoal", "avoid": "Brights, Athleisure", "beverage": "Whiskey", "pet": "None", "lastDate": "20 November 2025", "lastType": "Fitting", "lastNote": "Complained about synthetic blends. Loves heavy vintage fabrics.", "followUp": "11 April 2026", "lastPurchase": "Tweed Suit", "sku": "SUI-M-TWD-01", "purchaseDate": "20 November 2025", "location": "London Mayfair", "alterations": "Yes", "aftercare": "20 May 2026", "urgency": "Low urgency", "caAction": "Sourcing via auction house", "appointment": "11 April 2026"}, {"id": "C-1015", "name": "Yuki Tanaka", "tier": "VVIC", "ltv": "€280,000", "ca": "CA-101", "contact": "Line App", "birthday": "2 April 1991", "partner": "Kenji Tanaka", "anniversary": "10 October 2020", "sizeTop": "FR 34", "sizeBottom": "FR 36", "shoe": "35.5", "jewelry": "Ring: 50", "colors": "Black, Red", "avoid": "Classic cuts, Florals", "beverage": "Green Tea", "pet": "None", "lastDate": "25 February 2026", "lastType": "Line App", "lastNote": "Flying in for fashion week in September. Needs VIP seating.", "followUp": "1 August 2026", "lastPurchase": "Deconstructed Cape", "sku": "COA-W-DEC-05", "purchaseDate": "15 January 2026", "location": "Tokyo Ginza", "alterations": "Yes", "aftercare": "15 July 2026", "urgency": "Needed by Sept FW", "caAction": "Reserved runway sample", "appointment": "1 August 2026"}, {"id": "C-1016", "name": "Oliver Sterling", "tier": "Gold", "ltv": "€42,000", "ca": "CA-102", "contact": "WhatsApp", "birthday": "18 July 1980", "partner": "Victoria Sterling", "anniversary": "20 September 2008", "sizeTop": "IT 48", "sizeBottom": "IT 50", "shoe": "42", "jewelry": "Wrist: 18cm", "colors": "Pastel Blue, Pink", "avoid": "Edgy items, Leather", "beverage": "Iced Tea", "pet": "None", "lastDate": "10 January 2026", "lastType": "Boutique Visit", "lastNote": "Son needs graduation suit in 2028. Spends weekends golfing.", "followUp": "15 April 2026", "lastPurchase": "Cable Knit Sweater", "sku": "KNI-M-CBL-02", "purchaseDate": "10 January 2026", "location": "New York 5th Ave", "alterations": "No", "aftercare": "10 July 2026", "urgency": "Low urgency", "caAction": "In transit to store", "appointment": "15 April 2026"}, {"id": "C-1017", "name": "Zara Ndiaye", "tier": "Platinum", "ltv": "€76,500", "ca": "CA-105", "contact": "Email", "birthday": "20 December 1989", "partner": "None", "anniversary": "N/A", "sizeTop": "FR 38", "sizeBottom": "FR 40", "shoe": "40", "jewelry": "Ring: 54", "colors": "Emerald, Gold, Onyx", "avoid": "Casual wear, Denim", "beverage": "Champagne", "pet": "None", "lastDate": "5 December 2025", "lastType": "Brand Event", "lastNote": "Art curator. Loved history behind the Deco collection.", "followUp": "1 May 2026", "lastPurchase": "Velvet Jacket", "sku": "JKT-W-VEL-01", "purchaseDate": "5 December 2025", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "5 June 2026", "urgency": "Low urgency", "caAction": "Production delayed", "appointment": "1 May 2026"}, {"id": "C-1018", "name": "Benjamin Hayes", "tier": "Silver", "ltv": "€22,000", "ca": "CA-104", "contact": "SMS", "birthday": "28 February 1994", "partner": "Emily Hayes", "anniversary": "20 October 2023", "sizeTop": "IT 48", "sizeBottom": "IT 48", "shoe": "42.5", "jewelry": "N/A", "colors": "Grey, Navy", "avoid": "Suits, Formal shoes", "beverage": "Cold Brew", "pet": "None", "lastDate": "28 February 2026", "lastType": "Boutique Visit", "lastNote": "Tech background. Wants stealth wealth basics. Dislikes shopping.", "followUp": "1 June 2026", "lastPurchase": "Merino Joggers", "sku": "PAN-M-MER-03", "purchaseDate": "28 February 2026", "location": "San Francisco", "alterations": "No", "aftercare": "28 August 2026", "urgency": "Medium urgency", "caAction": "Available in store", "appointment": "1 June 2026"}, {"id": "C-1019", "name": "Elena Rostova", "tier": "VIC", "ltv": "€190,000", "ca": "CA-101", "contact": "Phone", "birthday": "5 October 1978", "partner": "Dmitri Rostov", "anniversary": "15 May 1998", "sizeTop": "FR 40", "sizeBottom": "FR 42", "shoe": "39", "jewelry": "Neck: 42cm", "colors": "Leopard, Red, Gold", "avoid": "Minimalism, Flats", "beverage": "Martini", "pet": "None", "lastDate": "20 December 2025", "lastType": "Phone Call", "lastNote": "Glamorous client. Wants daughter Anastasia to get a matching bag.", "followUp": "15 October 2026", "lastPurchase": "Fur-Trimmed Coat", "sku": "COA-W-FUR-02", "purchaseDate": "20 December 2025", "location": "Geneva", "alterations": "Yes", "aftercare": "20 June 2026", "urgency": "Medium urgency", "caAction": "Sketching custom design", "appointment": "15 October 2026"}, {"id": "C-1020", "name": "Lucas Silva", "tier": "Gold", "ltv": "€51,000", "ca": "CA-103", "contact": "WhatsApp", "birthday": "14 August 1986", "partner": "Maria Silva", "anniversary": "12 December 2015", "sizeTop": "IT 50", "sizeBottom": "IT 52", "shoe": "44", "jewelry": "Wrist: 21cm", "colors": "Royal Blue, White", "avoid": "Restrictive tailoring", "beverage": "Protein Shake", "pet": "None", "lastDate": "30 January 2026", "lastType": "WhatsApp", "lastNote": "Pro athlete. Needs durable weather-proof travel gear.", "followUp": "7 April 2026", "lastPurchase": "Tech Rain Jacket", "sku": "JKT-M-TEC-01", "purchaseDate": "30 January 2026", "location": "Milan Flagship", "alterations": "Yes", "aftercare": "30 July 2026", "urgency": "High urgency", "caAction": "Shipping directly to hotel", "appointment": "7 April 2026"}];
+const clients = [{"id": "C-1001", "name": "Eleanor Vance", "tier": "VVIC", "ltv": "€145,500", "ca": "CA-101", "contact": "WhatsApp", "birthday": "12 April 1982", "partner": "Arthur Vance", "anniversary": "5 September 2010", "sizeTop": "FR 38", "sizeBottom": "FR 40", "shoe": "38.5", "jewelry": "Ring: 52", "colors": "Navy, Emerald, Gold", "avoid": "Fur, Heavy Wool, Stilettos", "beverage": "Champagne", "pet": "Biscuit — Cavalier King Charles", "lastDate": "5 March 2026", "lastType": "Boutique Visit", "lastNote": "Summering in Lake Como. Husband looking for anniversary gifts.", "followUp": "1 April 2026", "lastPurchase": "Med Alligator Tote", "sku": "BAG-L-CROC-09", "purchaseDate": "20 November 2025", "location": "Milan Flagship", "alterations": "No", "aftercare": "20 November 2026", "urgency": "Needed by July", "caAction": "Holding in back of house", "appointment": "1 April 2026"}, {"id": "C-1002", "name": "Matteo Ricci", "tier": "Platinum", "ltv": "€82,300", "ca": "CA-102", "contact": "SMS", "birthday": "22 September 1975", "partner": "Sofia Ricci", "anniversary": "18 June 2005", "sizeTop": "IT 48", "sizeBottom": "IT 48", "shoe": "43", "jewelry": "Wrist: 19cm", "colors": "Charcoal, Burgundy", "avoid": "Logos, Synthetics", "beverage": "Espresso", "pet": "None", "lastDate": "14 February 2026", "lastType": "WhatsApp", "lastNote": "Mentioned charity gala coming up in May.", "followUp": "10 April 2026", "lastPurchase": "Navy Pinstripe Suit", "sku": "SUI-M-PIN-02", "purchaseDate": "10 January 2026", "location": "Rome Boutique", "alterations": "Yes", "aftercare": "10 July 2026", "urgency": "Needed for May Gala", "caAction": "Fabric sourcing from UK mill", "appointment": "10 April 2026"}, {"id": "C-1003", "name": "Sofia Lorenzo", "tier": "Gold", "ltv": "€45,000", "ca": "CA-103", "contact": "Phone", "birthday": "3 November 1990", "partner": "Marco Lorenzo", "anniversary": "12 October 2019", "sizeTop": "IT 40", "sizeBottom": "IT 42", "shoe": "39", "jewelry": "Ring: 54", "colors": "Black, Silver", "avoid": "Florals, Pastels", "beverage": "Sparkling Water", "pet": "Luna — French Bulldog", "lastDate": "28 February 2026", "lastType": "Phone Call", "lastNote": "New baby Clara. Wants comfortable but edgy flats.", "followUp": "22 April 2026", "lastPurchase": "Asymmetric Wool Blazer", "sku": "JKT-W-ASYM-04", "purchaseDate": "5 December 2025", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "5 June 2026", "urgency": "Low urgency", "caAction": "Ready for client pickup", "appointment": "22 April 2026"}, {"id": "C-1004", "name": "James Harrington", "tier": "VIC", "ltv": "€110,000", "ca": "CA-101", "contact": "Email", "birthday": "14 February 1968", "partner": "Claire Harrington", "anniversary": "20 August 1995", "sizeTop": "IT 52", "sizeBottom": "IT 54", "shoe": "44", "jewelry": "Wrist: 20cm", "colors": "Earth tones, Olive", "avoid": "Tight fits, Bold prints", "beverage": "Gin and Tonic", "pet": "None", "lastDate": "20 January 2026", "lastType": "Boutique Visit", "lastNote": "Retiring next year. Buying house in Tuscany. Needs casual wardrobe.", "followUp": "5 April 2026", "lastPurchase": "Suede Loafers", "sku": "SHO-M-LOAF-01", "purchaseDate": "20 January 2026", "location": "London Mayfair", "alterations": "No", "aftercare": "20 July 2026", "urgency": "Needed by Fall 2026", "caAction": "HQ allocating in August", "appointment": "5 April 2026"}, {"id": "C-1005", "name": "Wei Chen", "tier": "VVIC", "ltv": "€320,000", "ca": "CA-104", "contact": "WeChat", "birthday": "8 July 1995", "partner": "None", "anniversary": "N/A", "sizeTop": "FR 34", "sizeBottom": "FR 34", "shoe": "36", "jewelry": "Ring: 48", "colors": "Pink, Neon, Gold", "avoid": "Minimalist, Muted", "beverage": "Iced Matcha", "pet": "None", "lastDate": "1 March 2026", "lastType": "WeChat", "lastNote": "Wants runway look 4 immediately. Traveling to Paris next week.", "followUp": "14 April 2026", "lastPurchase": "Crystal Mini Bag", "sku": "BAG-W-CRY-08", "purchaseDate": "10 February 2026", "location": "Shanghai", "alterations": "No", "aftercare": "10 August 2026", "urgency": "High urgency", "caAction": "Contacted Paris HQ for sample", "appointment": "14 April 2026"}, {"id": "C-1006", "name": "Chloe Dubois", "tier": "Silver", "ltv": "€12,400", "ca": "CA-102", "contact": "Email", "birthday": "19 May 1988", "partner": "Thomas Dubois", "anniversary": "22 April 2017", "sizeTop": "FR 42", "sizeBottom": "FR 44", "shoe": "40", "jewelry": "Ring: 56", "colors": "Camel, Red, Black", "avoid": "Neons, Chunky sneakers", "beverage": "Black Coffee", "pet": "None", "lastDate": "15 February 2026", "lastType": "Email", "lastNote": "Bought first RTW piece. Wants to build capsule wardrobe.", "followUp": "28 April 2026", "lastPurchase": "Silk Trench Coat", "sku": "COA-W-TRN-03", "purchaseDate": "15 February 2026", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "15 August 2026", "urgency": "Low urgency", "caAction": "Available in store", "appointment": "28 April 2026"}, {"id": "C-1007", "name": "Amira Al-Fayed", "tier": "VVIC", "ltv": "€450,000", "ca": "CA-105", "contact": "WhatsApp", "birthday": "30 January 1985", "partner": "Tariq Al-Fayed", "anniversary": "30 December 2010", "sizeTop": "FR 36", "sizeBottom": "FR 38", "shoe": "37", "jewelry": "Neck: 40cm", "colors": "Jewel Tones, Gold", "avoid": "Deep necklines, Sheer", "beverage": "Mint Tea", "pet": "Layla — Saluki", "lastDate": "10 December 2025", "lastType": "Private Styling", "lastNote": "Tariq wants a major jewelry piece for the anniversary next year.", "followUp": "1 October 2026", "lastPurchase": "Custom Embellished Gown", "sku": "GWN-W-CUS-01", "purchaseDate": "10 December 2025", "location": "Dubai Mall", "alterations": "Yes", "aftercare": "10 June 2026", "urgency": "Needed by Dec 2026", "caAction": "Sketches sent to Geneva HQ", "appointment": "1 October 2026"}, {"id": "C-1008", "name": "Liam Gallagher", "tier": "Gold", "ltv": "€38,900", "ca": "CA-104", "contact": "SMS", "birthday": "10 October 1992", "partner": "None", "anniversary": "N/A", "sizeTop": "IT 50", "sizeBottom": "IT 50", "shoe": "42", "jewelry": "N/A", "colors": "Black, Orange", "avoid": "Formal tailoring, Ties", "beverage": "IPA Beer", "pet": "None", "lastDate": "20 February 2026", "lastType": "SMS", "lastNote": "Asked about upcoming artist collab. Highly restricted.", "followUp": "8 April 2026", "lastPurchase": "Chunky Sneakers", "sku": "SHO-M-SNK-05", "purchaseDate": "5 January 2026", "location": "New York Soho", "alterations": "No", "aftercare": "N/A", "urgency": "Critical urgency", "caAction": "Waitlist 3 — Pending drop", "appointment": "8 April 2026"}, {"id": "C-1009", "name": "Harper Quinn", "tier": "Platinum", "ltv": "€95,000", "ca": "CA-101", "contact": "Email", "birthday": "5 December 1979", "partner": "David Quinn", "anniversary": "9 September 2015", "sizeTop": "FR 38", "sizeBottom": "FR 38", "shoe": "38", "jewelry": "Wrist: 16cm", "colors": "Monochromes", "avoid": "Frills, Casual wear", "beverage": "Diet Coke", "pet": "None", "lastDate": "2 March 2026", "lastType": "Email", "lastNote": "Needs boardroom bag fitting 15-inch laptop. No small talk.", "followUp": "16 April 2026", "lastPurchase": "Wool Crepe Midi", "sku": "DRE-W-CRP-02", "purchaseDate": "10 November 2025", "location": "New York 5th Ave", "alterations": "Yes", "aftercare": "10 May 2026", "urgency": "High urgency", "caAction": "Holding 3 options for approval", "appointment": "16 April 2026"}, {"id": "C-1010", "name": "David Rothschild", "tier": "VIC", "ltv": "€175,000", "ca": "CA-103", "contact": "Phone", "birthday": "21 August 1960", "partner": "Elizabeth Rothschild", "anniversary": "12 June 1990", "sizeTop": "IT 54", "sizeBottom": "IT 56", "shoe": "45", "jewelry": "Ring: 64", "colors": "Navy, Brown", "avoid": "Trendy items, Denim", "beverage": "Scotch", "pet": "Winston — Bulldog", "lastDate": "15 December 2025", "lastType": "Boutique Visit", "lastNote": "Forgot his anniversary last year. Make sure he remembers in June.", "followUp": "15 May 2026", "lastPurchase": "Cashmere Cardigan", "sku": "KNI-M-CSH-07", "purchaseDate": "15 December 2025", "location": "London Mayfair", "alterations": "No", "aftercare": "15 June 2026", "urgency": "Low urgency", "caAction": "Out of stock — Checking Milan", "appointment": "15 May 2026"}, {"id": "C-1011", "name": "Priya Patel", "tier": "Gold", "ltv": "€55,000", "ca": "CA-102", "contact": "WhatsApp", "birthday": "15 March 1987", "partner": "Arjun Patel", "anniversary": "14 February 2018", "sizeTop": "FR 40", "sizeBottom": "FR 42", "shoe": "38", "jewelry": "Ring: 54", "colors": "Fuchsia, Saffron", "avoid": "Black, Beige", "beverage": "Chai", "pet": "None", "lastDate": "10 February 2026", "lastType": "Boutique Visit", "lastNote": "Traveling to Maldives for Easter. Wants bold resort wear.", "followUp": "4 April 2026", "lastPurchase": "Silk Kaftan", "sku": "DRE-W-KAF-01", "purchaseDate": "10 February 2026", "location": "Miami Design Dist.", "alterations": "No", "aftercare": "N/A", "urgency": "Needed by April", "caAction": "Ready for fitting", "appointment": "4 April 2026"}, {"id": "C-1012", "name": "Noah Kim", "tier": "Silver", "ltv": "€18,500", "ca": "CA-104", "contact": "Instagram", "birthday": "9 September 1998", "partner": "Chloe Kim", "anniversary": "N/A", "sizeTop": "IT 46", "sizeBottom": "IT 46", "shoe": "41", "jewelry": "N/A", "colors": "White, Black", "avoid": "Logos, Patterns", "beverage": "Sparkling Water", "pet": "None", "lastDate": "25 January 2026", "lastType": "Social DM", "lastNote": "Detail-oriented architecture student. Asked about fabric weaves.", "followUp": "1 April 2026", "lastPurchase": "Poplin Shirt", "sku": "SHI-M-POP-04", "purchaseDate": "25 January 2026", "location": "Seoul Gangnam", "alterations": "No", "aftercare": "25 July 2026", "urgency": "Low urgency", "caAction": "Next season drop", "appointment": "1 April 2026"}, {"id": "C-1013", "name": "Isabella Costa", "tier": "VIC", "ltv": "€105,000", "ca": "CA-105", "contact": "WhatsApp", "birthday": "25 June 1983", "partner": "Lorenzo Costa", "anniversary": "10 May 2012", "sizeTop": "IT 42", "sizeBottom": "IT 44", "shoe": "39", "jewelry": "Ring: 56", "colors": "Coral, Turquoise", "avoid": "Turtlenecks, Dark", "beverage": "Bellini", "pet": "Figo — Maltese", "lastDate": "5 February 2026", "lastType": "WhatsApp", "lastNote": "Needs UV-protective pieces for summer boat trips.", "followUp": "20 April 2026", "lastPurchase": "Woven Tote", "sku": "BAG-W-WOV-02", "purchaseDate": "12 October 2025", "location": "Monaco", "alterations": "No", "aftercare": "12 October 2026", "urgency": "Medium urgency", "caAction": "Reserved from another boutique", "appointment": "20 April 2026"}, {"id": "C-1014", "name": "Thomas Shelby", "tier": "Platinum", "ltv": "€88,000", "ca": "CA-103", "contact": "Phone", "birthday": "11 November 1972", "partner": "Grace Shelby", "anniversary": "5 November 2002", "sizeTop": "IT 50", "sizeBottom": "IT 52", "shoe": "43", "jewelry": "Wrist: 19cm", "colors": "Tweed, Charcoal", "avoid": "Brights, Athleisure", "beverage": "Whiskey", "pet": "None", "lastDate": "20 November 2025", "lastType": "Fitting", "lastNote": "Complained about synthetic blends. Loves heavy vintage fabrics.", "followUp": "11 April 2026", "lastPurchase": "Tweed Suit", "sku": "SUI-M-TWD-01", "purchaseDate": "20 November 2025", "location": "London Mayfair", "alterations": "Yes", "aftercare": "20 May 2026", "urgency": "Low urgency", "caAction": "Sourcing via auction house", "appointment": "11 April 2026"}, {"id": "C-1015", "name": "Yuki Tanaka", "tier": "VVIC", "ltv": "€280,000", "ca": "CA-101", "contact": "Line App", "birthday": "2 April 1991", "partner": "Kenji Tanaka", "anniversary": "10 October 2020", "sizeTop": "FR 34", "sizeBottom": "FR 36", "shoe": "35.5", "jewelry": "Ring: 50", "colors": "Black, Red", "avoid": "Classic cuts, Florals", "beverage": "Green Tea", "pet": "None", "lastDate": "25 February 2026", "lastType": "Line App", "lastNote": "Flying in for fashion week in September. Needs VIP seating.", "followUp": "1 August 2026", "lastPurchase": "Deconstructed Cape", "sku": "COA-W-DEC-05", "purchaseDate": "15 January 2026", "location": "Tokyo Ginza", "alterations": "Yes", "aftercare": "15 July 2026", "urgency": "Needed by Sept FW", "caAction": "Reserved runway sample", "appointment": "1 August 2026"}, {"id": "C-1016", "name": "Oliver Sterling", "tier": "Gold", "ltv": "€42,000", "ca": "CA-102", "contact": "WhatsApp", "birthday": "18 July 1980", "partner": "Victoria Sterling", "anniversary": "20 September 2008", "sizeTop": "IT 48", "sizeBottom": "IT 50", "shoe": "42", "jewelry": "Wrist: 18cm", "colors": "Pastel Blue, Pink", "avoid": "Edgy items, Leather", "beverage": "Iced Tea", "pet": "None", "lastDate": "10 January 2026", "lastType": "Boutique Visit", "lastNote": "Son needs graduation suit in 2028. Spends weekends golfing.", "followUp": "15 April 2026", "lastPurchase": "Cable Knit Sweater", "sku": "KNI-M-CBL-02", "purchaseDate": "10 January 2026", "location": "New York 5th Ave", "alterations": "No", "aftercare": "10 July 2026", "urgency": "Low urgency", "caAction": "In transit to store", "appointment": "15 April 2026"}, {"id": "C-1017", "name": "Zara Ndiaye", "tier": "Platinum", "ltv": "€76,500", "ca": "CA-105", "contact": "Email", "birthday": "20 December 1989", "partner": "None", "anniversary": "N/A", "sizeTop": "FR 38", "sizeBottom": "FR 40", "shoe": "40", "jewelry": "Ring: 54", "colors": "Emerald, Gold, Onyx", "avoid": "Casual wear, Denim", "beverage": "Champagne", "pet": "None", "lastDate": "5 December 2025", "lastType": "Brand Event", "lastNote": "Art curator. Loved history behind the Deco collection.", "followUp": "1 May 2026", "lastPurchase": "Velvet Jacket", "sku": "JKT-W-VEL-01", "purchaseDate": "5 December 2025", "location": "Paris Flagship", "alterations": "Yes", "aftercare": "5 June 2026", "urgency": "Low urgency", "caAction": "Production delayed", "appointment": "1 May 2026"}, {"id": "C-1018", "name": "Benjamin Hayes", "tier": "Silver", "ltv": "€22,000", "ca": "CA-104", "contact": "SMS", "birthday": "28 February 1994", "partner": "Emily Hayes", "anniversary": "20 October 2023", "sizeTop": "IT 48", "sizeBottom": "IT 48", "shoe": "42.5", "jewelry": "N/A", "colors": "Grey, Navy", "avoid": "Suits, Formal shoes", "beverage": "Cold Brew", "pet": "None", "lastDate": "28 February 2026", "lastType": "Boutique Visit", "lastNote": "Tech background. Wants stealth wealth basics. Dislikes shopping.", "followUp": "1 June 2026", "lastPurchase": "Merino Joggers", "sku": "PAN-M-MER-03", "purchaseDate": "28 February 2026", "location": "San Francisco", "alterations": "No", "aftercare": "28 August 2026", "urgency": "Medium urgency", "caAction": "Available in store", "appointment": "1 June 2026"}, {"id": "C-1019", "name": "Elena Rostova", "tier": "VIC", "ltv": "€190,000", "ca": "CA-101", "contact": "Phone", "birthday": "5 October 1978", "partner": "Dmitri Rostov", "anniversary": "15 May 1998", "sizeTop": "FR 40", "sizeBottom": "FR 42", "shoe": "39", "jewelry": "Neck: 42cm", "colors": "Leopard, Red, Gold", "avoid": "Minimalism, Flats", "beverage": "Martini", "pet": "None", "lastDate": "20 December 2025", "lastType": "Phone Call", "lastNote": "Glamorous client. Wants daughter Anastasia to get a matching bag.", "followUp": "15 October 2026", "lastPurchase": "Fur-Trimmed Coat", "sku": "COA-W-FUR-02", "purchaseDate": "20 December 2025", "location": "Geneva", "alterations": "Yes", "aftercare": "20 June 2026", "urgency": "Medium urgency", "caAction": "Sketching custom design", "appointment": "15 October 2026"}, {"id": "C-1020", "name": "Lucas Silva", "tier": "Gold", "ltv": "€51,000", "ca": "CA-103", "contact": "WhatsApp", "birthday": "14 August 1986", "partner": "Maria Silva", "anniversary": "12 December 2015", "sizeTop": "IT 50", "sizeBottom": "IT 52", "shoe": "44", "jewelry": "Wrist: 21cm", "colors": "Royal Blue, White", "avoid": "Restrictive tailoring", "beverage": "Protein Shake", "pet": "None", "lastDate": "30 January 2026", "lastType": "WhatsApp", "lastNote": "Pro athlete. Needs durable weather-proof travel gear.", "followUp": "7 April 2026", "lastPurchase": "Tech Rain Jacket", "sku": "JKT-M-TEC-01", "purchaseDate": "30 January 2026", "location": "Milan Flagship", "alterations": "Yes", "aftercare": "30 July 2026", "urgency": "High urgency", "caAction": "Shipping directly to hotel", "appointment": "7 April 2026"}];
 
 const histories = {"C-1001": {"transactions": [{"date": "20 Nov 2025", "item": "Med Alligator Tote", "sku": "BAG-L-CROC-09", "amount": "€12,400", "location": "Milan Flagship"}, {"date": "14 Jun 2025", "item": "Silk Evening Gown", "sku": "GWN-W-SLK-03", "amount": "€8,200", "location": "Milan Flagship"}, {"date": "02 Mar 2025", "item": "Cashmere Wrap Coat", "sku": "COA-W-CSH-01", "amount": "€6,800", "location": "Paris Flagship"}, {"date": "18 Nov 2024", "item": "Gold Chain Belt", "sku": "ACC-W-BLT-02", "amount": "€1,950", "location": "Milan Flagship"}, {"date": "04 Sep 2024", "item": "Navy Silk Blouse", "sku": "TOP-W-SLK-07", "amount": "€2,100", "location": "Milan Flagship"}], "interactions": [{"date": "05 Mar 2026", "type": "Boutique Visit", "note": "Summering in Lake Como. Husband looking for anniversary gifts."}, {"date": "10 Jan 2026", "type": "WhatsApp", "note": "Asked about new alligator arrivals for spring."}, {"date": "20 Nov 2025", "type": "Boutique Visit", "note": "Purchased tote. Requested monogram service."}, {"date": "03 Oct 2025", "type": "Phone Call", "note": "Enquired about trunk show in Milan."}, {"date": "14 Jun 2025", "type": "Private Styling", "note": "Season opener. Purchased gown for Amalfi event."}]}, "C-1002": {"transactions": [{"date": "10 Jan 2026", "item": "Navy Pinstripe Suit", "sku": "SUI-M-PIN-02", "amount": "€4,800", "location": "Rome Boutique"}, {"date": "15 Sep 2025", "item": "Leather Oxford Shoes", "sku": "SHO-M-OXF-03", "amount": "€1,200", "location": "Rome Boutique"}, {"date": "20 Apr 2025", "item": "Midnight Tuxedo", "sku": "SUI-M-TUX-01", "amount": "€6,200", "location": "Rome Boutique"}, {"date": "08 Dec 2024", "item": "Cashmere Overcoat", "sku": "COA-M-CSH-02", "amount": "€5,400", "location": "Milan Flagship"}, {"date": "22 Jun 2024", "item": "White Linen Suit", "sku": "SUI-M-LIN-04", "amount": "€3,600", "location": "Rome Boutique"}], "interactions": [{"date": "14 Feb 2026", "type": "WhatsApp", "note": "Mentioned charity gala coming up in May."}, {"date": "10 Jan 2026", "type": "Boutique Visit", "note": "Suit purchase. Requested rush alterations."}, {"date": "02 Dec 2025", "type": "Phone Call", "note": "Checking on overcoat delivery timeline."}, {"date": "15 Sep 2025", "type": "Boutique Visit", "note": "Shoes fitted. Discussed autumn wardrobe needs."}, {"date": "20 Apr 2025", "type": "Private Appointment", "note": "Tuxedo commission for opera season."}]}, "C-1003": {"transactions": [{"date": "05 Dec 2025", "item": "Asymmetric Wool Blazer", "sku": "JKT-W-ASYM-04", "amount": "€3,200", "location": "Paris Flagship"}, {"date": "18 Aug 2025", "item": "Draped Jersey Dress", "sku": "DRE-W-JRS-02", "amount": "€2,400", "location": "Paris Flagship"}, {"date": "10 Apr 2025", "item": "Leather Ankle Boots", "sku": "SHO-W-ANK-06", "amount": "€1,800", "location": "Paris Flagship"}, {"date": "22 Nov 2024", "item": "Structured Wool Trousers", "sku": "PAN-W-WOL-03", "amount": "€1,400", "location": "Paris Flagship"}, {"date": "07 Jun 2024", "item": "Silver Chain Necklace", "sku": "JWL-W-NCK-01", "amount": "€2,800", "location": "Paris Flagship"}], "interactions": [{"date": "28 Feb 2026", "type": "Phone Call", "note": "New baby Clara. Wants comfortable but edgy flats."}, {"date": "05 Dec 2025", "type": "Boutique Visit", "note": "Blazer purchase. Wanted relaxed silhouettes during pregnancy."}, {"date": "10 Sep 2025", "type": "WhatsApp", "note": "Asked about new season arrivals."}, {"date": "18 Aug 2025", "type": "Boutique Visit", "note": "Purchased jersey dress. Happy with fit."}, {"date": "10 Apr 2025", "type": "Email", "note": "Boot fitting appointment confirmed."}]}, "C-1004": {"transactions": [{"date": "20 Jan 2026", "item": "Suede Loafers", "sku": "SHO-M-LOAF-01", "amount": "€1,600", "location": "London Mayfair"}, {"date": "05 Oct 2025", "item": "Olive Linen Blazer", "sku": "JKT-M-LIN-02", "amount": "€3,400", "location": "London Mayfair"}, {"date": "12 May 2025", "item": "Earth Tone Polo Set", "sku": "SET-M-POL-01", "amount": "€2,200", "location": "London Mayfair"}, {"date": "18 Dec 2024", "item": "Merino Crewneck", "sku": "KNI-M-MRN-04", "amount": "€1,100", "location": "London Mayfair"}, {"date": "30 Aug 2024", "item": "Tan Leather Belt", "sku": "ACC-M-BLT-01", "amount": "€650", "location": "London Mayfair"}], "interactions": [{"date": "20 Jan 2026", "type": "Boutique Visit", "note": "Retiring next year. Buying house in Tuscany. Needs casual wardrobe."}, {"date": "08 Nov 2025", "type": "Email", "note": "Requested autumn lookbook."}, {"date": "05 Oct 2025", "type": "Boutique Visit", "note": "Linen blazer. Discussed countryside dressing."}, {"date": "12 May 2025", "type": "Boutique Visit", "note": "Polo set for summer. Wife accompanied."}, {"date": "18 Dec 2024", "type": "Phone Call", "note": "Christmas gift request for himself."}]}, "C-1005": {"transactions": [{"date": "10 Feb 2026", "item": "Crystal Mini Bag", "sku": "BAG-W-CRY-08", "amount": "€8,900", "location": "Shanghai"}, {"date": "22 Nov 2025", "item": "Neon Sequin Mini Dress", "sku": "DRE-W-SEQ-03", "amount": "€5,600", "location": "Paris Flagship"}, {"date": "14 Jul 2025", "item": "Pink Logo Sneakers", "sku": "SHO-W-SNK-09", "amount": "€1,400", "location": "Shanghai"}, {"date": "03 Apr 2025", "item": "Gold Charm Bracelet", "sku": "JWL-W-BRC-04", "amount": "€6,200", "location": "Shanghai"}, {"date": "19 Jan 2025", "item": "Runway Look 12 Coat", "sku": "COA-W-RWY-12", "amount": "€14,000", "location": "Paris Flagship"}], "interactions": [{"date": "01 Mar 2026", "type": "WeChat", "note": "Wants runway look 4 immediately. Traveling to Paris."}, {"date": "10 Feb 2026", "type": "Boutique Visit", "note": "Crystal bag purchase. Requested Paris HQ sample."}, {"date": "22 Nov 2025", "type": "Private Styling", "note": "Paris visit. Purchased sequin dress for New Year event."}, {"date": "14 Jul 2025", "type": "WeChat", "note": "Requested new sneaker colourways."}, {"date": "03 Apr 2025", "type": "VIP Event", "note": "Attended brand jewellery launch in Shanghai."}]}, "C-1006": {"transactions": [{"date": "15 Feb 2026", "item": "Silk Trench Coat", "sku": "COA-W-TRN-03", "amount": "€4,200", "location": "Paris Flagship"}, {"date": "10 Oct 2025", "item": "Camel Wool Trousers", "sku": "PAN-W-WOL-02", "amount": "€1,600", "location": "Paris Flagship"}, {"date": "05 Jun 2025", "item": "Red Leather Gloves", "sku": "ACC-W-GLV-01", "amount": "€480", "location": "Paris Flagship"}, {"date": "20 Feb 2025", "item": "Black Crepe Blouse", "sku": "TOP-W-CRP-04", "amount": "€890", "location": "Paris Flagship"}, {"date": "12 Nov 2024", "item": "Camel Tote Bag", "sku": "BAG-W-TOT-05", "amount": "€2,800", "location": "Paris Flagship"}], "interactions": [{"date": "15 Feb 2026", "type": "Email", "note": "First RTW purchase. Wants to build capsule wardrobe."}, {"date": "10 Oct 2025", "type": "Boutique Visit", "note": "Second visit. More confident in her taste."}, {"date": "05 Jun 2025", "type": "Email", "note": "Enquired about summer accessories."}, {"date": "20 Feb 2025", "type": "Boutique Visit", "note": "First visit. Referred by colleague."}, {"date": "12 Nov 2024", "type": "Email", "note": "Online enquiry about bag availability."}]}, "C-1007": {"transactions": [{"date": "10 Dec 2025", "item": "Custom Embellished Gown", "sku": "GWN-W-CUS-01", "amount": "€42,000", "location": "Dubai Mall"}, {"date": "05 Jun 2025", "item": "Emerald Silk Set", "sku": "SET-W-SLK-02", "amount": "€9,800", "location": "Dubai Mall"}, {"date": "18 Feb 2025", "item": "Gold Cuff Bracelet", "sku": "JWL-W-CUF-03", "amount": "€18,500", "location": "Geneva"}, {"date": "14 Oct 2024", "item": "Jewel Tone Cape Coat", "sku": "COA-W-CAP-04", "amount": "€11,200", "location": "Dubai Mall"}, {"date": "20 Mar 2024", "item": "Ruby Embellished Clutch", "sku": "BAG-W-CLT-07", "amount": "€7,400", "location": "Paris Flagship"}], "interactions": [{"date": "10 Dec 2025", "type": "Private Styling", "note": "Tariq wants major jewelry piece for anniversary."}, {"date": "05 Jun 2025", "type": "Private Appointment", "note": "Ramadan styling session. Very pleased with emerald set."}, {"date": "18 Feb 2025", "type": "Boutique Visit", "note": "Geneva visit with Tariq. Purchased cuff together."}, {"date": "14 Oct 2024", "type": "VIP Event", "note": "Attended private collection preview in Dubai."}, {"date": "20 Mar 2024", "type": "Boutique Visit", "note": "Paris visit. First introduction to maison."}]}, "C-1008": {"transactions": [{"date": "05 Jan 2026", "item": "Chunky Sneakers", "sku": "SHO-M-SNK-05", "amount": "€980", "location": "New York Soho"}, {"date": "14 Sep 2025", "item": "Oversized Graphic Tee", "sku": "TOP-M-GRP-03", "amount": "€650", "location": "New York Soho"}, {"date": "02 May 2025", "item": "Black Technical Jacket", "sku": "JKT-M-TEC-02", "amount": "€2,400", "location": "New York Soho"}, {"date": "20 Dec 2024", "item": "Orange Nylon Backpack", "sku": "BAG-M-BCK-01", "amount": "€1,800", "location": "New York Soho"}, {"date": "08 Aug 2024", "item": "Black Cargo Trousers", "sku": "PAN-M-CRG-02", "amount": "€1,200", "location": "New York Soho"}], "interactions": [{"date": "20 Feb 2026", "type": "SMS", "note": "Asked about artist collab. Highly restricted info."}, {"date": "05 Jan 2026", "type": "Boutique Visit", "note": "Sneaker purchase. On waitlist for upcoming drop."}, {"date": "14 Sep 2025", "type": "SMS", "note": "Requested early access to new graphic tees."}, {"date": "02 May 2025", "type": "Boutique Visit", "note": "Technical jacket. Interested in streetwear collabs."}, {"date": "20 Dec 2024", "type": "Boutique Visit", "note": "Holiday shopping. Brought two friends."}]}, "C-1009": {"transactions": [{"date": "10 Nov 2025", "item": "Wool Crepe Midi Dress", "sku": "DRE-W-CRP-02", "amount": "€3,800", "location": "New York 5th Ave"}, {"date": "25 Jun 2025", "item": "Monochrome Blazer", "sku": "JKT-W-MON-01", "amount": "€4,200", "location": "New York 5th Ave"}, {"date": "14 Feb 2025", "item": "White Structured Tote", "sku": "BAG-W-STR-03", "amount": "€5,600", "location": "New York 5th Ave"}, {"date": "10 Sep 2024", "item": "Black Wide-Leg Trousers", "sku": "PAN-W-WID-02", "amount": "€2,100", "location": "New York 5th Ave"}, {"date": "28 Mar 2024", "item": "Grey Cashmere Turtleneck", "sku": "KNI-W-CSH-05", "amount": "€1,800", "location": "New York 5th Ave"}], "interactions": [{"date": "02 Mar 2026", "type": "Email", "note": "Needs boardroom bag for 15-inch laptop. No small talk."}, {"date": "10 Nov 2025", "type": "Boutique Visit", "note": "Midi dress. Efficient appointment, 25 minutes."}, {"date": "25 Jun 2025", "type": "Email", "note": "Requested blazer options ahead of visit."}, {"date": "14 Feb 2025", "type": "Boutique Visit", "note": "Tote purchase. Appreciated structured silhouette."}, {"date": "10 Sep 2024", "type": "Boutique Visit", "note": "Trousers. In and out in 20 minutes."}]}, "C-1010": {"transactions": [{"date": "15 Dec 2025", "item": "Cashmere Cardigan", "sku": "KNI-M-CSH-07", "amount": "€2,800", "location": "London Mayfair"}, {"date": "20 Aug 2025", "item": "Navy Double-Breasted Suit", "sku": "SUI-M-DBL-03", "amount": "€7,400", "location": "London Mayfair"}, {"date": "10 Apr 2025", "item": "Brown Leather Briefcase", "sku": "BAG-M-BRF-01", "amount": "€4,200", "location": "London Mayfair"}, {"date": "05 Dec 2024", "item": "Merino Wool Trousers x2", "sku": "PAN-M-MRN-02", "amount": "€3,200", "location": "London Mayfair"}, {"date": "18 Jun 2024", "item": "Silk Anniversary Scarf", "sku": "ACC-W-SCF-04", "amount": "€680", "location": "London Mayfair"}], "interactions": [{"date": "15 Dec 2025", "type": "Boutique Visit", "note": "Cardigan purchase. Reminded about June anniversary."}, {"date": "20 Aug 2025", "type": "Boutique Visit", "note": "Suit commission. Elizabeth prefers classic gifts."}, {"date": "10 Apr 2025", "type": "Phone Call", "note": "Briefcase enquiry for new board role."}, {"date": "05 Dec 2024", "type": "Boutique Visit", "note": "Trousers. Bought scarf as gift for Elizabeth."}, {"date": "18 Jun 2024", "type": "Phone Call", "note": "Last-minute anniversary gift. Needed same-day."}]}, "C-1011": {"transactions": [{"date": "10 Feb 2026", "item": "Silk Kaftan", "sku": "DRE-W-KAF-01", "amount": "€3,400", "location": "Miami Design Dist."}, {"date": "15 Sep 2025", "item": "Fuchsia Blazer", "sku": "JKT-W-FCH-02", "amount": "€4,100", "location": "Miami Design Dist."}, {"date": "20 Apr 2025", "item": "Saffron Silk Scarf", "sku": "ACC-W-SCF-08", "amount": "€920", "location": "Miami Design Dist."}, {"date": "12 Dec 2024", "item": "Embroidered Evening Bag", "sku": "BAG-W-EMB-03", "amount": "€5,800", "location": "Miami Design Dist."}, {"date": "08 Jun 2024", "item": "Printed Maxi Dress", "sku": "DRE-W-PRT-06", "amount": "€2,900", "location": "Miami Design Dist."}], "interactions": [{"date": "10 Feb 2026", "type": "Boutique Visit", "note": "Maldives trip for Easter. Wants bold resort wear."}, {"date": "15 Sep 2025", "type": "Boutique Visit", "note": "Blazer for Diwali event. Brought Arjun."}, {"date": "20 Apr 2025", "type": "WhatsApp", "note": "Requested scarf options for a birthday gift."}, {"date": "12 Dec 2024", "type": "VIP Event", "note": "Attended charity gala. Purchased bag on the night."}, {"date": "08 Jun 2024", "type": "Boutique Visit", "note": "Summer purchase. Asked about made-to-order options."}]}, "C-1012": {"transactions": [{"date": "25 Jan 2026", "item": "Poplin Shirt", "sku": "SHI-M-POP-04", "amount": "€780", "location": "Seoul Gangnam"}, {"date": "10 Oct 2025", "item": "White Slim Trousers", "sku": "PAN-M-SLM-01", "amount": "€1,200", "location": "Seoul Gangnam"}, {"date": "05 May 2025", "item": "Black Cotton Overshirt", "sku": "SHI-M-OVR-02", "amount": "€960", "location": "Seoul Gangnam"}, {"date": "20 Jan 2025", "item": "Minimalist White Sneakers", "sku": "SHO-M-SNK-01", "amount": "€820", "location": "Seoul Gangnam"}, {"date": "14 Aug 2024", "item": "Fine Knit Crewneck", "sku": "KNI-M-FNK-03", "amount": "€1,100", "location": "Seoul Gangnam"}], "interactions": [{"date": "25 Jan 2026", "type": "Social DM", "note": "Asked about fabric weaves. Architecture student perspective."}, {"date": "10 Oct 2025", "type": "Boutique Visit", "note": "Trousers. Long discussion on tailoring construction."}, {"date": "05 May 2025", "type": "Instagram DM", "note": "Spotted overshirt in editorial. Requested to purchase."}, {"date": "20 Jan 2025", "type": "Boutique Visit", "note": "First in-store visit. Very detail-oriented."}, {"date": "14 Aug 2024", "type": "Instagram DM", "note": "First contact. Asked about materials in knitwear."}]}, "C-1013": {"transactions": [{"date": "12 Oct 2025", "item": "Woven Tote", "sku": "BAG-W-WOV-02", "amount": "€4,600", "location": "Monaco"}, {"date": "22 Jun 2025", "item": "Coral Linen Shirt Dress", "sku": "DRE-W-LIN-04", "amount": "€2,800", "location": "Monaco"}, {"date": "14 Mar 2025", "item": "Turquoise Silk Trousers", "sku": "PAN-W-SLK-03", "amount": "€2,100", "location": "Monaco"}, {"date": "10 Nov 2024", "item": "Gold Hoop Earrings", "sku": "JWL-W-EAR-02", "amount": "€3,200", "location": "Monaco"}, {"date": "04 Jul 2024", "item": "White Broderie Anglaise Dress", "sku": "DRE-W-BRD-01", "amount": "€3,600", "location": "Monaco"}], "interactions": [{"date": "05 Feb 2026", "type": "WhatsApp", "note": "UV-protective pieces for summer boat trips."}, {"date": "12 Oct 2025", "type": "Boutique Visit", "note": "Tote purchase. Discussed summer 2026 collection."}, {"date": "22 Jun 2025", "type": "Boutique Visit", "note": "Shirt dress. Lorenzo joined for first time."}, {"date": "14 Mar 2025", "type": "WhatsApp", "note": "Requested silk trouser options for Monaco GP."}, {"date": "10 Nov 2024", "type": "Boutique Visit", "note": "Earrings as anniversary gift from Lorenzo."}]}, "C-1014": {"transactions": [{"date": "20 Nov 2025", "item": "Tweed Suit", "sku": "SUI-M-TWD-01", "amount": "€8,800", "location": "London Mayfair"}, {"date": "15 Jun 2025", "item": "Heavy Wool Overcoat", "sku": "COA-M-WOL-03", "amount": "€6,400", "location": "London Mayfair"}, {"date": "10 Feb 2025", "item": "Herringbone Waistcoat", "sku": "VST-M-HRB-01", "amount": "€2,200", "location": "London Mayfair"}, {"date": "22 Oct 2024", "item": "Charcoal Flannel Trousers", "sku": "PAN-M-FLN-02", "amount": "€1,800", "location": "London Mayfair"}, {"date": "18 Apr 2024", "item": "Vintage Wool Blazer", "sku": "JKT-M-VNT-04", "amount": "€5,600", "location": "London Mayfair"}], "interactions": [{"date": "20 Nov 2025", "type": "Fitting", "note": "Tweed suit commission. Complained about synthetic blends."}, {"date": "15 Jun 2025", "type": "Boutique Visit", "note": "Overcoat sourced from British mill per request."}, {"date": "10 Feb 2025", "type": "Phone Call", "note": "Waistcoat for Grace birthday dinner."}, {"date": "22 Oct 2024", "type": "Boutique Visit", "note": "Flannel trousers. Requested heavier weight."}, {"date": "18 Apr 2024", "type": "Private Appointment", "note": "First visit. Introduced by club member."}]}, "C-1015": {"transactions": [{"date": "15 Jan 2026", "item": "Deconstructed Cape", "sku": "COA-W-DEC-05", "amount": "€9,200", "location": "Tokyo Ginza"}, {"date": "10 Sep 2025", "item": "Red Avant-Garde Jumpsuit", "sku": "JMP-W-AVG-02", "amount": "€6,800", "location": "Paris Flagship"}, {"date": "20 Apr 2025", "item": "Black Sculptural Bag", "sku": "BAG-W-SCL-01", "amount": "€11,400", "location": "Tokyo Ginza"}, {"date": "05 Dec 2024", "item": "Asymmetric Leather Skirt", "sku": "SKT-W-LTH-03", "amount": "€4,200", "location": "Tokyo Ginza"}, {"date": "10 Jun 2024", "item": "Runway Embellished Heels", "sku": "SHO-W-EMB-08", "amount": "€3,600", "location": "Paris Flagship"}], "interactions": [{"date": "25 Feb 2026", "type": "Line App", "note": "Flying in for fashion week in September. Needs VIP seating."}, {"date": "15 Jan 2026", "type": "Boutique Visit", "note": "Cape purchase. Discussed FW26 show access."}, {"date": "10 Sep 2025", "type": "VIP Event", "note": "Front row at Paris show. Purchased jumpsuit backstage."}, {"date": "20 Apr 2025", "type": "Private Styling", "note": "Tokyo styling session. Kenji accompanied."}, {"date": "05 Dec 2024", "type": "Boutique Visit", "note": "Leather skirt. Requested runway samples."}]}, "C-1016": {"transactions": [{"date": "10 Jan 2026", "item": "Cable Knit Sweater", "sku": "KNI-M-CBL-02", "amount": "€1,400", "location": "New York 5th Ave"}, {"date": "20 Aug 2025", "item": "Pastel Blue Chinos", "sku": "PAN-M-CHN-01", "amount": "€980", "location": "New York 5th Ave"}, {"date": "15 Apr 2025", "item": "Pink Oxford Shirt", "sku": "SHI-M-OXF-06", "amount": "€720", "location": "New York 5th Ave"}, {"date": "05 Dec 2024", "item": "Weekend Holdall", "sku": "BAG-M-HLD-02", "amount": "€3,200", "location": "New York 5th Ave"}, {"date": "22 Jun 2024", "item": "Lightweight Summer Blazer", "sku": "JKT-M-SUM-03", "amount": "€2,800", "location": "New York 5th Ave"}], "interactions": [{"date": "10 Jan 2026", "type": "Boutique Visit", "note": "Sweater. Mentioned son graduation suit for 2028."}, {"date": "20 Aug 2025", "type": "WhatsApp", "note": "Requested chinos for golf weekend."}, {"date": "15 Apr 2025", "type": "Boutique Visit", "note": "Shirt for spring. Victoria accompanied."}, {"date": "05 Dec 2024", "type": "Boutique Visit", "note": "Holdall as gift from Victoria."}, {"date": "22 Jun 2024", "type": "Email", "note": "Summer blazer enquiry ahead of Hamptons trip."}]}, "C-1017": {"transactions": [{"date": "05 Dec 2025", "item": "Velvet Jacket", "sku": "JKT-W-VEL-01", "amount": "€5,800", "location": "Paris Flagship"}, {"date": "18 Jul 2025", "item": "Emerald Silk Blouse", "sku": "TOP-W-SLK-04", "amount": "€2,600", "location": "Paris Flagship"}, {"date": "10 Mar 2025", "item": "Onyx Leather Clutch", "sku": "BAG-W-CLT-04", "amount": "€4,100", "location": "Paris Flagship"}, {"date": "22 Oct 2024", "item": "Gold Geometric Earrings", "sku": "JWL-W-EAR-06", "amount": "€2,900", "location": "Paris Flagship"}, {"date": "14 Jun 2024", "item": "Art Deco Print Scarf", "sku": "ACC-W-SCF-11", "amount": "€1,200", "location": "Paris Flagship"}], "interactions": [{"date": "05 Dec 2025", "type": "Brand Event", "note": "Loved history behind Deco collection. Velvet jacket purchase."}, {"date": "18 Jul 2025", "type": "Boutique Visit", "note": "Blouse for gallery opening. Very knowledgeable about craft."}, {"date": "10 Mar 2025", "type": "Email", "note": "Requested pieces for auction house gala."}, {"date": "22 Oct 2024", "type": "VIP Event", "note": "Attended archive exhibition. Purchased earrings."}, {"date": "14 Jun 2024", "type": "Boutique Visit", "note": "First visit. Introduced herself as curator at Pompidou."}]}, "C-1018": {"transactions": [{"date": "28 Feb 2026", "item": "Merino Joggers", "sku": "PAN-M-MER-03", "amount": "€980", "location": "San Francisco"}, {"date": "15 Nov 2025", "item": "Grey Cashmere Hoodie", "sku": "KNI-M-HDD-01", "amount": "€1,600", "location": "San Francisco"}, {"date": "10 Jun 2025", "item": "Navy Technical Polo", "sku": "TOP-M-TEC-02", "amount": "€780", "location": "San Francisco"}, {"date": "20 Feb 2025", "item": "Stealth Leather Wallet", "sku": "ACC-M-WLT-01", "amount": "€620", "location": "San Francisco"}, {"date": "08 Oct 2024", "item": "Minimal White Tee x3", "sku": "TOP-M-WHT-01", "amount": "€960", "location": "San Francisco"}], "interactions": [{"date": "28 Feb 2026", "type": "Boutique Visit", "note": "Joggers purchase. In and out in 15 minutes."}, {"date": "15 Nov 2025", "type": "SMS", "note": "Requested cashmere hoodie. No store visit needed."}, {"date": "10 Jun 2025", "type": "Boutique Visit", "note": "Polo purchase. Emily chose it."}, {"date": "20 Feb 2025", "type": "SMS", "note": "Wallet for Emily birthday request."}, {"date": "08 Oct 2024", "type": "Boutique Visit", "note": "First visit. Referred by colleague at Series B firm."}]}, "C-1019": {"transactions": [{"date": "20 Dec 2025", "item": "Fur-Trimmed Coat", "sku": "COA-W-FUR-02", "amount": "€14,200", "location": "Geneva"}, {"date": "10 Aug 2025", "item": "Leopard Silk Evening Gown", "sku": "GWN-W-LEP-01", "amount": "€9,800", "location": "Geneva"}, {"date": "15 Apr 2025", "item": "Gold Statement Necklace", "sku": "JWL-W-NCK-05", "amount": "€12,400", "location": "Geneva"}, {"date": "05 Dec 2024", "item": "Red Embellished Heels", "sku": "SHO-W-EMB-03", "amount": "€3,200", "location": "Geneva"}, {"date": "20 Jun 2024", "item": "Custom Leather Gloves", "sku": "ACC-W-GLV-03", "amount": "€1,800", "location": "Geneva"}], "interactions": [{"date": "20 Dec 2025", "type": "Phone Call", "note": "Wants daughter Anastasia to get a matching bag."}, {"date": "10 Aug 2025", "type": "Private Styling", "note": "Gown for UN gala. Arrived with entourage."}, {"date": "15 Apr 2025", "type": "Boutique Visit", "note": "Necklace commission. Very specific brief."}, {"date": "05 Dec 2024", "type": "Boutique Visit", "note": "Heels for Dmitri annual dinner."}, {"date": "20 Jun 2024", "type": "Phone Call", "note": "Custom gloves order. Gift for a friend."}]}, "C-1020": {"transactions": [{"date": "30 Jan 2026", "item": "Tech Rain Jacket", "sku": "JKT-M-TEC-01", "amount": "€3,200", "location": "Milan Flagship"}, {"date": "14 Oct 2025", "item": "Performance Travel Suit", "sku": "SUI-M-PRF-02", "amount": "€4,800", "location": "Milan Flagship"}, {"date": "20 Jun 2025", "item": "Royal Blue Polo Shirt", "sku": "TOP-M-POL-04", "amount": "€880", "location": "Milan Flagship"}, {"date": "10 Mar 2025", "item": "Waterproof Holdall", "sku": "BAG-M-WPR-01", "amount": "€2,400", "location": "Milan Flagship"}, {"date": "05 Nov 2024", "item": "Compression Base Layer Set", "sku": "SET-M-CMP-01", "amount": "€1,200", "location": "Milan Flagship"}], "interactions": [{"date": "30 Jan 2026", "type": "WhatsApp", "note": "Needs weather-proof travel gear. Shipping to hotel."}, {"date": "14 Oct 2025", "type": "Boutique Visit", "note": "Travel suit. Requested non-restrictive fit."}, {"date": "20 Jun 2025", "type": "WhatsApp", "note": "Polo for post-match press appearance."}, {"date": "10 Mar 2025", "type": "Boutique Visit", "note": "Holdall for European tour. Maria accompanied."}, {"date": "05 Nov 2024", "type": "Boutique Visit", "note": "Base layers for winter training camp."}]}};
-
-clients.forEach(c => { if (!c.lookbook) c.lookbook = []; });
 
 let selected = null;
 let filtered = [...clients];
@@ -3768,12 +3489,11 @@ function getDateAlerts() {
 
 function getUpcomingAppointments() {
   const tierOrder = { 'VVIC': 0, 'VIC': 1, 'Platinum': 2, 'Gold': 3, 'Silver': 4 };
-  const today = new Date(); today.setHours(0,0,0,0);
-  const twoDaysAgo = new Date(today); twoDaysAgo.setDate(today.getDate() - 2);
+  const today = new Date();
   return clients
     .filter(c => {
       const d = parseDate(c.appointment);
-      return d && d >= twoDaysAgo;
+      return d && d >= today;
     })
     .sort((a, b) => {
       const tA = tierOrder[a.tier] ?? 5;
@@ -3865,7 +3585,7 @@ function renderDashboard() {
         </div>` : ''}
       </div>
 
-      <div class="dash-greeting">
+      <div class="dash-greeting" style="margin-bottom:20px;">
         <div class="dash-greeting-time">${dateStr}</div>
         <div class="dash-greeting-text" id="liveGreeting">${getGreeting()}. Here is your client overview.</div>
       </div>
@@ -3882,96 +3602,33 @@ function renderDashboard() {
             const urgClass = cl.urgency.toLowerCase().includes('critical') || cl.urgency.toLowerCase().includes('high') ? 'urgent' : '';
             const hasHandover = !!handoverNotes[cl.id];
             const countdown = apptCountdown(cl.appointment);
-            const apptDate = parseDate(cl.appointment);
-            const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
-            const isPast = apptDate && apptDate < todayMidnight;
-            const hasNote = postVisitNotes[cl.id] && postVisitNotes[cl.id].length > 0;
-            return `<div class="dash-card" data-id="${cl.id}" style="${isPast ? 'opacity:0.5;' : ''}">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+            return `<div class="dash-card" data-id="${cl.id}">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
                 <span class="tier-pill ${tierClass(cl.tier)}">${cl.tier}</span>
                 ${hasHandover ? '<span style="font-size:9px;color:#8b3a22;letter-spacing:0.5px;">⚠ Handover</span>' : ''}
                 ${arrivedClients.has(cl.id) ? '<span class="arrived-badge">In</span>' : ''}
-                ${isPast ? `<span style="font-size:9px;color:var(--ink-faint);letter-spacing:0.5px;">${hasNote ? '✓ Logged' : 'Visit passed'}</span>` : ''}
               </div>
               <div class="dash-card-name">${cl.name}</div>
-              <div class="dash-card-ltv">${cl.ltv}</div>
-              <div class="dash-card-divider"></div>
-              <div class="dash-card-meta-row">
-                <div class="dash-card-meta-item"><strong>Last</strong>${cl.lastPurchase}</div>
-                <div class="dash-card-meta-item"><strong>CA</strong>${cl.caAction}</div>
-              </div>
-              ${countdown ? `<div class="dash-card-countdown">${countdown.replace('class="appt-countdown soon"', 'class="appt-countdown soon" style="font-size:8px;letter-spacing:1px;text-transform:uppercase;background:rgba(196,122,90,0.12);color:#8b3a22;padding:3px 8px;border-radius:2px;font-weight:500;font-style:normal;"').replace('class="appt-countdown"', 'class="appt-countdown" style="font-size:8px;letter-spacing:1px;text-transform:uppercase;background:var(--bg2);color:var(--ink-mid);padding:3px 8px;border-radius:2px;font-weight:500;font-style:normal;border:1px solid var(--rule);"')}</div>` : ''}
+              ${countdown ? `<div class="dash-card-countdown">${countdown}</div>` : ''}
               <div class="dash-card-appt">${cl.appointment} · ${cl.location}</div>
-              ${isPast && !hasNote
-                ? `<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-top:6px;cursor:pointer;" onclick="selectClient('${cl.id}')">Log visit →</div>`
-                : `<div class="dash-card-alert ${urgClass}"><span style="color:var(--ink-faint);font-style:normal;margin-right:4px;font-size:9px;">Open action —</span>${cl.urgency}</div>`
-              }
+              <div class="dash-card-alert ${urgClass}">${cl.urgency}</div>
             </div>`;
           }).join('')}
         </div>
 
         ${alerts.length > 0 ? `
-        <div class="dash-section-label">Important Dates</div>
+        <div class="dash-section-label">Important Dates — Next 30 Days</div>
         <div class="date-alert-list">
           ${alerts.map(a => `
-            <div class="date-alert-row ${a.passed ? '' : a.days <= 7 ? 'urgent' : ''}" data-id="${a.client.id}" data-occasion="${a.label}" style="cursor:pointer;${a.passed ? 'opacity:0.6;' : ''}">
+            <div class="date-alert-row ${a.days <= 7 ? 'urgent' : ''}" data-id="${a.client.id}">
               <div class="date-alert-left">
-                <div class="date-alert-name">${a.client.name} ${a.passed ? '<span style="font-size:7px;letter-spacing:1px;color:#8b8b7a;text-transform:uppercase;">· Follow up</span>' : ''}</div>
+                <div class="date-alert-name">${a.client.name}</div>
                 <div class="date-alert-detail">${a.label} · ${a.date}</div>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-family:'DM Sans',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);opacity:0.7;">${a.passed ? 'Reach out →' : 'Gift →'}</span>
-                <div class="date-alert-days ${a.passed ? '' : a.days <= 7 ? 'urgent' : ''}" style="${a.passed ? 'color:#8b8b7a;' : ''}">${a.passed ? `${Math.abs(a.days)}d ago` : a.days === 0 ? 'Today' : a.days === 1 ? 'Tomorrow' : `In ${a.days} days`}</div>
-              </div>
+              <div class="date-alert-days ${a.days <= 7 ? 'urgent' : ''}">${a.days === 0 ? 'Today' : a.days === 1 ? 'Tomorrow' : `In ${a.days} days`}</div>
             </div>
           `).join('')}
         </div>` : ''}
-
-        ${flaggedClients.size > 0 ? `
-        <div class="flagged-section-label">★ &nbsp;Flagged for Follow-up</div>
-        ${[...flaggedClients].map(id => {
-          const cl = clients.find(x => x.id === id);
-          if (!cl) return '';
-          return `<div class="flagged-card" data-id="${cl.id}">
-            <div class="client-row-avatar" style="${avatarStyle(cl.tier)};width:30px;height:30px;font-size:10px;flex-shrink:0;">${initials(cl.name)}</div>
-            <div>
-              <div class="flagged-card-name">${cl.name}</div>
-              <div class="flagged-card-meta">${cl.tier} · ${cl.ltv} · ${cl.location}</div>
-            </div>
-          </div>`;
-        }).join('')}` : ''}
-
-        ${(() => {
-          const needsAttention = clients.filter(cl => {
-            const u = cl.urgency.toLowerCase();
-            return u.includes('critical') || u.includes('high');
-          }).sort((a,b) => {
-            const order = {'critical':0,'high':1};
-            const aU = a.urgency.toLowerCase().includes('critical') ? 0 : 1;
-            const bU = b.urgency.toLowerCase().includes('critical') ? 0 : 1;
-            return aU - bU;
-          }).slice(0,4);
-          if (!needsAttention.length) return '';
-          return `
-          <div class="dash-section-label" style="margin-top:8px;">Needs Attention</div>
-          <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--rule);border-top:2px solid #c47a5a;background:#fff;margin-bottom:32px;">
-            ${needsAttention.map(cl => `
-              <div data-id="${cl.id}" style="display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--rule);cursor:pointer;transition:background 0.12s;" onmouseenter="this.style.background='var(--bg2)'" onmouseleave="this.style.background=''">
-                <div style="display:flex;align-items:center;gap:12px;">
-                  <div style="width:6px;height:6px;border-radius:50%;background:${cl.urgency.toLowerCase().includes('critical') ? '#c47a5a' : 'var(--gold)'};flex-shrink:0;"></div>
-                  <div>
-                    <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--ink);letter-spacing:0.1px;">${cl.name}</div>
-                    <div style="font-size:10px;color:var(--ink-faint);margin-top:2px;">${cl.caAction}</div>
-                  </div>
-                </div>
-                <div style="text-align:right;flex-shrink:0;">
-                  <div style="font-size:10px;color:${cl.urgency.toLowerCase().includes('critical') ? '#c47a5a' : 'var(--gold)'};font-style:italic;">${cl.urgency}</div>
-                  <div style="font-size:9px;color:var(--ink-faint);margin-top:2px;">${cl.tier} · ${cl.ltv}</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>`;
-        })()}
       </div>
 
       <div id="dash-ca-panel" class="ca-panel"></div>
@@ -3982,14 +3639,9 @@ function renderDashboard() {
 
   // Event delegation for dashboard clicks
   document.getElementById('content').addEventListener('click', function(e) {
-    const alertRow = e.target.closest('.date-alert-row[data-id]');
-    if (alertRow) {
-      openGiftSection(alertRow.dataset.id, alertRow.dataset.occasion);
-      return;
-    }
     const card = e.target.closest('[data-id]');
     if (card) selectFromDash(card.dataset.id);
-  });
+  }, { once: true });
 
   // Start live clock immediately and keep it always running
   tickClock();
@@ -4018,9 +3670,8 @@ function noteUUID() { return Math.random().toString(36).slice(2, 9); }
 function logActivity(clientId, type, title, detail) {
   if (!activityLogs[clientId]) activityLogs[clientId] = [];
   const now = new Date();
-  const caName = activeCA ? activeCA.name : null;
   activityLogs[clientId].unshift({
-    type, title, detail, caName,
+    type, title, detail,
     time: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
     date: now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
   });
@@ -4038,7 +3689,7 @@ function renderActivityLog(clientId) {
       ${entries.map(e => `
         <div class="activity-log-entry">
           <div class="activity-log-dot ${e.type}"></div>
-          <div class="activity-log-body"><strong>${e.title}</strong>${e.detail ? ' · ' + e.detail : ''}${e.caName ? `<span style="color:var(--ink-faint);font-weight:300;"> — ${e.caName}</span>` : ''}</div>
+          <div class="activity-log-body"><strong>${e.title}</strong>${e.detail ? ' · ' + e.detail : ''}</div>
           <div class="activity-log-time">${e.date} ${e.time}</div>
         </div>
       `).join('')}
@@ -4153,187 +3804,14 @@ function renderPostVisitNote(id) {
   `).join('');
 
   const inputHtml = `
-    <div style="position:relative;">
-      <textarea class="post-visit-textarea" id="postVisitInput-${id}" placeholder="What happened in this visit? Items shown, client mood, key requests, next steps..." style="padding-right:42px;"></textarea>
-      <button id="voiceBtn-${id}" onclick="toggleVoiceNote('${id}')" title="Dictate note" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.15s;">
-        <svg id="voiceIcon-${id}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="9" y="2" width="6" height="12" rx="3"/>
-          <path d="M5 10a7 7 0 0 0 14 0"/>
-          <line x1="12" y1="19" x2="12" y2="22"/>
-          <line x1="9" y1="22" x2="15" y2="22"/>
-        </svg>
-      </button>
-    </div>
-    <div class="post-visit-actions" style="justify-content:space-between;align-items:center;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button class="post-visit-save-btn" onclick="savePostVisitNote('${id}')">${isEditing ? 'Update Note' : 'Save Note'}</button>
-        ${isEditing ? `<button onclick="cancelEditNote('${id}')" style="background:none;border:none;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;letter-spacing:1px;color:var(--ink-mid);text-transform:uppercase;">Cancel</button>` : `<span style="font-size:10px;color:var(--ink-faint);font-style:italic;">Saved locally for this session</span>`}
-      </div>
-      <button id="aiDebriefBtn-${id}" onclick="generateAIDebrief('${id}')" style="display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--gold-light);padding:5px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);border-radius:2px;transition:all 0.15s;" title="Let AI expand your raw notes into a structured log entry">
-        <span style="font-size:11px;">✦</span> AI Debrief
-      </button>
-    </div>
-    <div id="aiDebriefResult-${id}" style="display:none;margin-top:12px;padding:12px 14px;background:var(--gold-pale);border-left:2px solid var(--gold-light);border-radius:2px;">
-      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">AI Debrief — Review &amp; Accept</div>
-      <div id="aiDebriefText-${id}" style="font-size:12px;line-height:1.7;color:var(--ink);margin-bottom:10px;"></div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button onclick="acceptAIDebrief('${id}')" class="post-visit-save-btn" style="font-size:9px;">Accept &amp; Save</button>
-        <button onclick="document.getElementById('aiDebriefResult-${id}').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;letter-spacing:1px;color:var(--ink-mid);text-transform:uppercase;">Discard</button>
-      </div>
+    <textarea class="post-visit-textarea" id="postVisitInput-${id}" placeholder="What happened in this visit? Items shown, client mood, key requests, next steps..."></textarea>
+    <div class="post-visit-actions">
+      <button class="post-visit-save-btn" onclick="savePostVisitNote('${id}')">${isEditing ? 'Update Note' : 'Save Note'}</button>
+      ${isEditing ? `<button onclick="cancelEditNote('${id}')" style="background:none;border:none;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;letter-spacing:1px;color:var(--ink-mid);text-transform:uppercase;margin-left:10px;">Cancel</button>` : `<span style="font-size:10px;color:var(--ink-faint);font-style:italic;">Saved locally for this session</span>`}
     </div>
   `;
 
   container.innerHTML = savedHtml + inputHtml;
-}
-
-// ── VOICE NOTE ──
-const voiceRecognizers = {};
-async function toggleVoiceNote(id) {
-  const btn = document.getElementById('voiceBtn-' + id);
-  const icon = document.getElementById('voiceIcon-' + id);
-  const ta = document.getElementById('postVisitInput-' + id);
-
-  const hasSpeechAPI = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
-  const hasMediaRecorder = ('MediaRecorder' in window && navigator.mediaDevices);
-
-  // Mobile fallback: MediaRecorder when SpeechRecognition not available (most mobile browsers)
-  if (!hasSpeechAPI) {
-    if (!hasMediaRecorder) {
-      showToast('!', 'Not supported', 'Voice notes are not available on this device');
-      return;
-    }
-    // Stop if already recording
-    if (window._bbMediaRecorder && window._bbMediaRecorder.state === 'recording') {
-      window._bbMediaRecorder.stop();
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks = [];
-      window._bbMediaRecorder = recorder;
-      icon.setAttribute('stroke', 'var(--gold)');
-      btn.style.background = 'var(--gold-pale)';
-      showToast('●', 'Recording', 'Tap the mic again to stop');
-      recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        icon.setAttribute('stroke', 'var(--ink-faint)');
-        btn.style.background = '';
-        showToast('✓', 'Done', 'Recording complete — type your notes below');
-        if (ta) { ta.focus(); ta.placeholder = 'Type what you recorded…'; }
-      };
-      recorder.start();
-    } catch(e) {
-      showToast('!', 'Mic blocked', 'Allow microphone access in your browser settings');
-    }
-    return;
-  }
-  if (voiceRecognizers[id]) {
-    const rec = voiceRecognizers[id];
-    delete voiceRecognizers[id];
-    rec.stop();
-    if (icon) icon.setAttribute('stroke', 'var(--ink-faint)');
-    if (btn) btn.style.background = '';
-    return;
-  }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const rec = new SR();
-  rec.lang = 'en-GB';
-  rec.interimResults = true;
-  rec.continuous = true;
-  voiceRecognizers[id] = rec;
-  icon.setAttribute('stroke', 'var(--gold)');
-  btn.style.background = 'var(--gold-pale)';
-  rec.onresult = e => {
-    let final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-    }
-    if (final) ta.value = (ta.value ? ta.value.trimEnd() + ' ' : '') + final;
-  };
-  rec.onend = () => {
-    // If still in voiceRecognizers, user hasn't tapped stop — Chrome cut it, restart
-    if (voiceRecognizers[id]) {
-      try { rec.start(); return; } catch(e) {}
-    }
-    if (icon) icon.setAttribute('stroke', 'var(--ink-faint)');
-    if (btn) btn.style.background = '';
-  };
-  rec.onerror = e => {
-    console.warn('Voice error:', e.error);
-    delete voiceRecognizers[id];
-    if (icon) icon.setAttribute('stroke', 'var(--ink-faint)');
-    if (btn) btn.style.background = '';
-    if (e.error === 'not-allowed') showToast('!', 'Mic blocked', 'Allow microphone access in Chrome site settings');
-  };
-  rec.start();
-}
-
-// ── AI DEBRIEF ──
-const aiDebriefCache = {};
-async function generateAIDebrief(id) {
-  const ta = document.getElementById('postVisitInput-' + id);
-  const rawNotes = ta ? ta.value.trim() : '';
-  if (!rawNotes) { showToast('!', 'No notes', 'Type or dictate your visit notes first'); return; }
-  const cl = clients.find(c => c.id === id);
-  if (!cl) return;
-  const btn = document.getElementById('aiDebriefBtn-' + id);
-  const resultEl = document.getElementById('aiDebriefResult-' + id);
-  const textEl = document.getElementById('aiDebriefText-' + id);
-  if (btn) { btn.innerHTML = '<span style="font-size:11px;">✦</span> Generating…'; btn.disabled = true; }
-  resultEl.style.display = 'none';
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'debrief', client: cl, rawNotes, history: histories[id] || {} })
-    });
-    const data = await res.json();
-    if (!data.content) throw new Error('API error');
-    const text = data.content.map(b => b.text || '').join('');
-    let parsed;
-    try { parsed = JSON.parse(text.replace(/```json|```/g, '').trim()); } catch(e) { throw new Error('Parse error'); }
-    aiDebriefCache[id] = parsed;
-    textEl.innerHTML = `
-      <div style="margin-bottom:10px;">${parsed.logEntry || ''}</div>
-      ${parsed.newPreferences && parsed.newPreferences.length ? `<div style="font-size:10px;color:var(--ink-mid);margin-bottom:6px;"><span style="color:var(--ink-faint);letter-spacing:1px;text-transform:uppercase;font-size:9px;">New preferences</span><br>${parsed.newPreferences.join(' · ')}</div>` : ''}
-      ${parsed.followUpDate ? `<div style="font-size:10px;color:var(--ink-mid);margin-bottom:6px;"><span style="color:var(--ink-faint);letter-spacing:1px;text-transform:uppercase;font-size:9px;">Follow-up</span><br>${parsed.followUpDate}</div>` : ''}
-      ${parsed.followUpDraft ? `<div style="font-size:10px;color:var(--ink-mid);margin-bottom:2px;"><span style="color:var(--ink-faint);letter-spacing:1px;text-transform:uppercase;font-size:9px;">Draft message</span><br><span style="font-style:italic;">${parsed.followUpDraft}</span></div>` : ''}
-    `;
-    resultEl.style.display = 'block';
-    resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  } catch(err) {
-    showToast('!', 'Error', 'AI Debrief failed — check connection');
-  } finally {
-    if (btn) { btn.innerHTML = '<span style="font-size:11px;">✦</span> AI Debrief'; btn.disabled = false; }
-  }
-}
-
-function acceptAIDebrief(id) {
-  const parsed = aiDebriefCache[id];
-  if (!parsed) return;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  if (!postVisitNotes[id]) postVisitNotes[id] = [];
-  postVisitNotes[id].unshift({ id: noteUUID(), text: parsed.logEntry, date: dateStr, time: timeStr, aiGenerated: true });
-  if (parsed.newPreferences && parsed.newPreferences.length) {
-    logActivity(id, 'briefing', 'AI Debrief — preferences updated', parsed.newPreferences.join(' · '));
-  }
-  if (parsed.openTasks && parsed.openTasks.length) {
-    logActivity(id, 'note', 'AI Debrief — open tasks', parsed.openTasks.join(' · '));
-  }
-  if (parsed.followUpDate) {
-    logActivity(id, 'briefing', 'AI Debrief — follow-up ' + parsed.followUpDate, parsed.followUpDraft || '');
-  }
-  delete aiDebriefCache[id];
-  const resultEl = document.getElementById('aiDebriefResult-' + id);
-  if (resultEl) resultEl.style.display = 'none';
-  const ta = document.getElementById('postVisitInput-' + id);
-  if (ta) ta.value = '';
-  renderPostVisitNote(id);
-  showToast('✦', 'Debrief saved', 'Log updated · ' + (parsed.followUpDate ? 'Follow-up: ' + parsed.followUpDate : 'Session recorded'));
 }
 
 function saveHandoverNote(id) {
@@ -4390,15 +3868,9 @@ function renderList() {
   if (!filtered.length) { renderEmptyState(); return; }
   document.getElementById('clientList').innerHTML = filtered.map(c => `
     <div class="client-row ${selected?.id===c.id?'active':''}" data-id="${c.id}" onclick="select('${c.id}')" oncontextmenu="showCtxMenu(event,'${c.id}')">
-      <div class="client-row-avatar-wrap">
-        <div class="client-row-avatar" style="${avatarStyle(c.tier)}">${initials(c.name)}</div>
-        ${arrivedClients.has(c.id) ? '<div class="arrived-dot"></div>' : ''}
-      </div>
+      <div class="client-row-avatar" style="${avatarStyle(c.tier)}">${initials(c.name)}</div>
       <div class="client-row-info">
-        <div class="client-row-name-wrap">
-          <div class="client-row-name">${c.name}</div>
-          ${flaggedClients.has(c.id) ? '<span class="followup-star">★</span>' : ''}
-        </div>
+        <div class="client-row-name">${c.name}</div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
           <span class="tier-pill ${tierClass(c.tier)}">${c.tier}</span>
           <span style="font-size:10px;color:rgba(255,255,255,0.35);">${c.ltv}</span>
@@ -4469,288 +3941,6 @@ function rowRequired(key, val, cls='') {
   return `<div class="data-row"><span class="data-key">${key}</span><span class="data-val ${cls}">${display}</span></div>`;
 }
 
-
-// ── CATALOG — loaded live from Airtable ──────────────────────────────────
-let masterCatalog = [];
-const catalogById = {};
-
-async function fetchCatalogFromAirtable() {
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'catalog' })
-    });
-    const data = await res.json();
-    if (data.catalog && Array.isArray(data.catalog)) {
-      masterCatalog = data.catalog;
-      masterCatalog.forEach(item => { catalogById[item.id] = item; });
-      console.log(`Catalog loaded: ${masterCatalog.length} items from Airtable`);
-    }
-  } catch(err) {
-    console.error('Failed to load catalog from Airtable:', err);
-  }
-}
-
-// ── GIFT STATE ───────────────────────────────────────────────────────────────
-// Per-client AI-selected gift IDs + reasons, cached so we don't re-call on revisit
-const aiGiftCache = {}; // clientId → [{ id, reason }]
-
-const giftActions = {}; // giftId → 'shipped' | 'reserved'
-
-
-const giftCategoryImgs = {
-  'Bag': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBlYmUyIi8+CjxyZWN0IHg9IjEzMCIgeT0iMTcwIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjExMCIgcng9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2I4YTg4MiIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxwYXRoIGQ9Ik0xNjUgMTcwIFExNjUgMTQwIDIwMCAxNDAgUTIzNSAxNDAgMjM1IDE3MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYjhhODgyIiBzdHJva2Utd2lkdGg9IjIiLz4KPHJlY3QgeD0iMTg1IiB5PSIxNjIiIHdpZHRoPSIzMCIgaGVpZ2h0PSIxMiIgcng9IjIiIGZpbGw9IiNjOGE4NGEiIG9wYWNpdHk9IjAuNyIvPgo8bGluZSB4MT0iMTMwIiB5MT0iMTk4IiB4Mj0iMjcwIiB5Mj0iMTk4IiBzdHJva2U9IiNiOGE4ODIiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC41Ii8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIyNSIgcj0iNCIgZmlsbD0iI2M4YTg0YSIgb3BhY2l0eT0iMC41Ii8+Cjwvc3ZnPg==',
-  'Jewellery': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBlYmUyIi8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjE5NSIgcj0iNTUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M4YTg0YSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPGNpcmNsZSBjeD0iMjAwIiBjeT0iMTk1IiByPSIzOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYjhhODgyIiBzdHJva2Utd2lkdGg9IjEiIG9wYWNpdHk9IjAuNiIvPgo8cG9seWdvbiBwb2ludHM9IjIwMCwxNTUgMjEwLDE4NSAyNDIsMTg1IDIxOCwyMDQgMjI3LDIzNCAyMDAsMjE2IDE3MywyMzQgMTgyLDIwNCAxNTgsMTg1IDE5MCwxODUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M4YTg0YSIgc3Ryb2tlLXdpZHRoPSIxLjIiIG9wYWNpdHk9IjAuOCIvPgo8Y2lyY2xlIGN4PSIyMDAiIGN5PSIxOTUiIHI9IjgiIGZpbGw9IiNjOGE4NGEiIG9wYWNpdHk9IjAuNCIvPgo8L3N2Zz4=',
-  'RTW': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBlYmUyIi8+CjxwYXRoIGQ9Ik0xNTUgMTQ1IEwxNDUgMTc1IEwxMzAgMTc1IEwxMzAgMjkwIEwyNzAgMjkwIEwyNzAgMTc1IEwyNTUgMTc1IEwyNDUgMTQ1IEwyMjUgMTU1IFEyMTAgMTY1IDIwMCAxNjUgUTE5MCAxNjUgMTc1IDE1NSBaIiBmaWxsPSJub25lIiBzdHJva2U9IiNiOGE4ODIiIHN0cm9rZS13aWR0aD0iMS44Ii8+CjxsaW5lIHgxPSIyMDAiIHkxPSIxNjUiIHgyPSIyMDAiIHkyPSIyOTAiIHN0cm9rZT0iI2I4YTg4MiIgc3Ryb2tlLXdpZHRoPSIxIiBvcGFjaXR5PSIwLjQiLz4KPC9zdmc+',
-  'Accessory': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBlYmUyIi8+CjxyZWN0IHg9IjE0NSIgeT0iMTc1IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjcwIiByeD0iMyIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYjhhODgyIiBzdHJva2Utd2lkdGg9IjEuOCIvPgo8bGluZSB4MT0iMTQ1IiB5MT0iMjAwIiB4Mj0iMjU1IiB5Mj0iMjAwIiBzdHJva2U9IiNiOGE4ODIiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iMC41Ii8+CjxyZWN0IHg9IjE4NSIgeT0iMTg4IiB3aWR0aD0iMzAiIGhlaWdodD0iMTIiIHJ4PSIxIiBmaWxsPSJub25lIiBzdHJva2U9IiNjOGE4NGEiIHN0cm9rZS13aWR0aD0iMS4yIi8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjE5NCIgcj0iMyIgZmlsbD0iI2M4YTg0YSIgb3BhY2l0eT0iMC42Ii8+Cjwvc3ZnPg==',
-  'Footwear': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBlYmUyIi8+CjxwYXRoIGQ9Ik0xMjAgMjMwIFExMzAgMjAwIDE2MCAxOTUgTDIyMCAxOTMgUTI1MCAxOTIgMjcwIDIwNSBMMjc4IDIyMCBRMjYwIDIyOCAyNDAgMjI4IEwxNDAgMjMyIFExMjggMjM0IDEyMCAyMzAgWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYjhhODgyIiBzdHJva2Utd2lkdGg9IjEuOCIvPgo8cGF0aCBkPSJNMTYwIDE5NSBMMTU4IDE3NSBRMTYwIDE2MiAxNzAgMTYwIEwxODUgMTYwIFExOTIgMTYyIDE5MiAxNzAgTDE5MiAxOTMiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2I4YTg4MiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPC9zdmc+',
-};
-function getCategoryImg(category) {
-  return giftCategoryImgs[category] || giftCategoryImgs['Accessory'];
-}
-
-const categoryConfig = {
-  'Bag':        { icon:'⌗', bg:['#ede8df','#e5dfd4'] },
-  'Jewellery':  { icon:'◈', bg:['#ede8df','#e8e0d0'] },
-  'RTW':        { icon:'◻', bg:['#ede8df','#e6e1d8'] },
-  'Accessory':  { icon:'◇', bg:['#ede8df','#e9e3da'] },
-  'Footwear':   { icon:'◁', bg:['#ede8df','#e7e2d9'] },
-};
-
-// Parse CSS colour names / hex to use as swatches
-const swatchMap = {
-  'Navy':'#2c3e6b', 'Emerald':'#2d6b4a', 'Gold':'#c8a84a',
-  'Charcoal':'#3d3d3d', 'Burgundy':'#6b2737', 'Black':'#1a1a1a',
-  'Silver':'#a0a0a8', 'Ivory':'#f5f0e6', 'Tan':'#b8956a',
-  'Brown':'#7a5c3a', 'Sapphire':'#1e3a6e', 'Ruby':'#8b1a2a',
-  'Amethyst':'#6b4a8b', 'Earth':'#8b6e4a', 'Olive':'#6b7a3a',
-  'Cream':'#f0ead8', 'White':'#f5f5f5', 'Coral':'#c47a5a',
-  'Dark Brown':'#5c3d1e', 'Dark Tan':'#a07850',
-};
-
-function getSwatches(clientColors, productName) {
-  // Pull 2-3 relevant swatches from client colour preferences
-  const colors = (clientColors||'').split(',').map(s=>s.trim());
-  const swatches = colors.slice(0,3).map(col => {
-    // Find closest match in swatchMap
-    const key = Object.keys(swatchMap).find(k => col.toLowerCase().includes(k.toLowerCase()));
-    return key ? swatchMap[key] : null;
-  }).filter(Boolean);
-  return swatches.length ? swatches : ['#b8a882','#c8a84a'];
-}
-
-function renderGiftVisual(g, clientColors) {
-  const stock = (typeof stockLevels !== 'undefined' && stockLevels[g.id] !== undefined) ? stockLevels[g.id] : parseInt(g.stock);
-  const isLow = stock <= 2;
-  const imgSrc = (g.img && g.img !== 'PLACEHOLDER') ? g.img : getCategoryImg(g.category);
-  return `
-    <div class="gift-card-visual">
-      <img src="${imgSrc}" alt="${g.name}">
-      <div class="gift-card-visual-overlay">
-        <span class="gift-card-visual-price">${g.price}</span>
-        <span class="gift-card-visual-stock ${isLow ? 'low' : ''}">${isLow ? '⚠ ' : ''}${stock} in stock</span>
-      </div>
-    </div>`;
-}
-
-function renderGiftCard(g, reason, clientId, occasionLabel) {
-  const action = giftActions[g.id];
-  return `
-  <div class="gift-card ${action ? 'actioned' : ''}" id="gcard-${g.id}">
-    ${renderGiftVisual(g, (clients.find(x=>x.id===clientId)||{}).colors)}
-    <div class="gift-card-body">
-      <div style="font-family:'DM Sans',sans-serif;font-size:7px;letter-spacing:1px;color:var(--ink-faint);margin-bottom:8px;">${g.sku.split('-').slice(2).join('-')}</div>
-      ${reason ? `<div class="stylist-note">${reason}</div>` : ''}
-      ${action ? `
-        <div class="gift-actioned-label ${action}">${action === 'shipped' ? '✓ Gift shipped to address on file' : '◎ Reserved — awaiting dispatch date'}</div>
-      ` : `
-        <div class="gift-card-actions">
-          <button class="gift-action-btn ship" onclick="giftAction('${g.id}','shipped','${clientId}','${occasionLabel}')">Ship Now</button>
-          <button class="gift-action-btn" onclick="giftAction('${g.id}','reserved','${clientId}','${occasionLabel}')">Reserve</button>
-        </div>
-      `}
-    </div>
-  </div>`;
-}
-
-function renderGiftSectionShell(clientId, occasion) {
-  const occasionLabel = occasion || 'Important Date';
-  return `
-    <div class="gift-section" id="giftSection-${clientId}">
-      <div class="section-divider" style="margin-bottom:20px;">
-        <div class="section-divider-line"></div>
-        <div class="section-divider-label">Gift Intelligence</div>
-        <div class="section-divider-line"></div>
-      </div>
-      <div class="gift-section-head">
-        <span class="gift-section-title">Curated Gift Selections</span>
-        <span class="gift-occasion-tag">${occasionLabel}</span>
-      </div>
-      <div class="gift-grid" id="giftGrid-${clientId}">
-        <div style="grid-column:1/-1;text-align:center;padding:32px 0;">
-          <div class="loading-sweep" style="margin-bottom:12px;"></div>
-          <div style="font-family:'Libre Baskerville',serif;font-style:italic;color:var(--ink-faint);font-size:12px;">Selecting gifts for ${(clients.find(x=>x.id===clientId)||{name:clientId}).name.split(' ')[0]}…</div>
-        </div>
-      </div>
-    </div>`;
-}
-
-function renderGiftSection(clientId, occasion) {
-  const selections = aiGiftCache[clientId] || [];
-  if (selections.length) populateGiftGrid(clientId, selections, occasion || 'Just Because');
-}
-
-async function generateGiftIntelligence(clientId, occasion) {
-  if (!masterCatalog.length) {
-    showToast('!', 'Catalog loading', 'Please wait a moment and try again');
-    return;
-  }
-
-  if (aiGiftCache[clientId]) {
-    renderGiftSection(clientId, occasion);
-    return;
-  }
-
-  const c = clients.find(x => x.id === clientId);
-  if (!c) return;
-
-  const genderFilter = c.gender === 'W' ? ['W', 'U'] : ['M', 'U'];
-  const genderFiltered = masterCatalog.filter(item => genderFilter.includes(item.gender));
-  const aiCatalog = genderFiltered
-    .slice(0, 40)
-    .map(({ id, name, category }) => ({ id, name, category }));
-  console.log(
-    `[Gift Catalog] Full: ${masterCatalog.length} → ` +
-    `Gender-filtered: ${genderFiltered.length} → ` +
-    `AI payload: ${aiCatalog.length} items (id/name/category only)`
-  );
-
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'gifts', client: c, occasion: occasion || 'Important Date', catalog: aiCatalog })
-    });
-    const data = await res.json();
-    if (!data.content) throw new Error(data.error?.message || 'No response from API');
-    const text = data.content.map(b => b.text || '').join('');
-    let parsed;
-    try {
-      parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
-    } catch(e) {
-      throw new Error('Invalid gift response format');
-    }
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      aiGiftCache[clientId] = parsed;
-    }
-  } catch(err) {
-    console.error('Gift generation error:', err);
-    showToast('!', 'Gift generation failed', err.message || 'Please try again');
-  }
-
-  renderGiftSection(clientId, occasion);
-}
-
-function populateGiftGrid(clientId, selections, occasionLabel) {
-  const grid = document.getElementById('giftGrid-' + clientId);
-  if (!grid) return;
-  const usedImgs = new Set();
-  const allImgs = masterCatalog.map(i => i.img).filter(u => u && u !== 'PLACEHOLDER');
-  const html = selections.map(sel => {
-    const item = catalogById[sel.id];
-    if (!item) return '';
-    // Deduplicate: if this image already used in this profile, find an unused one
-    let displayItem = item;
-    if (usedImgs.has(item.img)) {
-      const altImg = allImgs.find(u => !usedImgs.has(u)) || item.img;
-      displayItem = Object.assign({}, item, { img: altImg });
-    }
-    usedImgs.add(displayItem.img);
-    return renderGiftCard(displayItem, sel.reason, clientId, occasionLabel);
-  }).filter(Boolean).join('');
-  grid.innerHTML = html || '<div style="grid-column:1/-1;padding:20px;color:var(--ink-faint);font-size:12px;">No matching items found.</div>';
-}
-
-function giftAction(giftId, action, clientId, occasion) {
-  giftActions[giftId] = action;
-
-  if (action === 'shipped') {
-    const item = catalogById[giftId];
-    if (item && item.airtableId) {
-      const newStock = Math.max(0, (item.stock || 0) - 1);
-      item.stock = newStock;
-      fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'stock', airtableId: item.airtableId, newStock })
-      });
-    }
-  }
-
-  const card = document.getElementById('gcard-' + giftId);
-  if (card) {
-    const g = catalogById[giftId];
-    if (g) {
-      card.classList.add('actioned');
-      const actionsEl = card.querySelector('.gift-card-actions');
-      if (actionsEl) {
-        const label = document.createElement('div');
-        label.className = 'gift-actioned-label ' + action;
-        label.textContent = action === 'shipped' ? '✓ Gift shipped to address on file' : '◎ Reserved — awaiting dispatch date';
-        actionsEl.replaceWith(label);
-      }
-    }
-  }
-  const cl = clients.find(x => x.id === clientId);
-  if (cl) {
-    const today = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-    if (histories[clientId]) {
-      histories[clientId].interactions.unshift({
-        date: today,
-        type: action === 'shipped' ? 'Gift Shipped' : 'Gift Reserved',
-        note: `${action === 'shipped' ? 'Gift dispatched' : 'Gift reserved'} for ${occasion}. SKU: ${giftId}.`
-      });
-    }
-    const toastMsg = action === 'shipped'
-      ? `Gift shipping to ${cl.name}'s address on file`
-      : `Gift reserved for ${cl.name} — confirm dispatch date`;
-    showToast(action === 'shipped' ? '✓' : '◎',
-      action === 'shipped' ? 'Gift Applied' : 'Gift Reserved',
-      toastMsg);
-  }
-}
-
-function openGiftSection(clientId, occasion) {
-  // Navigate to client profile first if not already there
-  if (!selected || selected.id !== clientId) {
-    select(clientId);
-    setTimeout(() => scrollToGifts(clientId, occasion), 400);
-  } else {
-    scrollToGifts(clientId, occasion);
-  }
-}
-
-function scrollToGifts(clientId, occasion) {
-  const giftEl = document.getElementById('giftSection-' + clientId);
-  if (!giftEl) return;
-  const ctxEl = document.getElementById('recsContext-' + clientId);
-  if (ctxEl && occasion && occasion !== 'Important Date') ctxEl.value = occasion;
-  setTimeout(() => giftEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-}
-
-
-function triggerStyleRecommendations(clientId) {
-  const ctxEl = document.getElementById('recsContext-' + clientId);
-  const context = ctxEl ? ctxEl.value : 'Just Because';
-  const btn = document.getElementById('recsBtn-' + clientId);
-  delete aiGiftCache[clientId];
-  if (btn) { btn.textContent = 'Generating\u2026'; btn.disabled = true; }
-  generateGiftIntelligence(clientId, context).then(() => {
-    if (btn) { btn.textContent = 'Refresh Picks'; btn.disabled = false; }
-  });
-}
-
 function renderProfile() {
   const c = selected;
   const urgClass = c.urgency.toLowerCase().includes('critical') ? 'alert' :
@@ -4770,7 +3960,7 @@ function renderProfile() {
           <line x1="12" y1="11" x2="12" y2="17"/>
           <polyline points="9 14 12 17 15 14"/>
         </svg>
-<span class="pdf-btn-label">Export PDF</span>
+<span class="pdf-btn-label">Save as PDF</span>
       </button>
     </div>
 
@@ -4909,8 +4099,6 @@ function renderProfile() {
 
     ${renderSparkline(c.id)}
 
-    ${renderLookbook(c.id)}
-
     <div class="section-divider" style="margin:28px 0 0;">
       <div class="section-divider-line"></div>
       <div class="section-divider-label">Communication</div>
@@ -4933,27 +4121,6 @@ function renderProfile() {
       <div id="activityLog-${c.id}"></div>
     </div>
 
-    <div class="section-divider" style="margin:28px 0 16px;">
-      <div class="section-divider-line"></div>
-      <div class="section-divider-label">Stylist Picks</div>
-      <div class="section-divider-line"></div>
-    </div>
-    <div class="gift-section" id="giftSection-${c.id}">
-      <div class="recs-context-row">
-        <select class="recs-select" id="recsContext-${c.id}">
-          <option value="Just Because">Just Because</option>
-          <option value="New Arrivals">New Arrivals</option>
-          <option value="Birthday">Birthday</option>
-          <option value="Anniversary">Anniversary</option>
-          <option value="Seasonal Update">Seasonal Update</option>
-        </select>
-        <button id="recsBtn-${c.id}" class="post-visit-save-btn" onclick="triggerStyleRecommendations('${c.id}')">Generate Recommendations</button>
-      </div>
-      <div class="gift-grid" id="giftGrid-${c.id}">
-        <div style="grid-column:1/-1;padding:20px 0;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--ink-faint);text-align:center;letter-spacing:0.3px;">Select an outreach context and generate recommendations.</div>
-      </div>
-    </div>
-
 <div id="briefingArea"></div>
   `;
 
@@ -4961,11 +4128,6 @@ function renderProfile() {
   renderPostVisitNote(c.id);
   renderHandoverNote(c.id);
   renderActivityLog(c.id);
-  if (aiGiftCache[c.id] && aiGiftCache[c.id].length) {
-    populateGiftGrid(c.id, aiGiftCache[c.id], '');
-    const recsBtn = document.getElementById('recsBtn-' + c.id);
-    if (recsBtn) recsBtn.textContent = 'Refresh Picks';
-  }
 }
 
 function renderHistory(clientId) {
@@ -5022,24 +4184,6 @@ function renderHistory(clientId) {
   `;
 }
 
-
-function getBriefingAppointmentContext(c) {
-  if (!c.appointment || c.appointment === '—') return 'No upcoming appointment scheduled.';
-  const months = {January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11};
-  const parts = c.appointment.split(' ');
-  if (parts.length < 3) return 'Appointment date unclear.';
-  const d = parseInt(parts[0]), m = months[parts[1]], y = parseInt(parts[2]);
-  if (isNaN(d)||isNaN(m)||isNaN(y)) return 'Appointment date unclear.';
-  const appt = new Date(y, m, d);
-  const now = new Date(); now.setHours(0,0,0,0);
-  const diff = Math.round((appt - now) / (1000*60*60*24));
-  if (diff < 0) return 'Appointment has passed.';
-  if (diff === 0) return `CONFIRMED APPOINTMENT TODAY at ${c.location}. Make the briefing directive and time-sensitive. Action items should be immediate.`;
-  if (diff === 1) return `Confirmed appointment TOMORROW at ${c.location}. Briefing should be preparation-focused and specific.`;
-  if (diff <= 7) return `Appointment in ${diff} days at ${c.location}. Briefing should begin flagging preparation steps.`;
-  return `Appointment on ${c.appointment} at ${c.location} — ${diff} days away. Standard briefing tone.`;
-}
-
 async function generateBriefing() {
   if (!selected) return;
   const c = selected;
@@ -5062,17 +4206,42 @@ async function generateBriefing() {
     <div style="text-align:center; font-family:'Libre Baskerville',serif; font-style:italic; color:var(--ink-faint); padding: 12px; font-size:13px;">Preparing client intelligence...</div>
   `;
 
+  const prompt = `You are a discreet, highly intelligent luxury client intelligence system used internally by Client Advisors at a major luxury fashion house. Your tone is warm, precise, and human — never robotic or clinical. Help Client Advisors deliver extraordinary, personalised service.
 
+Generate a pre-visit briefing. Three sections only. No filler.
+
+CLIENT:
+Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv}
+Appointment: ${c.appointment} at ${c.location}
+Birthday: ${c.birthday}${c.partner!=='None'?' | Partner: '+c.partner:''}${c.anniversary!=='N/A'?' | Anniversary: '+c.anniversary:''}
+${c.pet!=='None'?'Pet: '+c.pet:''}
+Sizes: Top ${c.sizeTop} / Bottom ${c.sizeBottom} / Shoe ${c.shoe}${c.jewelry&&c.jewelry!=='N/A'?' / Jewelry: '+c.jewelry:''}
+Preferred colours: ${c.colors} | Never show: ${c.avoid}
+Beverage: ${c.beverage}
+Last contact: ${c.lastDate} (${c.lastType}) — "${c.lastNote}"
+Last purchase: ${c.lastPurchase} (${c.sku}) on ${c.purchaseDate}
+Alterations: ${c.alterations} | Aftercare due: ${c.aftercare}
+Current CA action: ${c.caAction} | Urgency: ${c.urgency}
+
+Client mood/energy today (CA assessment): ${mood} — adjust your briefing tone and what you prioritise accordingly. If Relaxed: warm and exploratory. If Busy: concise, direct, pre-select fewer options. If Celebrating: lean into the moment. If Difficult: flag sensitivities, give CA tools to de-escalate.
+
+Respond ONLY with valid JSON, no markdown, no backticks:
+{
+  "opening": "2-3 sentences. Who this client is and what matters most to them right now. Reference specific personal context naturally — as if briefing a trusted colleague. If they have a pet, weave it in naturally as part of who they are.",
+  "conversation": "2-3 sentences. Exact topics for the Client Advisor to raise and how to frame them. Specific, not generic. Reference real details from their file. If they have a pet and are likely to bring it, note any preparation (treats by the fitting room, etc.).",
+  "action": "2-3 sentences. Precise commercial action to take in this appointment. What to show, confirm, or resolve. Reference the CA action and urgency.",
+  "alerts": ["Any critical alert — dates, sensitivities, restrictions. Only if genuinely important. Max 2."],
+  "tags": ["3-4 short descriptor tags for this client profile"]
+}`;
 
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        type: 'briefing',
-        client: c,
-        mood: mood,
-        appointmentContext: getBriefingAppointmentContext(c)
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
       })
     });
 
@@ -5223,10 +4392,8 @@ function selectFromDash(id) {
 }
 
 function setNavActive(isDash) {
-  const dash = document.getElementById('dashNavBtn');
-  const shop = document.getElementById('shopNavBtn');
-  if (dash) dash.classList.toggle('active', isDash);
-  if (shop) shop.classList.remove('active');
+  const btn = document.getElementById('dashNavBtn');
+  if (btn) btn.classList.toggle('active', isDash);
 }
 
 function toggleCheck(i) {
@@ -5337,68 +4504,6 @@ function updateMobileBriefingBar(show, generating) {
     }
   }
 }
-
-// ── CA LOGIN ──
-const caProfiles = [
-  { id: 'CA-101', name: 'Sophie Marchand',  location: 'Milan Flagship' },
-  { id: 'CA-102', name: 'James Reid',        location: 'Paris Flagship' },
-  { id: 'CA-103', name: 'Giulia Ferretti',   location: 'Rome Boutique' },
-  { id: 'CA-104', name: 'Kenji Park',        location: 'New York' },
-  { id: 'CA-105', name: 'Nadia Al-Hassan',   location: 'Dubai' },
-];
-
-let activeCA = null;
-let selectedCAId = null;
-
-function buildLoginScreen() {
-  const list = document.getElementById('caList');
-  if (!list) return;
-  list.innerHTML = caProfiles.map(ca => `
-    <div class="ca-login-row" data-ca="${ca.id}" onclick="selectCARow('${ca.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:background 0.12s;border-radius:1px;">
-      <div>
-        <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;color:#e8e2d8;">${ca.name}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px;letter-spacing:0.3px;">${ca.location}</div>
-      </div>
-      <div class="ca-check" id="check-${ca.id}" style="width:6px;height:6px;border-radius:50%;background:var(--gold);opacity:0;transition:opacity 0.15s;"></div>
-    </div>
-  `).join('');
-}
-
-function selectCARow(id) {
-  selectedCAId = id;
-  document.querySelectorAll('.ca-login-row').forEach(r => {
-    r.style.background = r.dataset.ca === id ? 'rgba(255,255,255,0.05)' : '';
-    r.style.borderColor = r.dataset.ca === id ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.06)';
-  });
-  document.querySelectorAll('.ca-check').forEach(c => c.style.opacity = '0');
-  const check = document.getElementById('check-' + id);
-  if (check) check.style.opacity = '1';
-  const btn = document.getElementById('loginBtn');
-  if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
-}
-
-function loginCA() {
-  if (!selectedCAId) return;
-  activeCA = caProfiles.find(c => c.id === selectedCAId);
-  const screen = document.getElementById('loginScreen');
-  if (screen) {
-    screen.style.transition = 'opacity 0.5s ease';
-    screen.style.opacity = '0';
-    setTimeout(() => { screen.style.display = 'none'; }, 500);
-  }
-  // Filter clients to this CA
-  filtered = clients.filter(c => c.ca === selectedCAId);
-  renderList();
-  renderDashboard();
-  // Update greeting to CA name
-  setTimeout(() => {
-    const g = document.getElementById('liveGreeting');
-    if (g && activeCA) g.textContent = getGreeting() + ', ' + activeCA.name.split(' ')[0] + '. Here is your client overview.';
-  }, 550);
-}
-
-buildLoginScreen();
-fetchCatalogFromAirtable();
 
 renderList();
 renderDashboard();
@@ -5619,27 +4724,6 @@ function obBack() {
   if (obStep > 1) { obStep--; obRender(); }
 }
 
-function sendIntakeForm(clientId) {
-  const cl = clients.find(x => x.id === clientId);
-  if (!cl) return;
-  const firstName = cl.name.split(' ')[0];
-  const msg =
-    "Buongiorno " + firstName + ",\n\n" +
-    "Thank you for visiting. To complete your client profile at the maison, " +
-    "we’d love to gather a few style details.\n\n" +
-    "Please fill in your profile here:\nhttps://forms.gle/blackbook-intake\n\n" +
-    "It takes under two minutes and allows us to personalise every visit for you.\n\n" +
-    "With warmest regards,\nYour Client Advisor — BlackBook";
-
-  try {
-    navigator.clipboard.writeText(msg).then(() => {
-      showToast('✉', 'Message copied', 'Ready to paste and send to ' + firstName + ' via ' + cl.contact + '.');
-    });
-  } catch(e) {
-    showToast('✉', 'Intake form message ready', 'Send via ' + cl.contact + ' to ' + firstName + '.');
-  }
-}
-
 function obFinish() {
   if (!obValidateStep()) return;
 
@@ -5655,21 +4739,9 @@ function obFinish() {
     ltv: g('ob-ltv') || '€0',
     ca: g('ob-ca') || 'CA-101',
     contact: g('ob-contact') || 'WhatsApp',
-    birthday: (() => {
-      const raw = g('ob-birthday');
-      if (!raw) return '—';
-      const d = new Date(raw + 'T00:00:00');
-      if (isNaN(d)) return raw;
-      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    })(),
+    birthday: g('ob-birthday') || '—',
     partner: g('ob-partner') || 'None',
-    anniversary: (() => {
-      const raw = g('ob-anniversary');
-      if (!raw) return 'N/A';
-      const d = new Date(raw + 'T00:00:00');
-      if (isNaN(d)) return raw;
-      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    })(),
+    anniversary: g('ob-anniversary') || 'N/A',
     pet: g('ob-pet') || 'None',
     beverage: g('ob-beverage') || '—',
     sizeTop: g('ob-sizeTop') || '—',
@@ -5701,7 +4773,6 @@ function obFinish() {
     note: newClient.lastNote
   }]};
   filtered = [...clients];
-  renderDashboard();
 
   // Show success then close
   const body = document.querySelector('.onboarding-body');
@@ -5715,10 +4786,7 @@ function obFinish() {
   `;
   footer.innerHTML = `
     <div></div>
-    <div style="display:flex;gap:10px;">
-      <button class="onboarding-btn-back" style="display:block;" onclick="sendIntakeForm('${newId}')">Send Intake Form</button>
-      <button class="onboarding-btn-finish" onclick="closeOnboarding(); select('${newId}');">Open Profile →</button>
-    </div>
+    <button class="onboarding-btn-finish" onclick="closeOnboarding(); select('${newId}');">Open Profile →</button>
   `;
   document.getElementById('onboardingProgress').style.width = '100%';
 
@@ -5811,10 +4879,9 @@ function ctxFlag(id) {
     showToast('☆', 'Flag Removed', name + ' removed from follow-up list');
   } else {
     flaggedClients.add(id);
-    showToast('★', 'Flagged for Follow-up', name + ' added to dashboard');
+    showToast('★', 'Follow-up Flagged', name + ' added to follow-up list');
   }
   renderList();
-  renderDashboard();
 }
 function ctxDuplicate(id) {
   removeCtxMenu();
@@ -5863,16 +4930,6 @@ function switchDashTab(tab) {
   }
 }
 
-function parseInteractionDate(str) {
-  if (!str) return null;
-  const monthMap = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-  const p = str.split(' ');
-  if (p.length < 3) return null;
-  const m = monthMap[p[1]]; if (m === undefined) return null;
-  return { year: parseInt(p[2]), month: m };
-}
-
-
 function renderCAPanel(el) {
   const cas = ['CA-101','CA-102','CA-103','CA-104','CA-105'];
   const stats = cas.map(ca => {
@@ -5880,27 +4937,7 @@ function renderCAPanel(el) {
     const ltv = group.reduce((s,x)=>s+parseInt((x.ltv||'0').replace(/[^0-9]/g,'')),0);
     const vvic = group.filter(x=>x.tier==='VVIC').length;
     const appts = group.filter(x=>x.appointment&&x.appointment!=='—').length;
-    // Conversion: interactions that led to a transaction (same month) or gift action
-    let convTotal = 0, convConverted = 0;
-    group.forEach(cl => {
-      const hist = histories[cl.id];
-      if (!hist) return;
-      hist.interactions.forEach(interaction => {
-        convTotal++;
-        if (interaction.type === 'Gift Shipped' || interaction.type === 'Gift Reserved') { convConverted++; return; }
-        const iDate = parseInteractionDate(interaction.date);
-        if (!iDate) return;
-        const iMs = new Date(iDate.year, iDate.month, 1).getTime();
-        if (hist.transactions.some(t => {
-          const tDate = parseInteractionDate(t.date);
-          if (!tDate) return false;
-          return Math.abs(new Date(tDate.year, tDate.month, 1).getTime() - iMs) <= 7*24*60*60*1000*5;
-        })) convConverted++;
-      });
-    });
-    const convRate = convTotal ? Math.round((convConverted/convTotal)*100) : 0;
-    const convColor = convRate >= 70 ? '#7ab87a' : convRate >= 40 ? '#c8a84a' : '#c47a5a';
-    return {ca, count:group.length, ltv, vvic, appts, convRate, convColor};
+    return {ca, count:group.length, ltv, vvic, appts};
   });
   const maxLTV = Math.max(...stats.map(s=>s.ltv));
   const topCA = stats.reduce((a,b)=>b.ltv>a.ltv?b:a);
@@ -5917,11 +4954,7 @@ function renderCAPanel(el) {
           </div>
           <div class="ca-stat">
             <div class="ca-stat-val" style="font-size:16px;">€${(s.ltv/1000).toFixed(0)}k</div>
-            <div class="ca-stat-lbl">Portfolio LTV</div>
-          </div>
-          <div class="ca-stat">
-            <div class="ca-stat-val" style="font-size:16px;color:${s.convColor};">${s.convRate}%</div>
-            <div class="ca-stat-lbl">Conversion Rate</div>
+            <div class="ca-stat-lbl">Total Lifetime Value</div>
           </div>
           <div class="ca-stat">
             <div class="ca-stat-val" style="font-size:16px;">${s.vvic}</div>
@@ -6282,10 +5315,30 @@ async function generateCommDraft(clientId) {
     ? `The client's most recent message to you was: "${lastInbound.text}". Your reply should acknowledge this naturally before moving to outreach.`
     : `There is no recent inbound message. Write a proactive outreach message.`;
 
+  const prompt = `You are a luxury Client Advisor at a high-end fashion house. Write a short, personalised ${cl.contact} message to ${cl.name} (${cl.tier} client, lifetime value ${cl.ltv}).
 
+Tone: ${tone}. ${tone === 'Formal' ? 'Refined and professional. Complete sentences. No contractions.' : tone === 'Warm' ? 'Friendly but polished. Personal without being overly casual.' : 'Light and conversational. Brief sentences. Tasteful personality.'}
+
+Context:
+- ${replyContext}
+- Last CA note: "${cl.lastNote}"
+- Upcoming appointment: ${cl.appointment} at ${cl.location}
+- Urgency: ${cl.urgency}
+- CA action: ${cl.caAction}
+${cl.partner !== 'None' ? `- Partner: ${cl.partner}` : ''}
+${cl.anniversary !== 'N/A' ? `- Anniversary: ${cl.anniversary}` : ''}
+${cl.pet !== 'None' ? `- Pet: ${cl.pet}` : ''}
+- Beverage preference: ${cl.beverage}
+
+Rules:
+- Max 4 sentences total
+- No emojis unless WeChat or Instagram
+- Do not mention prices
+- Reference one specific personal detail naturally
+- Output only the message text, nothing else`;
 
   try {
-    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ type: 'message', client: cl, tone: tone, replyContext: replyContext }) });
+    const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:250, messages:[{role:'user',content:prompt}] }) });
     const data = await res.json();
     const text = data.content.map(b=>b.text||'').join('').trim();
     if (ta) ta.value = text;
@@ -6418,7 +5471,14 @@ function renderSparkline(clientId) {
   }
 
   // Count interactions per month
-  // (parseInteractionDate is defined globally below)
+  function parseInteractionDate(str) {
+    if (!str) return null;
+    const monthMap = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const p = str.split(' ');
+    if (p.length < 3) return null;
+    const m = monthMap[p[1]]; if (m === undefined) return null;
+    return { year: parseInt(p[2]), month: m };
+  }
 
   const interactionCounts = months.map(m => {
     return hist.interactions.filter(i => {
@@ -6491,9 +5551,8 @@ function renderSparkline(clientId) {
   const trend = recent > prior ? 'up' : recent < prior ? 'down' : 'flat';
   const trendLabel = trend === 'up' ? '↑ Strengthening' : trend === 'down' ? '↓ Cooling' : '→ Steady';
 
-  // Conversion rate: interactions that led to a purchase OR a gift action
+  // Conversion rate: interactions that were followed by a transaction within 7 days
   const conversionCount = hist.interactions.filter(interaction => {
-    if (interaction.type === 'Gift Shipped' || interaction.type === 'Gift Reserved') return true;
     const iDate = parseInteractionDate(interaction.date);
     if (!iDate) return false;
     const iMs = new Date(iDate.year, iDate.month, 1).getTime();
@@ -6944,112 +6003,53 @@ async function startDemo() {
 
   if (!demoRunning) return;
 
-  // ── STEP 11: Gift Intelligence — navigate to Priya via dashboard alert ──
-  goHome();
-  await demoDelay(600);
-  if (!demoRunning) return;
-
-  // Highlight the date alert section
-  const giftAlertRow = document.querySelector('.date-alert-row');
-  if (giftAlertRow) {
-    giftAlertRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await demoDelay(500);
-    demoHighlight(giftAlertRow);
-    demoPill('Important date alert — birthday or anniversary approaching');
-    await demoDelay(2000);
-    if (!demoRunning) return;
-
-    // Click the alert to open gift section
-    demoPill('One tap opens curated gift selections for this occasion');
-    giftAlertRow.click();
-    await demoDelay(1800);
-    if (!demoRunning) return;
-
-    // Scroll to gift section
-    const giftSection = document.querySelector('.gift-section');
-    if (giftSection) {
-      giftSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      await demoDelay(600);
-      demoHighlight(giftSection.querySelector('.gift-grid'));
-      demoPill('Gift Intelligence — 6 items selected by AI for this client and occasion');
-      await demoDelay(2800);
-      if (!demoRunning) return;
-
-      // Highlight a single gift card
-      const firstCard = giftSection.querySelector('.gift-card');
-      if (firstCard) {
-        demoHighlight(firstCard);
-        demoPill('Each item matched to her colour palette, tier, and upcoming occasion');
-        await demoDelay(2400);
-        if (!demoRunning) return;
-
-        // Click Ship Now on the first card
-        const shipBtn = firstCard.querySelector('.gift-action-btn.ship');
-        if (shipBtn) {
-          demoHighlight(shipBtn);
-          demoPill('Ship Now — dispatched to address on file, logged to activity');
-          await demoDelay(1200);
-          if (!demoRunning) return;
-          shipBtn.click();
-          await demoDelay(1800);
-          if (!demoRunning) return;
-        }
-      }
-    }
-  }
+  // ── STEP 11: Draft WhatsApp message ──
+  // outreach demo removed
 
   if (!demoRunning) return;
-  document.getElementById('content').scrollTo({ top: 0, behavior: 'smooth' });
-  await demoDelay(600);
 
-  // ── STEP 12: Communication — re-open Wei Chen, show incoming message + draft reply ──
-  select('C-1005');
-  await demoDelay(800);
-  if (!demoRunning) return;
-
-  // Inject a new incoming WeChat message from Wei
-  if (!commThreads['C-1005']) commThreads['C-1005'] = [];
-  appendCommMessage('C-1005', {
-    from: 'client',
-    text: 'Any update on Look 4? I arrive in Paris next week.',
-    time: 'Just now',
-    channel: 'WeChat'
-  });
-
-  const commSection2 = document.querySelector('.comm-section');
-  if (commSection2) {
-    commSection2.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await demoDelay(700);
-    demoHighlight(commSection2);
-    demoPill('Incoming WeChat from Wei Chen — needs a reply');
+  // ── STEP 12: Communication — scroll to comm section, draft a message ──
+  const commSection = document.querySelector('.comm-section');
+  if (commSection) {
+    commSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    await demoDelay(800);
+    demoHighlight(commSection);
+    demoPill('Last messages with the client — full channel history');
     await demoDelay(2000);
   }
 
   if (!demoRunning) return;
 
-  // Draft a reply — typewriter, no API
+  // Draft a message
   const draftTa = document.getElementById('commDraft-C-1005');
   if (draftTa) {
     draftTa.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    await demoDelay(500);
+    await demoDelay(600);
     demoHighlight(draftTa);
-    demoPill('Draft a reply — AI writes in the right tone for this client');
-    await demoDelay(1200);
+    demoPill('Draft a message — AI writes it in the right tone for this client');
+    await demoDelay(1400);
     if (!demoRunning) return;
-    demoPill('Generating WeChat draft for Wei Chen…');
-    draftTa.value = '';
-    await demoDelay(1000);
-    if (!demoRunning) return;
-    const msg = `Wei, the Look 4 sample has been located at our Paris atelier — I've reserved it ahead of your arrival next week. I'll have everything prepared. Looking forward to seeing you.`;
-    for (const ch of msg) {
+    // Simulate clicking the Draft button
+    const draftBtn = document.getElementById('draftBtn-C-1005');
+    if (draftBtn) {
+      draftBtn.click();
+      demoPill('Generating WeChat draft for Wei Chen…');
+      await demoDelay(3200);
       if (!demoRunning) return;
-      draftTa.value += ch;
-      await demoDelay(14);
+    } else {
+      // Fallback: type directly
+      const msg = `Wei, just to confirm — the Look 4 sample has been located at our Paris atelier. I've reserved it ahead of your arrival next week. I'll have everything prepared for you.`;
+      for (const ch of msg) {
+        draftTa.value += ch;
+        if (!demoRunning) return;
+        await demoDelay(12);
+      }
     }
-    await demoDelay(900);
+    await demoDelay(800);
     if (!demoRunning) return;
+    // Send it
     demoHighlight(null);
-    demoPill('Reply drafted and sent via WeChat');
+    demoPill('Message approved and sent via WeChat');
     sendCommMessage('C-1005');
     await demoDelay(2200);
   }
@@ -7112,10 +6112,7 @@ async function startDemo() {
         await demoDelay(1200);
         if (!demoRunning) return;
         firstNotif.click();
-        await demoDelay(1800);
-        if (!demoRunning) return;
-
-
+        await demoDelay(2000);
       }
     } else {
       // Mobile: badge highlight only — tray would cover narration
@@ -7127,119 +6124,7 @@ async function startDemo() {
 
   if (!demoRunning) return;
 
-  // ── STEP 15: Context menu — right-click / long press ──
-  goHome();
-  await demoDelay(600);
-  if (!demoRunning) return;
-
-  // Open sidebar on mobile so client rows are visible
-  const isMobileCtx = window.innerWidth < 768;
-  const sidebarCtx = document.querySelector('.sidebar');
-  const backdropCtx = document.getElementById('sidebarBackdrop');
-  if (isMobileCtx) {
-    sidebarCtx.classList.add('mobile-open');
-    if (backdropCtx) backdropCtx.classList.add('active');
-    await demoDelay(600);
-  }
-
-  const ctxRow = document.querySelectorAll('.client-row')[1]; // Wei Chen
-  const ctxClientId = ctxRow ? ctxRow.dataset.id : 'C-1005';
-  if (ctxRow) {
-    demoHighlight(ctxRow);
-    demoPill(isMobileCtx ? 'Long-press any client — quick actions without opening the profile' : 'Right-click any client — quick actions without opening the profile');
-    await demoDelay(1800);
-    if (!demoRunning) return;
-
-    // Open context menu
-    const rect = ctxRow.getBoundingClientRect();
-    showCtxMenu(
-      { preventDefault: ()=>{}, stopPropagation: ()=>{}, clientX: rect.left + 120, clientY: rect.top + 10 },
-      ctxClientId
-    );
-    demoHighlight(document.getElementById('ctxMenu'));
-    demoPill('Mark as arrived, flag for follow-up, open or duplicate — one tap');
-    await demoDelay(2000);
-    if (!demoRunning) return;
-
-    // ── Action 1: Mark as Arrived ──
-    removeCtxMenu();
-    ctxArrive(ctxClientId);
-    await demoDelay(400);
-    if (!demoRunning) return;
-
-    // Highlight the green dot that just appeared on the avatar
-    const arrivedRow = document.querySelector('.client-row[data-id="' + ctxClientId + '"]');
-    const arrivedDot = arrivedRow ? arrivedRow.querySelector('.arrived-dot') : null;
-    demoHighlight(arrivedDot || arrivedRow);
-    demoPill('Green dot — client is on site. Live presence indicator.');
-    await demoDelay(2400);
-    if (!demoRunning) return;
-
-    // ── Action 2: Flag for Follow-up — open menu again on Eleanor (row 0) ──
-    const flagRow = document.querySelectorAll('.client-row')[0];
-    const flagClientId = flagRow ? flagRow.dataset.id : 'C-1001';
-    if (flagRow) {
-      demoHighlight(flagRow);
-      demoPill('Flag another client for follow-up');
-      await demoDelay(1200);
-      if (!demoRunning) return;
-
-      const flagRect = flagRow.getBoundingClientRect();
-      showCtxMenu(
-        { preventDefault: ()=>{}, stopPropagation: ()=>{}, clientX: flagRect.left + 120, clientY: flagRect.top + 10 },
-        flagClientId
-      );
-      await demoDelay(800);
-      if (!demoRunning) return;
-
-      removeCtxMenu();
-      ctxFlag(flagClientId);
-      await demoDelay(400);
-      if (!demoRunning) return;
-
-      // Highlight the gold star on the sidebar row
-      const flaggedRowEl = document.querySelector('.client-row[data-id="' + flagClientId + '"]');
-      const flagStar = flaggedRowEl ? flaggedRowEl.querySelector('.followup-star') : null;
-      demoHighlight(flagStar || flaggedRowEl);
-      demoPill('Gold star — flagged for follow-up. Appears on the dashboard instantly.');
-      await demoDelay(2200);
-      if (!demoRunning) return;
-    }
-
-    // ── Show dashboard with flagged section ──
-    if (isMobileCtx) {
-      sidebarCtx.classList.remove('mobile-open');
-      if (backdropCtx) backdropCtx.classList.remove('active');
-      await demoDelay(300);
-    }
-    goHome();
-    await demoDelay(600);
-    if (!demoRunning) return;
-
-    // Scroll to flagged section on dashboard
-    const flaggedSection = document.querySelector('.flagged-section-label');
-    if (flaggedSection) {
-      flaggedSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      await demoDelay(400);
-      demoHighlight(flaggedSection.nextElementSibling);
-      demoPill('Dashboard — flagged clients surfaced automatically for follow-up');
-      await demoDelay(2600);
-      if (!demoRunning) return;
-    }
-
-    demoHighlight(null);
-  }
-
-  // Close sidebar on mobile before onboarding (if still open)
-  if (isMobileCtx && document.querySelector('.sidebar')?.classList.contains('mobile-open')) {
-    sidebarCtx.classList.remove('mobile-open');
-    if (backdropCtx) backdropCtx.classList.remove('active');
-    await demoDelay(400);
-  }
-
-  if (!demoRunning) return;
-
-  // ── STEP 16: New client onboarding ──
+  // ── STEP 15: New client onboarding ──
   document.getElementById('content').scrollTo({ top: 0, behavior: 'smooth' });
   await demoDelay(400);
   goHome();
@@ -7332,232 +6217,6 @@ function closeMobileSidebar() {
 // Global clock — always running
 tickClock();
 setInterval(tickClock, 30000);
-
-// ── SHOP DASHBOARD ───────────────────────────────────────────────────────────
-window._shopQuery          = '';
-window._shopFilterGender   = 'All';
-window._shopFilterCategory = 'All';
-window._shopFilterColor    = 'All';
-window._shopSortPrice      = 'None';
-
-function goShop() {
-  selected = null;
-  if (window.innerWidth <= 768) closeMobileSidebar();
-  const backBtn = document.getElementById('mobileBackBtn');
-  if (backBtn) {
-    backBtn.classList.remove('hidden');
-    const left = document.getElementById('mobNavLeft');
-    const lbl  = document.getElementById('mobNavLeftLabel');
-    const divider = document.getElementById('mobNavDivider');
-    const right = document.getElementById('mobNavRight');
-    if (left) { left.onclick = goHome; left.style.cursor = 'pointer'; left.style.opacity = '1'; }
-    if (lbl) lbl.textContent = 'Dashboard';
-    if (divider) divider.style.display = '';
-    if (right) right.style.display = '';
-  }
-  document.getElementById('topbarLabel').textContent = 'Catalog';
-  document.getElementById('topbarName').textContent = 'Full Inventory';
-  document.getElementById('genBtn').disabled = true;
-  const dash = document.getElementById('dashNavBtn');
-  const shop = document.getElementById('shopNavBtn');
-  if (dash) dash.classList.remove('active');
-  if (shop) shop.classList.add('active');
-  renderList();
-  renderShopDashboard();
-  animatePage(document.getElementById('content'));
-}
-
-function renderShopDashboard() {
-  const q     = (window._shopQuery          || '').toLowerCase().trim();
-  const fg    =  window._shopFilterGender   || 'All';
-  const fc    =  window._shopFilterCategory || 'All';
-  const fcol  =  window._shopFilterColor    || 'All';
-  const fsort =  window._shopSortPrice      || 'None';
-
-  if (!masterCatalog || masterCatalog.length === 0) {
-    document.getElementById('content').innerHTML = `
-      <div style="padding:48px 0;text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-faint);letter-spacing:1px;">
-        Catalog loading — please wait a moment and try again.
-      </div>`;
-    return;
-  }
-
-  const allCategories = [...new Set(masterCatalog.flatMap(item =>
-    Array.isArray(item.category) ? item.category : [item.category].filter(Boolean)
-  ))].sort();
-
-  const allColors = [...new Set(masterCatalog.flatMap(item =>
-    Array.isArray(item.colors)
-      ? item.colors
-      : (item.colors ? String(item.colors).split(',').map(s => s.trim()) : [])
-  ))].filter(Boolean).sort();
-
-  let items = masterCatalog.filter(item => {
-    if (q) {
-      const cat = Array.isArray(item.category) ? item.category.join(' ') : (item.category || '');
-      if (!item.name.toLowerCase().includes(q) && !cat.toLowerCase().includes(q)) return false;
-    }
-    if (fg === 'Women' && !['W','U'].includes(item.gender)) return false;
-    if (fg === 'Men'   && !['M','U'].includes(item.gender)) return false;
-    if (fc !== 'All') {
-      const cats = Array.isArray(item.category) ? item.category : [item.category].filter(Boolean);
-      if (!cats.includes(fc)) return false;
-    }
-    if (fcol !== 'All') {
-      const cols = Array.isArray(item.colors)
-        ? item.colors
-        : (item.colors ? String(item.colors).split(',').map(s => s.trim()) : []);
-      if (!cols.includes(fcol)) return false;
-    }
-    return true;
-  });
-
-  if (fsort === 'asc')  items.sort((a,b) => (a.priceNum||0) - (b.priceNum||0));
-  if (fsort === 'desc') items.sort((a,b) => (b.priceNum||0) - (a.priceNum||0));
-
-  const catOptions = ['All', ...allCategories].map(cat =>
-    `<option value="${cat.replace(/"/g,'&quot;')}" ${fc === cat ? 'selected' : ''}>${cat === 'All' ? 'All Categories' : cat}</option>`
-  ).join('');
-
-  const colOptions = ['All', ...allColors].map(col =>
-    `<option value="${col.replace(/"/g,'&quot;')}" ${fcol === col ? 'selected' : ''}>${col === 'All' ? 'All Colors' : col}</option>`
-  ).join('');
-
-  const activeFilters = fg !== 'All' || fc !== 'All' || fcol !== 'All' || fsort !== 'None';
-  const emptyMsg = q
-    ? `No items match "${q}"`
-    : activeFilters ? 'No items match the current filters' : 'No items in catalog';
-
-  document.getElementById('content').innerHTML = `
-    <div class="shop-topbar">
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <button class="shop-back-btn" onclick="goHome()">← Back to Clients</button>
-        <span class="shop-meta">${items.length} item${items.length !== 1 ? 's' : ''}</span>
-      </div>
-      <input
-        class="shop-search"
-        type="text"
-        placeholder="Search by name or category…"
-        value="${q.replace(/"/g,'&quot;')}"
-        oninput="window._shopQuery=this.value;renderShopDashboard();"
-      >
-    </div>
-    <div class="shop-filter-row">
-      <select class="shop-select" onchange="window._shopFilterGender=this.value;renderShopDashboard();">
-        <option value="All"   ${fg==='All'   ?'selected':''}>All</option>
-        <option value="Women" ${fg==='Women' ?'selected':''}>Womenswear</option>
-        <option value="Men"   ${fg==='Men'   ?'selected':''}>Menswear</option>
-      </select>
-      <select class="shop-select" onchange="window._shopFilterCategory=this.value;renderShopDashboard();">
-        ${catOptions}
-      </select>
-      <select class="shop-select" onchange="window._shopFilterColor=this.value;renderShopDashboard();">
-        ${colOptions}
-      </select>
-      <select class="shop-select" onchange="window._shopSortPrice=this.value;renderShopDashboard();">
-        <option value="None" ${fsort==='None'?'selected':''}>Default</option>
-        <option value="asc"  ${fsort==='asc' ?'selected':''}>Price: Low to High</option>
-        <option value="desc" ${fsort==='desc'?'selected':''}>Price: High to Low</option>
-      </select>
-    </div>
-    ${items.length === 0
-      ? `<div style="padding:48px 0;text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-faint);letter-spacing:1px;">${emptyMsg}</div>`
-      : `<div class="shop-grid">${items.map(renderShopCard).join('')}</div>`
-    }`;
-}
-
-function renderShopCard(item) {
-  const soldOut = item.stock === 0;
-  const lowStock = !soldOut && item.stock <= 2;
-  const cat = Array.isArray(item.category) ? item.category[0] : (item.category || '');
-  const price = item.priceNum ? '€' + Number(item.priceNum).toLocaleString('en-EU') : (item.price || '');
-  const stockLabel = soldOut ? '' : lowStock ? `⚠ ${item.stock} in stock` : `${item.stock} in stock`;
-  return `
-    <div class="shop-card${soldOut ? ' sold-out' : ''}">
-      <div class="shop-card-img">
-        ${item.img ? `<img src="${item.img}" alt="${item.name.replace(/"/g,'&quot;')}" loading="lazy" onerror="this.parentNode.style.background='#ede9e2';this.remove();">` : ''}
-        ${soldOut ? '<div class="shop-sold-out-badge">Sold Out</div>' : ''}
-      </div>
-      <div class="shop-card-body">
-        <div class="shop-card-cat">${cat}</div>
-        <div class="shop-card-name">${item.name}</div>
-        <div class="shop-card-price">${price}</div>
-        ${stockLabel ? `<div class="shop-card-stock${lowStock ? ' low' : ''}">${stockLabel}</div>` : '<div style="margin-bottom:10px;"></div>'}
-        <button class="shop-save-btn" onclick="openClientPicker('${item.id}')">Save to Client ＋</button>
-      </div>
-    </div>`;
-}
-
-function openClientPicker(itemId) {
-  closeClientPicker();
-  window._pickerItem = itemId;
-  const overlay = document.createElement('div');
-  overlay.className = 'client-picker-overlay';
-  overlay.id = 'clientPickerOverlay';
-  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeClientPicker(); });
-  const rows = clients.map(cl => `
-    <div class="client-picker-item" onclick="saveToClient('${itemId}','${cl.id}')">
-      <span class="client-picker-name">${cl.name}</span>
-      <span class="client-picker-tier">${cl.tier}</span>
-    </div>`).join('');
-  overlay.innerHTML = `
-    <div class="client-picker-modal">
-      <div class="client-picker-head">
-        <span class="client-picker-title">Save to Client</span>
-        <button class="client-picker-close" onclick="closeClientPicker()">×</button>
-      </div>
-      <div class="client-picker-list">${rows}</div>
-    </div>`;
-  document.body.appendChild(overlay);
-}
-
-function closeClientPicker() {
-  const el = document.getElementById('clientPickerOverlay');
-  if (el) el.remove();
-}
-
-function saveToClient(itemId, clientId) {
-  const client = clients.find(c => c.id === clientId);
-  if (!client) return;
-  if (!client.lookbook) client.lookbook = [];
-  if (!client.lookbook.includes(itemId)) client.lookbook.push(itemId);
-  closeClientPicker();
-  const itemName = catalogById[itemId] ? catalogById[itemId].name : 'Item';
-  showToast('◈', 'Saved to Lookbook', itemName + ' → ' + client.name);
-  if (selected && selected.id === clientId) renderProfile();
-}
-
-function renderLookbook(clientId) {
-  const c = clients.find(x => x.id === clientId);
-  if (!c) return '';
-  const items = (c.lookbook || []).map(id => catalogById[id]).filter(Boolean);
-  const divider = `
-    <div class="section-divider" style="margin:28px 0 16px;">
-      <div class="section-divider-line"></div>
-      <div class="section-divider-label">Curated Lookbook</div>
-      <div class="section-divider-line"></div>
-    </div>`;
-  if (items.length === 0) {
-    return divider + `
-    <div style="padding:18px 0 24px;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--ink-faint);letter-spacing:0.5px;text-align:center;">
-      No items curated yet
-    </div>`;
-  }
-  const cards = items.map(item => {
-    const price = item.priceNum ? '€' + Number(item.priceNum).toLocaleString('en-EU') : (item.price || '');
-    return `
-      <div class="lookbook-mini-card">
-        <div class="lookbook-mini-img">
-          ${item.img ? `<img src="${item.img}" alt="${item.name.replace(/"/g,'&quot;')}" loading="lazy" onerror="this.parentNode.style.background='#ede9e2';this.remove();">` : ''}
-        </div>
-        <div class="lookbook-mini-body">
-          <div class="lookbook-mini-name">${item.name}</div>
-          <div class="lookbook-mini-price">${price}</div>
-        </div>
-      </div>`;
-  }).join('');
-  return divider + `<div class="lookbook-grid">${cards}</div>`;
-}
 </script>
 
   <!-- Global Search Overlay -->
@@ -7620,7 +6279,7 @@ function renderLookbook(clientId) {
           <div class="onboarding-two-col">
             <div class="onboarding-group">
               <div class="onboarding-field-label">Birthday</div>
-              <input class="onboarding-input" id="ob-birthday" type="date" style="color-scheme:light;">
+              <input class="onboarding-input" id="ob-birthday" placeholder="12 April 1982">
             </div>
             <div class="onboarding-group">
               <div class="onboarding-field-label">Preferred Contact</div>
@@ -7643,7 +6302,7 @@ function renderLookbook(clientId) {
             </div>
             <div class="onboarding-group">
               <div class="onboarding-field-label">Anniversary</div>
-              <input class="onboarding-input" id="ob-anniversary" type="date" style="color-scheme:light;">
+              <input class="onboarding-input" id="ob-anniversary" placeholder="5 September 2010">
             </div>
           </div>
 

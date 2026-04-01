@@ -163,11 +163,11 @@ Rules:
       'Silver':   '€200–€1,500. Achievable and relevant to where this relationship currently is.'
     }[c.tier] || 'Mix price points thoughtfully based on occasion and relationship stage.';
 
-    return `You are a luxury gift recommendation engine for a high-end fashion house. Select exactly 6 items from the catalog that are the best match for this client.
+    return `You are a Luxury Personal Stylist at a high-end fashion house. Select exactly 3 items from the catalog that are the best match for this client.
 
 CLIENT PROFILE:
 Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv} | Location: ${c.location}
-Occasion: ${occasion || 'Important Date'}
+Outreach Context: ${occasion || 'Just Because'}
 Preferred colours: ${c.colors}
 Avoid / never show: ${c.avoid}
 Sizes: Top ${c.sizeTop} / Bottom ${c.sizeBottom} / Shoe ${c.shoe}
@@ -181,32 +181,27 @@ SPEND GUIDANCE FOR ${c.tier}:
 ${spendGuide}
 
 SELECTION RULES:
-- Exactly 6 items
+- Exactly 3 items
 - Follow the spend guidance — price alignment signals the maison's respect for this client's status
-- Use PriceNum field for price logic, not any tier field
 - Gender: W items for women, M items for men, U fine for either
 - Colour: match preferred colours, strictly exclude anything in the avoid list
-- Categories: vary across the 6 selections — no more than 2 from the same category
-- Occasion calibration: anniversary → more elevated/romantic; birthday → personal/celebratory; evergreen → versatile
+- Categories: vary across the 3 selections — no more than 1 from the same category
+- Context calibration: Anniversary → elevated/romantic; Birthday → personal/celebratory; New Arrivals → fresh and current; Seasonal Update → transitional pieces; Just Because → versatile statement
 - Shoe size compatibility: only recommend footwear if shoe size is on file
 - Jewellery compatibility: respect ring/neck sizing if noted
-- Stock: avoid items with stock of 1 unless they are an exceptional match
-- Last purchase: do not repeat the same category twice in a row if avoidable
+- Last purchase: do not repeat the same category if avoidable
 
-REASON WRITING:
-- Each reason must be 1–2 sentences
-- Reference a specific profile detail (colour preference, location, occasion, partner, size, LTV tier)
-- Never write generic copy like "a timeless piece" — be specific to this client
-- Tone: warm, insider, like briefing a trusted colleague
+STYLIST NOTE:
+- One sentence per item, maximum 15 words
+- Explain why this item fits the client profile and the chosen Outreach Context
+- Reference one specific detail: a colour preference, occasion, location, or past purchase
+- Never write "a timeless piece" — be precise and personal
 
 CATALOG:
 ${catalogJson}
 
 Respond ONLY with a valid JSON array — no markdown, no backticks, no explanation:
 [
-  { "id": "...", "reason": "..." },
-  { "id": "...", "reason": "..." },
-  { "id": "...", "reason": "..." },
   { "id": "...", "reason": "..." },
   { "id": "...", "reason": "..." },
   { "id": "...", "reason": "..." }
@@ -269,7 +264,7 @@ Respond ONLY with valid JSON, no markdown, no backticks:
       return res.status(400).json({ error: 'Missing catalog array for gifts request' });
     }
     prompt = buildGiftsPrompt();
-    max_tokens = 800;
+    max_tokens = 400;
   } else if (type === 'debrief') {
     if (!rawNotes) return res.status(400).json({ error: 'Missing rawNotes for debrief request' });
     prompt = buildDebriefPrompt();
