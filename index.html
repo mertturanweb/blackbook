@@ -454,13 +454,6 @@ html, body {
 .data-card.full { grid-column: 1 / -1; }
 .data-card.half { grid-column: span 2; }
 
-/* ── PROFILE TWO-COLUMN LAYOUT ── */
-.profile-layout { display:grid; grid-template-columns:30% 1fr; gap:28px; align-items:start; }
-.profile-col-left { position:sticky; top:0; display:flex; flex-direction:column; gap:16px; }
-.profile-col-right { min-width:0; }
-.profile-right-cards { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
-.profile-right-cards .span-full { grid-column:1/-1; }
-
 /* ── LAST INTERACTION ── */
 .interaction-note {
   background: var(--surface);
@@ -2709,12 +2702,6 @@ html, body {
   box-sizing: border-box;
   animation: fadeSlideIn 0.2s ease both;
 }
-/* Profile two-column — stack at 1024px */
-@media (max-width: 1024px) {
-  .profile-layout { grid-template-columns: 1fr; }
-  .profile-col-left { position: static; }
-}
-
 @media (max-width: 768px) {
   .demo-pill {
     white-space: normal;
@@ -2840,11 +2827,6 @@ html, body {
   .data-card.half {
     grid-column: span 1 !important;
   }
-
-  /* Profile two-column layout — collapse to single column */
-  .profile-layout { grid-template-columns: 1fr !important; }
-  .profile-col-left { position: static !important; }
-  .profile-right-cards { grid-template-columns: 1fr !important; }
 
   /* Dashboard cards — single column */
   .dash-grid {
@@ -3475,6 +3457,15 @@ body { background-color: #f5f1ea !important; color: #1a1814 !important; }
     to   { transform: rotate(360deg); }
   }
 }
+
+/* ── STYLE INTELLIGENCE ── */
+.style-intel-section { background:var(--surface); border:1px solid var(--rule); border-top:2px solid var(--ink); margin-bottom:24px; }
+.style-intel-row { display:flex; align-items:center; gap:16px; padding:10px 16px; border-bottom:1px solid var(--rule); }
+.style-intel-row:last-child { border-bottom:none; }
+.style-intel-label { font-family:'DM Sans',sans-serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--ink-faint); flex-shrink:0; min-width:168px; }
+.style-intel-input { flex:1; font-family:'DM Sans',sans-serif; font-size:11px; color:var(--ink); background:transparent; border:none; border-bottom:1px solid var(--rule); padding:4px 0 3px; outline:none; transition:border-color 0.15s; }
+.style-intel-input:focus { border-bottom-color:var(--gold); }
+.style-intel-input::placeholder { color:var(--ink-faint); font-style:italic; }
 
 /* ── GIFT SELECTION SECTION ── */
 .gift-section { margin: 32px 0 0; }
@@ -4637,11 +4628,11 @@ async function generateGiftIntelligence(clientId, occasion) {
   const genderFiltered = masterCatalog.filter(item => genderFilter.includes(item.gender));
   const aiCatalog = genderFiltered
     .slice(0, 40)
-    .map(({ id, name, category }) => ({ id, name, category }));
+    .map(({ id, name, category, colors }) => ({ id, name, category, colors }));
   console.log(
     `[Gift Catalog] Full: ${masterCatalog.length} → ` +
     `Gender-filtered: ${genderFiltered.length} → ` +
-    `AI payload: ${aiCatalog.length} items (id/name/category only)`
+    `AI payload: ${aiCatalog.length} items (id/name/category/colors only)`
   );
 
   try {
@@ -4758,6 +4749,13 @@ function scrollToGifts(clientId, occasion) {
 }
 
 
+function saveStylePref(clientId, key, value) {
+  const c = clients.find(x => x.id === clientId);
+  if (!c) return;
+  if (!c.preferences) c.preferences = {};
+  c.preferences[key] = value;
+}
+
 function triggerStyleRecommendations(clientId) {
   const ctxEl = document.getElementById('recsContext-' + clientId);
   const context = ctxEl ? ctxEl.value : 'Just Because';
@@ -4776,9 +4774,6 @@ function renderProfile() {
                    c.urgency.toLowerCase().includes('medium') ? 'gold' : '';
 
   document.getElementById('content').innerHTML = `
-    <div class="profile-layout">
-
-    <div class="profile-col-left">
     <div class="appt-header-row" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;">
       <div class="appt-pill" style="margin-bottom:0;">
         <div class="appt-dot"></div>
@@ -4808,6 +4803,8 @@ function renderProfile() {
       </div>
     </div>
 
+    <div class="data-grid">
+
       <div class="data-card">
         <div class="data-card-head">Identity</div>
         <div class="data-card-body">
@@ -4836,11 +4833,6 @@ function renderProfile() {
         </div>
       </div>
 
-    </div><!-- /profile-col-left -->
-
-    <div class="profile-col-right">
-      <div class="profile-right-cards">
-
       <div class="data-card">
         <div class="data-card-head">Last Transaction</div>
         <div class="data-card-body">
@@ -4853,7 +4845,7 @@ function renderProfile() {
         </div>
       </div>
 
-      <div class="data-card">
+      <div class="data-card half">
         <div class="data-card-head">Current Status</div>
         <div class="data-card-body">
           ${row('Urgency', c.urgency, urgClass)}
@@ -4863,7 +4855,7 @@ function renderProfile() {
         </div>
       </div>
 
-      <div class="data-card span-full">
+      <div class="data-card">
         <div class="data-card-head">Appointment</div>
         <div class="data-card-body">
           ${row('Date', c.appointment)}
@@ -4905,7 +4897,7 @@ function renderProfile() {
         </div>
       </div>
 
-      </div><!-- /profile-right-cards -->
+    </div>
 
     <div class="interaction-note">
       <div class="interaction-meta">Last Interaction — ${c.lastDate} · ${c.lastType}</div>
@@ -4927,6 +4919,35 @@ function renderProfile() {
           `).join('')}
         </div>`;
       })()}
+    </div>
+
+    <div class="section-divider" style="margin:28px 0 16px;">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Style Intelligence</div>
+      <div class="section-divider-line"></div>
+    </div>
+    <div class="style-intel-section">
+      <div class="style-intel-row">
+        <span class="style-intel-label">Preferred Colors</span>
+        <input class="style-intel-input" type="text" id="prefColors-${c.id}"
+          value="${(c.preferences && c.preferences.colors) || ''}"
+          placeholder="e.g. ivory, burgundy, forest green"
+          oninput="saveStylePref('${c.id}', 'colors', this.value)">
+      </div>
+      <div class="style-intel-row">
+        <span class="style-intel-label">Items / Colors to Avoid</span>
+        <input class="style-intel-input" type="text" id="prefAvoid-${c.id}"
+          value="${(c.preferences && c.preferences.avoid) || ''}"
+          placeholder="e.g. black, animal print, logo-heavy"
+          oninput="saveStylePref('${c.id}', 'avoid', this.value)">
+      </div>
+      <div class="style-intel-row">
+        <span class="style-intel-label">CA Private Notes</span>
+        <input class="style-intel-input" type="text" id="prefNotes-${c.id}"
+          value="${(c.preferences && c.preferences.notes) || ''}"
+          placeholder="e.g. prefers quiet luxury, no statement pieces"
+          oninput="saveStylePref('${c.id}', 'notes', this.value)">
+      </div>
     </div>
 
     <div class="section-divider" style="margin:28px 0 16px;">
@@ -4978,11 +4999,7 @@ function renderProfile() {
       <div id="activityLog-${c.id}"></div>
     </div>
 
-      <div id="briefingArea"></div>
-
-    </div><!-- /profile-col-right -->
-
-    </div><!-- /profile-layout -->
+<div id="briefingArea"></div>
   `;
 
   // Render notes after DOM is built

@@ -155,6 +155,10 @@ Rules:
   function buildGiftsPrompt() {
     const catalogJson = JSON.stringify(catalog, null, 2);
 
+    const prefColors = (c.preferences && c.preferences.colors) || c.colors || '';
+    const prefAvoid  = (c.preferences && c.preferences.avoid)  || c.avoid  || '';
+    const prefNotes  = (c.preferences && c.preferences.notes)  || '';
+
     const spendGuide = {
       'VVIC':     'Prioritise items above €3,000. Mix statement pieces (bags, coats, fine jewellery) with one or two refined accessories. No item below €500 unless exceptional personal match.',
       'VIC':      'Focus on €1,500–€6,000. One hero piece above €3,000 with complementary items at €1,000–€2,500.',
@@ -168,8 +172,9 @@ Rules:
 CLIENT PROFILE:
 Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv} | Location: ${c.location}
 Outreach Context: ${occasion || 'Just Because'}
-Preferred colours: ${c.colors}
-Avoid / never show: ${c.avoid}
+Preferred colours: ${prefColors}
+Avoid / never show: ${prefAvoid}
+CA private notes: ${prefNotes || 'none'}
 Sizes: Top ${c.sizeTop} / Bottom ${c.sizeBottom} / Shoe ${c.shoe}
 Jewellery sizing: ${c.jewelry || 'not specified'}
 Last purchase: ${c.lastPurchase} — avoid recommending the same or near-identical item
@@ -180,11 +185,16 @@ Pet: ${c.pet !== 'None' ? c.pet : 'none'}
 SPEND GUIDANCE FOR ${c.tier}:
 ${spendGuide}
 
+COLOUR RULES (mandatory — no exceptions):
+- Each catalog item includes a 'colors' field. You MUST check it before selecting any item.
+- If a color appears in the client's avoid list, reject ANY item whose 'colors' field contains that color — no exceptions, even if the item is otherwise perfect.
+- Actively favour items whose 'colors' field overlaps with the client's preferred colours.
+- Colour compliance is non-negotiable. A perfect fit in every other dimension does not override a colour restriction.
+
 SELECTION RULES:
 - Exactly 3 items
 - Follow the spend guidance — price alignment signals the maison's respect for this client's status
 - Gender: W items for women, M items for men, U fine for either
-- Colour: match preferred colours, strictly exclude anything in the avoid list
 - Categories: vary across the 3 selections — no more than 1 from the same category
 - Context calibration: Anniversary → elevated/romantic; Birthday → personal/celebratory; New Arrivals → fresh and current; Seasonal Update → transitional pieces; Just Because → versatile statement
 - Shoe size compatibility: only recommend footwear if shoe size is on file
@@ -193,8 +203,8 @@ SELECTION RULES:
 
 STYLIST NOTE:
 - One sentence per item, maximum 15 words
-- Explain why this item fits the client profile and the chosen Outreach Context
-- Reference one specific detail: a colour preference, occasion, location, or past purchase
+- Explicitly mention how the pick aligns with their colour preferences (e.g. "Matches your preference for warm earth tones like Ivory")
+- Reference one specific personal detail: a colour, the outreach context, a past purchase, or their location
 - Never write "a timeless piece" — be precise and personal
 
 CATALOG:
