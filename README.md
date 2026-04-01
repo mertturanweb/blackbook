@@ -74,16 +74,18 @@ Drafts outreach messages per client's preferred channel.
 - Reply context field: paste inbound message for contextual replies
 - Max 4 sentences. No emojis unless WeChat/Instagram. No prices. References one specific personal detail.
 
-### Gift Intelligence
-6 AI-selected gift items per client based on profile, occasion, and live Airtable inventory.
+### Stylist Picks
+3 AI-selected recommendations per client, generated on demand by the CA — not automatic.
 
-- **Occasion types:** Birthday, Anniversary, Evergreen
-- **Spend guidance by tier:** VVIC prioritises €3,000+. VIC €1,500–6,000. Platinum €800–3,500. Gold €500–2,500. Silver €200–1,500. All logic uses `PriceNum` field — no legacy tier codes.
-- **Selection rules:** Colour match, avoid list enforced, category diversity (max 2 per category), gender match, stock awareness, size compatibility.
-- **Each item includes:** Reason written in warm insider tone referencing a specific profile detail.
+- **Trigger:** CA selects an Outreach Context from a dropdown and clicks "Generate Recommendations." The button updates to "Refresh Picks" after the first generation. Clicking it again clears the cache and fires a new request.
+- **Outreach contexts:** Just Because, New Arrivals, Birthday, Anniversary, Seasonal Update.
+- **Spend guidance by tier:** VVIC prioritises €3,000+. VIC €1,500–6,000. Platinum €800–3,500. Gold €500–2,500. Silver €200–1,500. Guidance is injected into the prompt as hardcoded text per tier — `PriceNum` is stripped from the AI catalog and not sent to Claude. No legacy T1-T6 codes.
+- **Selection rules:** Strict colour compliance (cross-referenced against catalog `colors` field), avoid list enforced item-by-item, category diversity (max 1 per category), gender match, size compatibility, context calibration per occasion.
+- **Stylist Note:** Each recommendation includes a 1-sentence stylist note (max 15 words) that explicitly references how the pick aligns with the client's colour preferences — never generic.
 - **Ship Now / Reserve:** CA can action items directly. Ship Now decrements stock in Airtable via a live PATCH write-back. Session stock updates immediately.
-- **AI Cost Optimisation:** Before the catalog is sent to Claude, it is pre-filtered by client gender (W/U or M/U) and stripped of heavy fields (`img`, `sku`, `colors`). Only `id`, `name`, `category`, `priceNum`, and `description` are sent. Reduces payload size by ~60% on average.
-- **Live catalog:** Fetched from Airtable on app initialisation via a server-side proxy. No hardcoded items remain in the frontend.
+- **Placement:** Appears immediately after the Last Interaction summary, before the History Tables. CAs see it at the right moment — not buried at the bottom.
+- **AI Cost Optimisation:** Gender pre-filter (W/U or M/U) reduces the catalog by ~44%. Field strip cuts it to `id`, `name`, `category`, `colors` only — no images, descriptions, or SKUs. Hard cap of 40 items. Payload is ~80% smaller than the full catalog. `max_tokens` set to 400.
+- **Live catalog:** Fetched from Airtable on app init via server-side proxy. No hardcoded items in the frontend.
 
 ### Shop Dashboard
 Full in-memory catalog view for browsing and curating — no additional API calls.
@@ -108,7 +110,7 @@ Per-client in-memory moodboard built from the live catalog.
 - Birthday and anniversary alerts with 30-day countdown.
 - Urgent (≤7 days) = terracotta accent.
 - Passed dates show follow-up nudge for 7 days after, then disappear.
-- Click row → opens gift section for that client and occasion.
+- Click row → opens client profile, scrolls to the Stylist Picks section, and pre-sets the Outreach Context dropdown to the matching occasion. Does not auto-generate picks — the CA clicks "Generate Recommendations" when ready.
 
 ### Dashboard
 - **Stats bar:** Total LTV, VVIC count, VIC count, urgent alerts today.
@@ -126,7 +128,11 @@ Per-client in-memory moodboard built from the live catalog.
 - Sizing: sizeTop, sizeBottom, shoe, jewelry
 - Style: colors (preferred), avoid (never show)
 - CRM: lastDate, lastType, lastNote, lastPurchase, sku, purchaseDate, urgency, caAction, appointment, followUp, alterations, aftercare
+- Gender: `gender` field (`W` or `M`) — used by `generateGiftIntelligence` for catalog pre-filtering; not displayed in UI
 - Curation: lookbook (array of catalog item IDs)
+- Intelligence: preferences `{ colors, avoid, notes }` — CA-editable, session-persisted
+
+**Profile layout:** Single-column vertical. Data cards at the top, followed by Last Interaction, then Stylist Picks, then History Tables. The intelligence layer (Style Intelligence + Stylist Picks) is deliberately positioned where the CA needs it — not buried below history.
 
 **Profile cards:**
 - **Client:** ID, tier badge, LTV, assigned CA, preferred contact
@@ -135,11 +141,19 @@ Per-client in-memory moodboard built from the live catalog.
 - **Last Transaction:** Item, SKU, date, boutique, alterations, aftercare
 - **Current Status:** Urgency, CA action (dominant), follow-up due, last interaction (dimmed)
 - **Appointment:** Date, location, Google Calendar sync indicator, aftercare follow-up with + Add button
-- **Curated Lookbook:** Mini-grid of catalog items saved from the Shop Dashboard
+
+**Style Intelligence section:** Editable panel that sits directly above Stylist Picks. Three fields:
+- **Preferred Colors** — overrides the Airtable `colors` field if filled in; fed directly to the AI prompt
+- **Items / Colors to Avoid** — fed to the mandatory COLOUR RULES block in the prompt; AI must reject any catalog item whose `colors` field contains an avoided color
+- **CA Private Notes** — freeform context the AI receives as `prefNotes` in the prompt; use for behavioural notes that don't belong in a CRM
+
+All three fields write to `c.preferences` in memory via `saveStylePref()` on every keystroke. No save button needed.
 
 **Interaction history:** Last interaction note displayed prominently. Previous 3 interactions shown below. Full transaction log accessible.
 
 **Relationship sparkline:** Visual trajectory of the relationship.
+
+**Curated Lookbook:** Mini-grid of catalog items saved from the Shop Dashboard.
 
 ### CA Performance Tab
 Per-advisor portfolio LTV, conversion rate, VVIC client count.
@@ -195,7 +209,7 @@ The JSON field names used in AI responses (`opening`, `conversation`, `action`, 
 
 ```
 final/
-├── index.html          ← Entire frontend (~7,845 lines, single file)
+├── index.html          ← Entire frontend (~7,905 lines, single file)
 ├── api/
 │   └── chat.js         ← Vercel serverless backend (all AI prompts + Airtable proxy)
 ```
@@ -229,7 +243,7 @@ final/
 
 **Key Data Structures:**
 ```javascript
-const clients = [...]           // 20 client objects — each carries a lookbook: [] array
+const clients = [...]           // 20 client objects — each carries lookbook: [] and preferences: {}
 const histories = {...}         // interaction + transaction history, keyed by client ID
 let masterCatalog = []          // populated on init via fetchCatalogFromAirtable()
 const catalogById = {}          // lookup map built from masterCatalog after fetch
@@ -274,12 +288,14 @@ window._shopSortPrice      = 'None';  // 'None' | 'asc' | 'desc'
 | Function | Description |
 |---|---|
 | `renderDashboard()` | Builds full dashboard with stats, appointment cards, important dates, needs attention |
-| `renderProfile()` | Builds client profile with all data cards, history, briefing area, gift section, lookbook |
+| `renderProfile()` | Builds single-column client profile: data cards → Last Interaction → Style Intelligence → Stylist Picks → History → Lookbook → Communication |
 | `renderList()` | Renders sidebar client list filtered to active CA |
 | `generateBriefing()` | POST `/api/chat` type:briefing |
 | `generateAIDebrief(id)` | POST `/api/chat` type:debrief |
 | `generateCommDraft(clientId)` | POST `/api/chat` type:message |
-| `generateGiftIntelligence(clientId, occasion)` | Applies pre-filter, then POST `/api/chat` type:gifts. Caches result in `aiGiftCache` |
+| `triggerStyleRecommendations(clientId)` | Reads the Outreach Context dropdown, clears `aiGiftCache`, updates button state, calls `generateGiftIntelligence` |
+| `generateGiftIntelligence(clientId, occasion)` | Gender pre-filter → field strip to `{id, name, category, colors}` → 40-item cap → POST `/api/chat` type:gifts. Caches result in `aiGiftCache` |
+| `saveStylePref(clientId, key, value)` | Writes CA-entered preference directly to `clients[x].preferences[key]` in memory |
 | `fetchCatalogFromAirtable()` | POST `/api/chat` type:catalog — populates `masterCatalog` and `catalogById` on init |
 | `goShop()` | Clears selected client, updates nav state, calls `renderList()` + `renderShopDashboard()` |
 | `renderShopDashboard()` | Applies all shop filter state to `masterCatalog`, renders product grid + filter controls |
@@ -351,13 +367,16 @@ All AI and Airtable calls route through `/api/chat.js` on Vercel. The frontend n
 **`type: 'gifts'`**
 ```javascript
 // Frontend sends (after pre-filter):
-{ type: 'gifts', client: c, occasion: 'Birthday', catalog: aiCatalog }
-// aiCatalog is gender-filtered (W/U or M/U) and field-stripped (id, name, category, priceNum, description only)
-// img, sku, colors are removed before the API call — reduces payload ~60%
+{ type: 'gifts', client: c, occasion: 'Just Because', catalog: aiCatalog }
+// aiCatalog is gender-filtered (W/U or M/U), field-stripped to {id, name, category, colors} only,
+// and hard-capped at 40 items. img, sku, priceNum, description are stripped before the call.
+// Payload is ~80% smaller than the full catalog.
+// client object includes c.preferences {colors, avoid, notes} — used in the prompt to resolve
+// preferred/avoid colours before falling back to the Airtable-sourced c.colors / c.avoid fields.
 
 // Returns JSON array:
-[{ id: "W-001", reason: "..." }, ...]  // exactly 6 items
-// max_tokens: 800
+[{ id: "W-001", reason: "..." }, ...]  // exactly 3 items
+// max_tokens: 400
 ```
 
 **`type: 'debrief'`**
@@ -408,11 +427,15 @@ The Airtable integration is fully complete. All steps described in the previous 
 | `type: 'catalog'` endpoint in `chat.js` | Live — paginated fetch, all 142 records |
 | `fetchCatalogFromAirtable()` called on app init | Live — runs before first gift request |
 | Hardcoded `masterCatalog` and `prebuiltGiftSelections` | Removed entirely |
-| Gift prompt uses `PriceNum` + gender rules (not legacy tier codes) | Live |
-| Gift generation guard (empty catalog check) | Live |
-| `renderGiftSection` shows "Generate" button when cache is empty | Live |
+| Prompt uses `PriceNum` + spend guidance by tier (not legacy tier codes) | Live |
+| Catalog guard (empty catalog check before generation) | Live |
+| Stylist Picks: on-demand trigger with Outreach Context dropdown | Live — `triggerStyleRecommendations()` |
+| Stylist Picks: "Generate Recommendations" → "Refresh Picks" after first run | Live |
+| Stylist Picks: positioned after Last Interaction, before History Tables | Live |
+| Style Intelligence section (Preferred Colors, Avoid, CA Notes) | Live — writes to `c.preferences` in memory |
+| AI colour rules: cross-reference catalog `colors` field against avoid list | Live — mandatory COLOUR RULES block in prompt |
 | `type: 'stock'` write-back on Ship Now | Live — PATCH to Airtable on every ship action |
-| Pre-filter for AI payload (gender + field strip) | Live — runs inside `generateGiftIntelligence` |
+| Pre-filter: gender + 40-item cap + strip to `{id, name, category, colors}` | Live — runs inside `generateGiftIntelligence` |
 
 ### Airtable Base
 - **Base ID:** `applcdHUp1qAiquUl`
@@ -428,7 +451,7 @@ The Airtable integration is fully complete. All steps described in the previous 
 | Category | Multiple select | Bag, RTW, Footwear, Jewellery, Accessory, Outerwear, Leather Goods |
 | Gender | Single select | W, M, U |
 | Price | Single line text | e.g. €3,600 |
-| PriceNum | Number | e.g. 3600 — used for AI spend guidance and sort |
+| PriceNum | Number | e.g. 3600 — used for Shop Dashboard price sort only; stripped from AI catalog payload |
 | Stock | Number | Integer — decremented live on Ship Now |
 | Colors | Single line text | Comma-separated |
 | Image | URL | CDN URLs — plan to migrate to Cloudinary |
@@ -436,14 +459,17 @@ The Airtable integration is fully complete. All steps described in the previous 
 
 ### AI Payload Optimisation Detail
 
-Before calling Claude for gift recommendations, `generateGiftIntelligence` applies two filters client-side:
+Before calling Claude for Stylist Picks, `generateGiftIntelligence` applies three filters client-side:
 
-1. **Gender filter:** Reduces 142 items to ~70–80 relevant to the client's gender.
-2. **Field strip:** Maps the filtered array to `{ id, name, category, priceNum, description }` only. Removes `img`, `sku`, and `colors`.
+1. **Gender filter:** Reduces 142 items to ~70–80 relevant to the client's gender (W/U or M/U).
+2. **Hard cap:** Slices the filtered array to a maximum of 40 items.
+3. **Field strip:** Maps to `{ id, name, category, colors }` only. Removes `img`, `sku`, `priceNum`, and `description`. The `colors` field is now **retained** — the AI must cross-reference it against the client's avoid list before selecting any item.
+
+Total reduction: ~80% smaller payload than the full catalog on average.
 
 A `console.log` statement in the function reports the reduction:
 ```
-[Gift Catalog] Full: 142 → Gender-filtered: 80 → AI payload: 80 items (img + sku + colors stripped)
+[Gift Catalog] Full: 142 → Gender-filtered: 80 → AI payload: 40 items (id/name/category/colors only)
 ```
 
 ### Verification
@@ -451,7 +477,7 @@ Open browser console on the live Vercel URL. On page load you should see:
 ```
 Catalog loaded: 142 items from Airtable
 ```
-Then test gift intelligence on any client. All 6 selections will reference real catalog items with W-001/M-001 IDs. Ship Now will decrement stock in Airtable immediately.
+Then open any client profile, fill in a "Items / Colors to Avoid" value in the Style Intelligence section, and generate Stylist Picks. All 3 selections will reference real catalog items with W-001/M-001 IDs, and none will contain the avoided color. Ship Now will decrement stock in Airtable immediately.
 
 ---
 
@@ -537,7 +563,7 @@ The pitch to a buyer: "We don't replace your CRM. We sit on top of what you alre
 
 - **Hard dependency:** Real product images in catalog (Cloudinary migration)
 - **Prompt logic:** Given client profile + live catalog, suggest 2-3 pieces that work together as a look for the upcoming appointment occasion
-- **Placement:** Inside briefing as "Suggested Look" section, or as separate tab alongside Gift Intelligence
+- **Placement:** Inside briefing as "Suggested Look" section, or as separate tab alongside Stylist Picks
 - **Requirement:** Sufficient catalog depth per gender category to make combinations feel intentional — 30+ well-photographed items minimum before this feature lands well
 
 ### 8e. Google Calendar Real Connection
@@ -608,4 +634,4 @@ Vercel is connected to the `main` branch of `github.com/mertturanweb/blackbook`.
 
 ---
 
-*Document version: April 2026. Reflects live production codebase with Airtable integration, Shop Dashboard, Client Lookbook, and AI cost optimisation. Last updated by Mert Turan.*
+*Document version: April 2026. Reflects live production codebase with Airtable integration, Shop Dashboard, Client Lookbook, Style Intelligence section, on-demand Stylist Picks with Outreach Context, and aggressive AI cost optimisation (id/name/category/colors only, 40-item cap, ~80% payload reduction). Last updated by Mert Turan.*

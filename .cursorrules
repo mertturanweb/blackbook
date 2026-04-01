@@ -1,0 +1,15 @@
+# BlackBook Project Constitution
+
+## The README Rule (Mandatory)
+Before finishing any task that changes the UI, the API logic, or the database structure, you must update README.md to reflect the current state of the app. Document new features, layout changes (like the vertical single-column profile), and API optimizations. This is the "Source of Truth" for all future AI sessions.
+
+## Style & Logic Laws
+1. Price-Driven Logic Only: Never use T1-T6 tiers. Use the PriceNum field to align gifts with client spend.
+2. The Color Rule: Each catalog item has a 'colors' field. You MUST cross-reference this with the client’s "Preferred Colors" and "Items to Avoid" lists. If a color is in the avoid list, it is a hard reject.
+3. Payload Minimization: Never send the full catalog to the AI. Pre-filter by gender and strip metadata (images/descriptions) in the backend. Only send ID, Name, Category, and Colors.
+4. Single-File Frontend: Keep all frontend logic, CSS, and HTML within index.html. Do not split files.
+
+## Security & Architecture
+1. Server-Side Prompts: Never put prompt text in index.html. All AI calls route through /api/chat.js.
+2. Airtable Proxy: The frontend never calls Airtable directly. All requests go through the backend proxy.
+3. No Exposed Keys: API keys must remain as environment variables and never be committed.
