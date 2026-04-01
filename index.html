@@ -3550,6 +3550,10 @@ body { background-color: #f5f1ea !important; color: #1a1814 !important; }
 .shop-card-stock.low { color:#c47a5a; }
 .shop-save-btn { width:100%; font-family:'DM Sans',sans-serif; font-size:8px; letter-spacing:1.5px; text-transform:uppercase; padding:7px; border:1px solid var(--rule); background:none; color:var(--ink-faint); cursor:pointer; transition:all 0.15s; }
 .shop-save-btn:hover { border-color:var(--gold); color:var(--gold); }
+.shop-filter-row { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.shop-select { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--ink); background:var(--surface); border:1px solid var(--rule); padding:8px 28px 8px 12px; outline:none; cursor:pointer; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23181814' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; transition:border-color 0.15s; }
+.shop-select:focus { border-color:var(--rule-dark); }
+@media (max-width:768px) { .shop-filter-row { gap:8px; } .shop-select { font-size:10px; padding:7px 24px 7px 10px; } }
 .client-picker-overlay { position:fixed; inset:0; background:rgba(24,24,20,0.5); z-index:2000; display:flex; align-items:center; justify-content:center; }
 .client-picker-modal { background:var(--surface); border:1px solid var(--rule-dark); width:320px; max-height:480px; display:flex; flex-direction:column; overflow:hidden; }
 .client-picker-head { padding:16px 20px 12px; border-bottom:1px solid var(--rule); display:flex; align-items:baseline; justify-content:space-between; }
@@ -7315,7 +7319,11 @@ tickClock();
 setInterval(tickClock, 30000);
 
 // ── SHOP DASHBOARD ───────────────────────────────────────────────────────────
-window._shopQuery = '';
+window._shopQuery          = '';
+window._shopFilterGender   = 'All';
+window._shopFilterCategory = 'All';
+window._shopFilterColor    = 'All';
+window._shopSortPrice      = 'None';
 
 function goShop() {
   selected = null;
@@ -7339,12 +7347,18 @@ function goShop() {
   const shop = document.getElementById('shopNavBtn');
   if (dash) dash.classList.remove('active');
   if (shop) shop.classList.add('active');
+  renderList();
   renderShopDashboard();
   animatePage(document.getElementById('content'));
 }
 
 function renderShopDashboard() {
-  const q = (window._shopQuery || '').toLowerCase().trim();
+  const q     = (window._shopQuery          || '').toLowerCase().trim();
+  const fg    =  window._shopFilterGender   || 'All';
+  const fc    =  window._shopFilterCategory || 'All';
+  const fcol  =  window._shopFilterColor    || 'All';
+  const fsort =  window._shopSortPrice      || 'None';
+
   if (!masterCatalog || masterCatalog.length === 0) {
     document.getElementById('content').innerHTML = `
       <div style="padding:48px 0;text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-faint);letter-spacing:1px;">
@@ -7352,28 +7366,87 @@ function renderShopDashboard() {
       </div>`;
     return;
   }
-  const items = masterCatalog.filter(item => {
-    if (!q) return true;
-    const cat = Array.isArray(item.category) ? item.category.join(' ') : (item.category || '');
-    return item.name.toLowerCase().includes(q) || cat.toLowerCase().includes(q);
+
+  const allCategories = [...new Set(masterCatalog.flatMap(item =>
+    Array.isArray(item.category) ? item.category : [item.category].filter(Boolean)
+  ))].sort();
+
+  const allColors = [...new Set(masterCatalog.flatMap(item =>
+    Array.isArray(item.colors)
+      ? item.colors
+      : (item.colors ? String(item.colors).split(',').map(s => s.trim()) : [])
+  ))].filter(Boolean).sort();
+
+  let items = masterCatalog.filter(item => {
+    if (q) {
+      const cat = Array.isArray(item.category) ? item.category.join(' ') : (item.category || '');
+      if (!item.name.toLowerCase().includes(q) && !cat.toLowerCase().includes(q)) return false;
+    }
+    if (fg === 'Women' && !['W','U'].includes(item.gender)) return false;
+    if (fg === 'Men'   && !['M','U'].includes(item.gender)) return false;
+    if (fc !== 'All') {
+      const cats = Array.isArray(item.category) ? item.category : [item.category].filter(Boolean);
+      if (!cats.includes(fc)) return false;
+    }
+    if (fcol !== 'All') {
+      const cols = Array.isArray(item.colors)
+        ? item.colors
+        : (item.colors ? String(item.colors).split(',').map(s => s.trim()) : []);
+      if (!cols.includes(fcol)) return false;
+    }
+    return true;
   });
+
+  if (fsort === 'asc')  items.sort((a,b) => (a.priceNum||0) - (b.priceNum||0));
+  if (fsort === 'desc') items.sort((a,b) => (b.priceNum||0) - (a.priceNum||0));
+
+  const catOptions = ['All', ...allCategories].map(cat =>
+    `<option value="${cat.replace(/"/g,'&quot;')}" ${fc === cat ? 'selected' : ''}>${cat === 'All' ? 'All Categories' : cat}</option>`
+  ).join('');
+
+  const colOptions = ['All', ...allColors].map(col =>
+    `<option value="${col.replace(/"/g,'&quot;')}" ${fcol === col ? 'selected' : ''}>${col === 'All' ? 'All Colors' : col}</option>`
+  ).join('');
+
+  const activeFilters = fg !== 'All' || fc !== 'All' || fcol !== 'All' || fsort !== 'None';
+  const emptyMsg = q
+    ? `No items match "${q}"`
+    : activeFilters ? 'No items match the current filters' : 'No items in catalog';
+
   document.getElementById('content').innerHTML = `
     <div class="shop-topbar">
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <button class="shop-back-btn" onclick="goHome()">← Back to Clients</button>
-        <span class="shop-meta">${items.length} item${items.length !== 1 ? 's' : ''}${q ? ' matching' : ''}</span>
+        <span class="shop-meta">${items.length} item${items.length !== 1 ? 's' : ''}</span>
       </div>
       <input
         class="shop-search"
         type="text"
         placeholder="Search by name or category…"
-        value="${q.replace(/"/g, '&quot;')}"
+        value="${q.replace(/"/g,'&quot;')}"
         oninput="window._shopQuery=this.value;renderShopDashboard();"
-        autofocus
       >
     </div>
+    <div class="shop-filter-row">
+      <select class="shop-select" onchange="window._shopFilterGender=this.value;renderShopDashboard();">
+        <option value="All"   ${fg==='All'   ?'selected':''}>All</option>
+        <option value="Women" ${fg==='Women' ?'selected':''}>Womenswear</option>
+        <option value="Men"   ${fg==='Men'   ?'selected':''}>Menswear</option>
+      </select>
+      <select class="shop-select" onchange="window._shopFilterCategory=this.value;renderShopDashboard();">
+        ${catOptions}
+      </select>
+      <select class="shop-select" onchange="window._shopFilterColor=this.value;renderShopDashboard();">
+        ${colOptions}
+      </select>
+      <select class="shop-select" onchange="window._shopSortPrice=this.value;renderShopDashboard();">
+        <option value="None" ${fsort==='None'?'selected':''}>Default</option>
+        <option value="asc"  ${fsort==='asc' ?'selected':''}>Price: Low to High</option>
+        <option value="desc" ${fsort==='desc'?'selected':''}>Price: High to Low</option>
+      </select>
+    </div>
     ${items.length === 0
-      ? `<div style="padding:48px 0;text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-faint);letter-spacing:1px;">No items match "${q}"</div>`
+      ? `<div style="padding:48px 0;text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-faint);letter-spacing:1px;">${emptyMsg}</div>`
       : `<div class="shop-grid">${items.map(renderShopCard).join('')}</div>`
     }`;
 }
