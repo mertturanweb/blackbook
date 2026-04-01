@@ -14,7 +14,65 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { type, client: c, mood, tone, replyContext, occasion, catalog, rawNotes, history, appointmentContext } = req.body;
+  const { type, client: c, mood, tone, replyContext, occasion, catalog, rawNotes, history, appointmentContext, airtableId, newStock } = req.body;
+
+  if (type === 'catalog') {
+    try {
+      const baseId = process.env.AIRTABLE_BASE_ID;
+      const apiKey = process.env.AIRTABLE_API_KEY;
+      let allRecords = [];
+      let offset = null;
+
+      do {
+        const url = `https://api.airtable.com/v0/${baseId}/Catalog${offset ? `?offset=${offset}` : ''}`;
+        const atRes = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${apiKey}` }
+        });
+        const atData = await atRes.json();
+        if (atData.error) throw new Error(atData.error.message);
+        allRecords = allRecords.concat(atData.records || []);
+        offset = atData.offset || null;
+      } while (offset);
+
+      const catalog = allRecords.map(r => ({
+        id:          r.fields.ID || r.id,
+        airtableId:  r.id,
+        name:        r.fields.Name || '',
+        category:    Array.isArray(r.fields.Category) ? r.fields.Category : [r.fields.Category].filter(Boolean),
+        gender:      r.fields.Gender || 'U',
+        price:       r.fields.Price || '',
+        priceNum:    r.fields.PriceNum || 0,
+        stock:       r.fields.Stock || 0,
+        sku:         r.fields.SKU || '',
+        colors:      r.fields.Colors ? r.fields.Colors.split(',').map(c => c.trim()) : [],
+        img:         r.fields.Image || '',
+        description: r.fields.Description || ''
+      }));
+
+      return res.status(200).json({ catalog });
+    } catch(err) {
+      console.error('Airtable fetch error:', err);
+      return res.status(500).json({ error: 'Failed to fetch catalog from Airtable' });
+    }
+  }
+
+  if (type === 'stock') {
+    try {
+      const url = `https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Catalog/${airtableId}`;
+      await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${process.env.AIRTABLE_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ fields: { Stock: newStock } })
+      });
+      return res.status(200).json({ ok: true });
+    } catch(err) {
+      console.error('Airtable stock update error:', err);
+      return res.status(500).json({ error: 'Failed to update stock in Airtable' });
+    }
+  }
 
   if (!type || !c) {
     return res.status(400).json({ error: 'Missing required fields: type, client' });
@@ -97,15 +155,13 @@ Rules:
   function buildGiftsPrompt() {
     const catalogJson = JSON.stringify(catalog, null, 2);
 
-    const tierGuide = {
-      'VVIC':     'Prioritise Tier 5–6 items (fine jewellery, bags, coats). Tier 1–2 only as a thoughtful accent alongside a hero piece.',
-      'VIC':      'Focus on Tier 4–6. Mix one statement Tier 6 piece with complementary Tier 3–4 items.',
-      'Platinum': 'Tier 3–5 is the sweet spot. One Tier 6 item if occasion warrants.',
-      'Gold':     'Tier 2–4 range. Avoid the very top of Tier 6 unless the occasion is exceptional.',
-      'Silver':   'Tier 1–3. Keep selections aspirational but not over-extended for this relationship stage.'
-    };
-
-    const spendGuide = tierGuide[c.tier] || 'Mix tiers thoughtfully based on the occasion.';
+    const spendGuide = {
+      'VVIC':     'Prioritise items above €3,000. Mix statement pieces (bags, coats, fine jewellery) with one or two refined accessories. No item below €500 unless exceptional personal match.',
+      'VIC':      'Focus on €1,500–€6,000. One hero piece above €3,000 with complementary items at €1,000–€2,500.',
+      'Platinum': 'Sweet spot is €800–€3,500. One elevated piece if occasion warrants.',
+      'Gold':     '€500–€2,500 range. Aspirational but not overextended.',
+      'Silver':   '€200–€1,500. Achievable and relevant to where this relationship currently is.'
+    }[c.tier] || 'Mix price points thoughtfully based on occasion and relationship stage.';
 
     return `You are a luxury gift recommendation engine for a high-end fashion house. Select exactly 6 items from the catalog that are the best match for this client.
 
@@ -121,12 +177,14 @@ Last CA note: "${c.lastNote}"
 Partner: ${c.partner !== 'None' ? c.partner : 'none'}
 Pet: ${c.pet !== 'None' ? c.pet : 'none'}
 
-TIER SPEND GUIDANCE FOR ${c.tier}:
+SPEND GUIDANCE FOR ${c.tier}:
 ${spendGuide}
 
 SELECTION RULES:
 - Exactly 6 items
-- Follow the tier spend guidance — tier alignment signals the maison's respect for this client's status
+- Follow the spend guidance — price alignment signals the maison's respect for this client's status
+- Use PriceNum field for price logic, not any tier field
+- Gender: W items for women, M items for men, U fine for either
 - Colour: match preferred colours, strictly exclude anything in the avoid list
 - Categories: vary across the 6 selections — no more than 2 from the same category
 - Occasion calibration: anniversary → more elevated/romantic; birthday → personal/celebratory; evergreen → versatile
@@ -134,7 +192,6 @@ SELECTION RULES:
 - Jewellery compatibility: respect ring/neck sizing if noted
 - Stock: avoid items with stock of 1 unless they are an exceptional match
 - Last purchase: do not repeat the same category twice in a row if avoidable
-- Gender: infer appropriate gender targeting from the client's name and profile
 
 REASON WRITING:
 - Each reason must be 1–2 sentences
@@ -147,12 +204,12 @@ ${catalogJson}
 
 Respond ONLY with a valid JSON array — no markdown, no backticks, no explanation:
 [
-  { "id": "T#-###", "reason": "..." },
-  { "id": "T#-###", "reason": "..." },
-  { "id": "T#-###", "reason": "..." },
-  { "id": "T#-###", "reason": "..." },
-  { "id": "T#-###", "reason": "..." },
-  { "id": "T#-###", "reason": "..." }
+  { "id": "...", "reason": "..." },
+  { "id": "...", "reason": "..." },
+  { "id": "...", "reason": "..." },
+  { "id": "...", "reason": "..." },
+  { "id": "...", "reason": "..." },
+  { "id": "...", "reason": "..." }
 ]`;
   }
 
