@@ -155,9 +155,10 @@ Rules:
   function buildGiftsPrompt() {
     const catalogJson = JSON.stringify(catalog, null, 2);
 
-    const prefColors = (c.preferences && c.preferences.colors) || c.colors || '';
-    const prefAvoid  = (c.preferences && c.preferences.avoid)  || c.avoid  || '';
-    const prefNotes  = (c.preferences && c.preferences.notes)  || '';
+    // Additive merge: onboarding data (Airtable) + CA-entered UI data, both honoured
+    const finalColors = [c.colors, c.preferences && c.preferences.colors].filter(Boolean).join(', ');
+    const finalAvoid  = [c.avoid,  c.preferences && c.preferences.avoid ].filter(Boolean).join(', ');
+    const finalNotes  = [c.preferences && c.preferences.notes].filter(Boolean).join(' | ');
 
     const spendGuide = {
       'VVIC':     'Prioritise items above €3,000. Mix statement pieces (bags, coats, fine jewellery) with one or two refined accessories. No item below €500 unless exceptional personal match.',
@@ -172,9 +173,9 @@ Rules:
 CLIENT PROFILE:
 Name: ${c.name} | Tier: ${c.tier} | LTV: ${c.ltv} | Location: ${c.location}
 Outreach Context: ${occasion || 'Just Because'}
-Preferred colours: ${prefColors}
-Avoid / never show: ${prefAvoid}
-CA private notes: ${prefNotes || 'none'}
+Preferred colours: ${finalColors || 'not specified'}
+Avoid / never show: ${finalAvoid || 'none'}
+CA private notes: ${finalNotes || 'none'}
 Sizes: Top ${c.sizeTop} / Bottom ${c.sizeBottom} / Shoe ${c.shoe}
 Jewellery sizing: ${c.jewelry || 'not specified'}
 Last purchase: ${c.lastPurchase} — avoid recommending the same or near-identical item
@@ -190,6 +191,12 @@ COLOUR RULES (mandatory — no exceptions):
 - If a color appears in the client's avoid list, reject ANY item whose 'colors' field contains that color — no exceptions, even if the item is otherwise perfect.
 - Actively favour items whose 'colors' field overlaps with the client's preferred colours.
 - Colour compliance is non-negotiable. A perfect fit in every other dimension does not override a colour restriction.
+
+CONFLICT RESOLUTION PROTOCOL (non-negotiable):
+- THE AVOID LIST IS SUPREME. It is a hard-filter. If any color or category appears in 'Avoid / never show', you MUST reject that item entirely — even if it also appears on the preferred list.
+- NO COMPROMISE: Do not find middle ground on avoided colours. If the client avoids Black, do not suggest Dark Charcoal, Onyx, Jet, or any near-black variant. Apply common sense to synonyms and near-matches.
+- EXPERT FEEDBACK: If strict filtering leaves 0 viable items (e.g. the avoid list covers the entire available catalog), do NOT hallucinate or select bad-fit items. Instead return this exact JSON object (not an array):
+  { "gifts": [], "reasoning": "My apologies. Based on your current strict restrictions (Avoid: ${finalAvoid}), there are no items in the current collection that meet your standards. Consider broadening the avoid list or refreshing the catalog." }
 
 SELECTION RULES:
 - Exactly 3 items
@@ -210,12 +217,14 @@ STYLIST NOTE:
 CATALOG:
 ${catalogJson}
 
-Respond ONLY with a valid JSON array — no markdown, no backticks, no explanation:
+Respond ONLY with valid JSON — no markdown, no backticks, no explanation.
+If picks are available: a JSON array of exactly 3 objects:
 [
   { "id": "...", "reason": "..." },
   { "id": "...", "reason": "..." },
   { "id": "...", "reason": "..." }
-]`;
+]
+If no picks survive filtering: { "gifts": [], "reasoning": "My apologies. Based on your current strict restrictions (Avoid: ...), there are no items in the current collection that meet your standards." }`;
   }
 
 

@@ -8,6 +8,12 @@ Before finishing any task that changes the UI, the API logic, or the database st
 2. The Color Rule: Each catalog item has a 'colors' field. You MUST cross-reference this with the client’s "Preferred Colors" and "Items to Avoid" lists. If a color is in the avoid list, it is a hard reject.
 3. Payload Minimization: Never send the full catalog to the AI. Pre-filter by gender and strip metadata (images/descriptions) in the backend. Only send ID, Name, Category, and Colors.
 4. Single-File Frontend: Keep all frontend logic, CSS, and HTML within index.html. Do not split files.
+5. Additive Preferences: Client preferences are always a merge of onboarding data (Airtable fields) AND CA-entered UI data. Never replace one with the other — always combine both sources.
+
+## Conflict Resolution Rule (The Hierarchy)
+1. The Avoid List Is Supreme: The avoid list is a hard-filter, not a preference. If a color or category appears in 'Avoid / never show', the item is rejected unconditionally — even if it also appears in 'Preferred'.
+2. No Middle Ground: If a client avoids Black, do not suggest Dark Charcoal, Onyx, Jet, or any near-synonym. Apply common-sense synonymy to all avoid entries.
+3. Expert Feedback Over Hallucination: If strict filtering leaves 0 viable items, the AI must NOT pick bad-fit items. It must return { "gifts": [], "reasoning": "..." } explaining exactly which restrictions caused the impasse. The frontend is wired to display this message elegantly in the Stylist Picks grid.
 
 ## Security & Architecture
 1. Server-Side Prompts: Never put prompt text in index.html. All AI calls route through /api/chat.js.

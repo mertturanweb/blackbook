@@ -4503,7 +4503,8 @@ async function fetchCatalogFromAirtable() {
 
 // ── GIFT STATE ───────────────────────────────────────────────────────────────
 // Per-client AI-selected gift IDs + reasons, cached so we don't re-call on revisit
-const aiGiftCache = {}; // clientId → [{ id, reason }]
+const aiGiftCache = {};     // clientId → [{ id, reason }]
+const aiGiftReasoning = {}; // clientId → string (AI's expert feedback when 0 picks survive filtering)
 
 const giftActions = {}; // giftId → 'shipped' | 'reserved'
 
@@ -4607,7 +4608,14 @@ function renderGiftSectionShell(clientId, occasion) {
 
 function renderGiftSection(clientId, occasion) {
   const selections = aiGiftCache[clientId] || [];
-  if (selections.length) populateGiftGrid(clientId, selections, occasion || 'Just Because');
+  if (selections.length) {
+    populateGiftGrid(clientId, selections, occasion || 'Just Because');
+  } else if (aiGiftReasoning[clientId]) {
+    const grid = document.getElementById('giftGrid-' + clientId);
+    if (grid) {
+      grid.innerHTML = `<div style="grid-column:1/-1;padding:28px 24px;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-light);text-align:center;font-style:italic;line-height:1.8;letter-spacing:0.2px;">${aiGiftReasoning[clientId]}</div>`;
+    }
+  }
 }
 
 async function generateGiftIntelligence(clientId, occasion) {
@@ -4652,6 +4660,9 @@ async function generateGiftIntelligence(clientId, occasion) {
     }
     if (Array.isArray(parsed) && parsed.length > 0) {
       aiGiftCache[clientId] = parsed;
+      delete aiGiftReasoning[clientId];
+    } else if (parsed && Array.isArray(parsed.gifts) && parsed.reasoning) {
+      aiGiftReasoning[clientId] = parsed.reasoning;
     }
   } catch(err) {
     console.error('Gift generation error:', err);
@@ -4761,6 +4772,7 @@ function triggerStyleRecommendations(clientId) {
   const context = ctxEl ? ctxEl.value : 'Just Because';
   const btn = document.getElementById('recsBtn-' + clientId);
   delete aiGiftCache[clientId];
+  delete aiGiftReasoning[clientId];
   if (btn) { btn.textContent = 'Generating\u2026'; btn.disabled = true; }
   generateGiftIntelligence(clientId, context).then(() => {
     if (btn) { btn.textContent = 'Refresh Picks'; btn.disabled = false; }
@@ -4931,21 +4943,21 @@ function renderProfile() {
         <span class="style-intel-label">Preferred Colors</span>
         <input class="style-intel-input" type="text" id="prefColors-${c.id}"
           value="${(c.preferences && c.preferences.colors) || ''}"
-          placeholder="e.g. ivory, burgundy, forest green"
+          placeholder="Onboarding: ${c.colors || 'None'}"
           oninput="saveStylePref('${c.id}', 'colors', this.value)">
       </div>
       <div class="style-intel-row">
         <span class="style-intel-label">Items / Colors to Avoid</span>
         <input class="style-intel-input" type="text" id="prefAvoid-${c.id}"
           value="${(c.preferences && c.preferences.avoid) || ''}"
-          placeholder="e.g. black, animal print, logo-heavy"
+          placeholder="Onboarding: ${c.avoid || 'None'}"
           oninput="saveStylePref('${c.id}', 'avoid', this.value)">
       </div>
       <div class="style-intel-row">
         <span class="style-intel-label">CA Private Notes</span>
         <input class="style-intel-input" type="text" id="prefNotes-${c.id}"
           value="${(c.preferences && c.preferences.notes) || ''}"
-          placeholder="e.g. prefers quiet luxury, no statement pieces"
+          placeholder="Add private notes for AI context"
           oninput="saveStylePref('${c.id}', 'notes', this.value)">
       </div>
     </div>

@@ -80,6 +80,8 @@ Drafts outreach messages per client's preferred channel.
 - **Trigger:** CA selects an Outreach Context from a dropdown and clicks "Generate Recommendations." The button updates to "Refresh Picks" after the first generation. Clicking it again clears the cache and fires a new request.
 - **Outreach contexts:** Just Because, New Arrivals, Birthday, Anniversary, Seasonal Update.
 - **Spend guidance by tier:** VVIC prioritises €3,000+. VIC €1,500–6,000. Platinum €800–3,500. Gold €500–2,500. Silver €200–1,500. Guidance is injected into the prompt as hardcoded text per tier — `PriceNum` is stripped from the AI catalog and not sent to Claude. No legacy T1-T6 codes.
+- **Additive preferences:** Colour and avoid data is a merge of the client's onboarding record (Airtable `colors`/`avoid` fields) AND any CA-entered values in the Style Intelligence section. Both sources are honoured simultaneously — neither overrides the other.
+- **Conflict Resolution Hierarchy:** The avoid list is supreme. If a color is avoided, that item is hard-rejected regardless of any other match. No near-synonyms permitted (avoiding Black also blocks Dark Charcoal, Onyx, Jet). If strict filtering leaves 0 viable items, the AI returns `{ "gifts": [], "reasoning": "..." }` and the frontend displays the message elegantly in the Stylist Picks grid — no hallucination, no bad picks.
 - **Selection rules:** Strict colour compliance (cross-referenced against catalog `colors` field), avoid list enforced item-by-item, category diversity (max 1 per category), gender match, size compatibility, context calibration per occasion.
 - **Stylist Note:** Each recommendation includes a 1-sentence stylist note (max 15 words) that explicitly references how the pick aligns with the client's colour preferences — never generic.
 - **Ship Now / Reserve:** CA can action items directly. Ship Now decrements stock in Airtable via a live PATCH write-back. Session stock updates immediately.
@@ -143,11 +145,16 @@ Per-client in-memory moodboard built from the live catalog.
 - **Appointment:** Date, location, Google Calendar sync indicator, aftercare follow-up with + Add button
 
 **Style Intelligence section:** Editable panel that sits directly above Stylist Picks. Three fields:
-- **Preferred Colors** — overrides the Airtable `colors` field if filled in; fed directly to the AI prompt
-- **Items / Colors to Avoid** — fed to the mandatory COLOUR RULES block in the prompt; AI must reject any catalog item whose `colors` field contains an avoided color
-- **CA Private Notes** — freeform context the AI receives as `prefNotes` in the prompt; use for behavioural notes that don't belong in a CRM
+- **Preferred Colors** — placeholder shows the client's onboarding value (`Onboarding: Ivory, Camel`). Any value entered here is merged additively with the onboarding data — both are sent to the AI.
+- **Items / Colors to Avoid** — placeholder shows the onboarding avoid list. Entered values merge with onboarding avoid data. This combined list is the SUPREME hard-filter in the AI prompt — no item survives if it contains an avoided color.
+- **CA Private Notes** — freeform context the AI receives as `finalNotes`; use for behavioural cues that don't belong in a CRM.
 
-All three fields write to `c.preferences` in memory via `saveStylePref()` on every keystroke. No save button needed.
+All three fields write to `c.preferences` in memory via `saveStylePref()` on every keystroke. No save button needed. Preference resolution in `buildGiftsPrompt`:
+```javascript
+finalColors = [c.colors, c.preferences.colors].filter(Boolean).join(', ')
+finalAvoid  = [c.avoid,  c.preferences.avoid ].filter(Boolean).join(', ')
+finalNotes  = [c.preferences.notes].filter(Boolean).join(' | ')
+```
 
 **Interaction history:** Last interaction note displayed prominently. Previous 3 interactions shown below. Full transaction log accessible.
 
@@ -269,6 +276,7 @@ const postVisitNotes = {};   // clientId → [{id, text, date, time, aiGenerated
 const handoverNotes = {};    // clientId → {text, date, time}
 const activityLogs = {};     // clientId → [{type, title, detail, caName, time, date}]
 const aiGiftCache = {};      // clientId → [{id, reason}]
+const aiGiftReasoning = {};  // clientId → string (AI's expert feedback when 0 picks survive filtering)
 const advisorNotes = {};     // clientId → [{id, text, date}]
 const giftActions = {};      // giftId → 'shipped' | 'reserved'
 const flaggedClients = new Set();
@@ -374,8 +382,11 @@ All AI and Airtable calls route through `/api/chat.js` on Vercel. The frontend n
 // client object includes c.preferences {colors, avoid, notes} — used in the prompt to resolve
 // preferred/avoid colours before falling back to the Airtable-sourced c.colors / c.avoid fields.
 
-// Returns JSON array:
-[{ id: "W-001", reason: "..." }, ...]  // exactly 3 items
+// Returns one of two JSON shapes:
+// Success (3 picks):
+[{ id: "W-001", reason: "..." }, ...]
+// Zero picks (conflict resolution triggered):
+{ "gifts": [], "reasoning": "My apologies. Based on your current strict restrictions (Avoid: ...), there are no items in the current collection that meet your standards." }
 // max_tokens: 400
 ```
 
@@ -434,6 +445,9 @@ The Airtable integration is fully complete. All steps described in the previous 
 | Stylist Picks: positioned after Last Interaction, before History Tables | Live |
 | Style Intelligence section (Preferred Colors, Avoid, CA Notes) | Live — writes to `c.preferences` in memory |
 | AI colour rules: cross-reference catalog `colors` field against avoid list | Live — mandatory COLOUR RULES block in prompt |
+| Additive preference merge (onboarding + UI fields combined) | Live — `finalColors`/`finalAvoid`/`finalNotes` in `buildGiftsPrompt` |
+| Conflict Resolution Protocol — avoid list supreme, no synonym compromises | Live — CONFLICT RESOLUTION PROTOCOL block in prompt |
+| Expert Feedback — `{gifts:[], reasoning}` when 0 picks survive filtering | Live — displayed in Stylist Picks grid via `aiGiftReasoning` |
 | `type: 'stock'` write-back on Ship Now | Live — PATCH to Airtable on every ship action |
 | Pre-filter: gender + 40-item cap + strip to `{id, name, category, colors}` | Live — runs inside `generateGiftIntelligence` |
 
@@ -634,4 +648,4 @@ Vercel is connected to the `main` branch of `github.com/mertturanweb/blackbook`.
 
 ---
 
-*Document version: April 2026. Reflects live production codebase with Airtable integration, Shop Dashboard, Client Lookbook, Style Intelligence section, on-demand Stylist Picks with Outreach Context, and aggressive AI cost optimisation (id/name/category/colors only, 40-item cap, ~80% payload reduction). Last updated by Mert Turan.*
+*Document version: April 2026. Reflects live production codebase with Airtable integration, Shop Dashboard, Client Lookbook, Style Intelligence section, on-demand Stylist Picks with Outreach Context, additive preference merging (onboarding + UI data), Conflict Resolution Protocol (avoid list is supreme), Expert Feedback on zero-pick scenarios, and aggressive AI cost optimisation (id/name/category/colors only, 40-item cap, ~80% payload reduction). Last updated by Mert Turan.*
