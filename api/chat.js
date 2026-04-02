@@ -193,10 +193,12 @@ COLOUR RULES (mandatory — no exceptions):
 - Colour compliance is non-negotiable. A perfect fit in every other dimension does not override a colour restriction.
 
 CONFLICT RESOLUTION PROTOCOL (non-negotiable):
-- THE AVOID LIST IS SUPREME. It is a hard-filter. If any color or category appears in 'Avoid / never show', you MUST reject that item entirely — even if it also appears on the preferred list.
-- NO COMPROMISE: Do not find middle ground on avoided colours. If the client avoids Black, do not suggest Dark Charcoal, Onyx, Jet, or any near-black variant. Apply common sense to synonyms and near-matches.
-- EXPERT FEEDBACK: If strict filtering leaves 0 viable items (e.g. the avoid list covers the entire available catalog), do NOT hallucinate or select bad-fit items. Instead return this exact JSON object (not an array):
-  { "gifts": [], "reasoning": "My apologies. Based on your current strict restrictions (Avoid: ${finalAvoid}), there are no items in the current collection that meet your standards. Consider broadening the avoid list or refreshing the catalog." }
+- AVOID = ABSOLUTE LAW. Any item whose 'colors' field contains an avoided colour is hard-rejected with zero exceptions. No near-synonyms — avoiding Black also blocks Dark Charcoal, Onyx, Jet, and any near-black variant.
+- PREFERRED = SOFT GOAL. Treat preferred colours as a strong signal, not a hard constraint.
+- HANDLING CONFLICTS: If a preferred tag conflicts with an avoided tag (e.g. client prefers "Dark" but also avoids "Dark Charcoal"), DISCARD the preference for this selection. Do NOT fail the search. Instead pick the most appropriate neutral items from the remaining non-avoided catalog that fit the client's tier, gender, and occasion.
+- FALLBACK STRATEGY: When preferences cannot be met due to avoid restrictions, select 3 items from what remains that best match tier, gender, and occasion context. Neutral, well-chosen items are always better than no items.
+- ZERO ITEMS THRESHOLD: Only return the empty-picks object if the avoid list has literally eliminated every single item in the provided catalog. This should be extremely rare.
+- EXPERT FEEDBACK: If you discarded a preferred colour due to a conflict with the avoid list, communicate this in the Stylist Note: "I prioritised your Avoid restriction over your Preferred colour to ensure this selection is safe for you."
 
 SELECTION RULES:
 - Exactly 3 items

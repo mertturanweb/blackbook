@@ -7425,12 +7425,6 @@ function goShop() {
 }
 
 function renderShopDashboard() {
-  const q     = (window._shopQuery          || '').toLowerCase().trim();
-  const fg    =  window._shopFilterGender   || 'All';
-  const fc    =  window._shopFilterCategory || 'All';
-  const fcol  =  window._shopFilterColor    || 'All';
-  const fsort =  window._shopSortPrice      || 'None';
-
   if (!masterCatalog || masterCatalog.length === 0) {
     document.getElementById('content').innerHTML = `
       <div style="padding:48px 0;text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-faint);letter-spacing:1px;">
@@ -7439,15 +7433,87 @@ function renderShopDashboard() {
     return;
   }
 
-  const allCategories = [...new Set(masterCatalog.flatMap(item =>
-    Array.isArray(item.category) ? item.category : [item.category].filter(Boolean)
-  ))].sort();
+  // Only rebuild the static shell when entering the view.
+  // Keeping search input and filter selects in the DOM prevents focus loss on keypress.
+  if (!document.getElementById('shopGridContainer')) {
+    const allCategories = [...new Set(masterCatalog.flatMap(item =>
+      Array.isArray(item.category) ? item.category : [item.category].filter(Boolean)
+    ))].sort();
 
-  const allColors = [...new Set(masterCatalog.flatMap(item =>
-    Array.isArray(item.colors)
-      ? item.colors
-      : (item.colors ? String(item.colors).split(',').map(s => s.trim()) : [])
-  ))].filter(Boolean).sort();
+    const allColors = [...new Set(masterCatalog.flatMap(item =>
+      Array.isArray(item.colors)
+        ? item.colors
+        : (item.colors ? String(item.colors).split(',').map(s => s.trim()) : [])
+    ))].filter(Boolean).sort();
+
+    const catOptions = ['All', ...allCategories].map(cat =>
+      `<option value="${cat.replace(/"/g,'&quot;')}">${cat === 'All' ? 'All Categories' : cat}</option>`
+    ).join('');
+
+    const colOptions = ['All', ...allColors].map(col =>
+      `<option value="${col.replace(/"/g,'&quot;')}">${col === 'All' ? 'All Colors' : col}</option>`
+    ).join('');
+
+    document.getElementById('content').innerHTML = `
+      <div class="shop-topbar">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <button class="shop-back-btn" onclick="goHome()">← Back to Clients</button>
+          <span id="shopMeta" class="shop-meta"></span>
+        </div>
+        <input
+          id="shopSearchInput"
+          class="shop-search"
+          type="text"
+          placeholder="Search by name or category…"
+          oninput="window._shopQuery=this.value;renderShopGrid();"
+        >
+      </div>
+      <div class="shop-filter-row">
+        <select id="shopFilterGender" class="shop-select" onchange="window._shopFilterGender=this.value;renderShopGrid();">
+          <option value="All">All</option>
+          <option value="Women">Womenswear</option>
+          <option value="Men">Menswear</option>
+        </select>
+        <select id="shopFilterCategory" class="shop-select" onchange="window._shopFilterCategory=this.value;renderShopGrid();">
+          ${catOptions}
+        </select>
+        <select id="shopFilterColor" class="shop-select" onchange="window._shopFilterColor=this.value;renderShopGrid();">
+          ${colOptions}
+        </select>
+        <select id="shopFilterSort" class="shop-select" onchange="window._shopSortPrice=this.value;renderShopGrid();">
+          <option value="None">Default</option>
+          <option value="asc">Price: Low to High</option>
+          <option value="desc">Price: High to Low</option>
+        </select>
+      </div>
+      <div id="shopGridContainer"></div>`;
+
+    // Restore any pre-existing filter state to the newly created DOM elements
+    const q = window._shopQuery || '';
+    if (q) document.getElementById('shopSearchInput').value = q;
+    const fg = window._shopFilterGender || 'All';
+    if (fg !== 'All') document.getElementById('shopFilterGender').value = fg;
+    const fc = window._shopFilterCategory || 'All';
+    if (fc !== 'All') document.getElementById('shopFilterCategory').value = fc;
+    const fcol = window._shopFilterColor || 'All';
+    if (fcol !== 'All') document.getElementById('shopFilterColor').value = fcol;
+    const fsort = window._shopSortPrice || 'None';
+    if (fsort !== 'None') document.getElementById('shopFilterSort').value = fsort;
+  }
+
+  renderShopGrid();
+}
+
+// Rebuilds only the results grid — search input and filters are never touched.
+function renderShopGrid() {
+  const container = document.getElementById('shopGridContainer');
+  if (!container) return;
+
+  const q     = (window._shopQuery          || '').toLowerCase().trim();
+  const fg    =  window._shopFilterGender   || 'All';
+  const fc    =  window._shopFilterCategory || 'All';
+  const fcol  =  window._shopFilterColor    || 'All';
+  const fsort =  window._shopSortPrice      || 'None';
 
   let items = masterCatalog.filter(item => {
     if (q) {
@@ -7472,55 +7538,17 @@ function renderShopDashboard() {
   if (fsort === 'asc')  items.sort((a,b) => (a.priceNum||0) - (b.priceNum||0));
   if (fsort === 'desc') items.sort((a,b) => (b.priceNum||0) - (a.priceNum||0));
 
-  const catOptions = ['All', ...allCategories].map(cat =>
-    `<option value="${cat.replace(/"/g,'&quot;')}" ${fc === cat ? 'selected' : ''}>${cat === 'All' ? 'All Categories' : cat}</option>`
-  ).join('');
-
-  const colOptions = ['All', ...allColors].map(col =>
-    `<option value="${col.replace(/"/g,'&quot;')}" ${fcol === col ? 'selected' : ''}>${col === 'All' ? 'All Colors' : col}</option>`
-  ).join('');
+  const metaEl = document.getElementById('shopMeta');
+  if (metaEl) metaEl.textContent = `${items.length} item${items.length !== 1 ? 's' : ''}`;
 
   const activeFilters = fg !== 'All' || fc !== 'All' || fcol !== 'All' || fsort !== 'None';
   const emptyMsg = q
     ? `No items match "${q}"`
     : activeFilters ? 'No items match the current filters' : 'No items in catalog';
 
-  document.getElementById('content').innerHTML = `
-    <div class="shop-topbar">
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <button class="shop-back-btn" onclick="goHome()">← Back to Clients</button>
-        <span class="shop-meta">${items.length} item${items.length !== 1 ? 's' : ''}</span>
-      </div>
-      <input
-        class="shop-search"
-        type="text"
-        placeholder="Search by name or category…"
-        value="${q.replace(/"/g,'&quot;')}"
-        oninput="window._shopQuery=this.value;renderShopDashboard();"
-      >
-    </div>
-    <div class="shop-filter-row">
-      <select class="shop-select" onchange="window._shopFilterGender=this.value;renderShopDashboard();">
-        <option value="All"   ${fg==='All'   ?'selected':''}>All</option>
-        <option value="Women" ${fg==='Women' ?'selected':''}>Womenswear</option>
-        <option value="Men"   ${fg==='Men'   ?'selected':''}>Menswear</option>
-      </select>
-      <select class="shop-select" onchange="window._shopFilterCategory=this.value;renderShopDashboard();">
-        ${catOptions}
-      </select>
-      <select class="shop-select" onchange="window._shopFilterColor=this.value;renderShopDashboard();">
-        ${colOptions}
-      </select>
-      <select class="shop-select" onchange="window._shopSortPrice=this.value;renderShopDashboard();">
-        <option value="None" ${fsort==='None'?'selected':''}>Default</option>
-        <option value="asc"  ${fsort==='asc' ?'selected':''}>Price: Low to High</option>
-        <option value="desc" ${fsort==='desc'?'selected':''}>Price: High to Low</option>
-      </select>
-    </div>
-    ${items.length === 0
-      ? `<div style="padding:48px 0;text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-faint);letter-spacing:1px;">${emptyMsg}</div>`
-      : `<div class="shop-grid">${items.map(renderShopCard).join('')}</div>`
-    }`;
+  container.innerHTML = items.length === 0
+    ? `<div style="padding:48px 0;text-align:center;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--ink-faint);letter-spacing:1px;">${emptyMsg}</div>`
+    : `<div class="shop-grid">${items.map(renderShopCard).join('')}</div>`;
 }
 
 function renderShopCard(item) {
